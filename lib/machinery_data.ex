@@ -2,23 +2,40 @@ defmodule Machinery.Data do
   import Ecto.Query
   alias Machinery.Repo
   alias Machinery.ChatHistory
+  alias Machinery.ApplicantStage
+  alias Machinery.Data.Mem
 
   alias GrammarScore
   alias SpeechScore
   alias SpeechLog
 
-  def start_link, do: Repo.start_link()
+  import Logger
+
+  def start_link do
+    Mem.start()
+
+    Repo.start_link()
+    
+    data_mem_loader()
+
+    Logger.info("data in memory loaded.")
+  end
+
   def data_mem_loader do
     chat_history = Repo.all(ChatHistory)
     Enum.each(
       chat_history,
-      fn h -> IO.inspect(h.msisdn) end # perform put into memory-db
+      fn h -> 
+       Mem.add_chat_history(h, h.id)
+      end
     )
 
-    applicant_stage = Repo.all(Machinery.ApplicantStage)
+    applicant_stage = Repo.all(ApplicantStage)
     Enum.each(
       applicant_stage,
-      fn a -> IO.inspect("#{a.msisdn} : #{a.task}") end # # perform put into memory-db
+      fn a -> 
+        Mem.add_applicant_stage(a, a.id)
+      end
     )
   end
 
@@ -240,8 +257,6 @@ defmodule Machinery.Data do
         Repo.insert!(skill)
         Repo.insert!(rel)
       end)
-      # IO.inspect applicant
-      # IO.puts("pura leña")
   end
 
   rescue

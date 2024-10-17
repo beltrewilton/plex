@@ -158,6 +158,111 @@ defmodule Machinery.Data do
     end
   end
 
+  def applicant_register(%HrApplicant{} = appl, english_level) do
+    skill = %HrApplicantSkill{}
+    rel = %HrApplicantSkillRel{}
+  
+    Repo.transaction(fn ->
+      appl
+      |> Repo.insert!()
+      |> then(fn appl ->
+        skill
+        |> Map.put(:applicant_id, appl.id)
+        |> Map.put(:skill_level_id, english_level)
+        |> Repo.insert!()
+  
+        rel
+        |> Map.put(:hr_applicant_id, appl.id)
+        |> Map.put(:hr_skill_id, 1)
+        |> Repo.insert!()
+      end)
+    end)
+    |> case do
+      {:ok, _} -> :ok
+      {:error, error} -> IO.inspect(error)
+    end
+  end
+
+  def register_or_update(
+    partner_phone,
+    partner_name,
+    english_level,
+    is_valid_dominican_id,
+    availability_tostart,
+    availability_towork,
+    city_residence,
+    campaign
+  ) do
+  appl = get_hrapplicant(partner_phone, campaign)
+  IO.inspect Repo.one(appl)
+
+  case Repo.one(appl) do
+    nil -> #TODO: maybe this never happen
+      # Create new
+      {:ok, job} = get_job_by_campaign(campaign)
+      appl = %HrApplicant{
+        partner_phone: partner_phone,
+        partner_phone_sanitized: partner_phone,
+        phone_sanitized: partner_phone,
+        partner_mobile: partner_phone,
+        partner_mobile_sanitized: partner_phone,
+        is_valid_dominican_id: is_valid_dominican_id,
+        availability_tostart: availability_tostart,
+        availability_towork: availability_towork,
+        city_residence: city_residence,
+        name: job.name["en_US"],
+        partner_name: partner_name,
+        job_id: job.id
+      }
+      applicant_register(appl, english_level)
+
+    applicant ->
+      # Update existing
+      Ecto.Changeset.change(applicant, %{
+        partner_name: partner_name,
+        is_valid_dominican_id: is_valid_dominican_id,
+        availability_tostart: availability_tostart,
+        availability_towork: availability_towork,
+        city_residence: city_residence
+      })
+      |> Repo.update!()
+      |> then(fn appl ->
+        skill = %HrApplicantSkill{
+          applicant_id: appl.id,
+          skill_level_id: english_level
+        }
+
+        rel = %HrApplicantSkillRel{
+          hr_applicant_id: appl.id,
+          hr_skill_id: 1
+        }
+
+        Repo.insert!(skill)
+        Repo.insert!(rel)
+      end)
+      # IO.inspect applicant
+      # IO.puts("pura leña")
+  end
+
+  rescue
+    e in Exception ->
+      IO.inspect(e)
+  end
+
+  def register_without_name(msisdn, campaign) do
+    #TODO: first: perform some memory logic
+    {:ok, job} = get_job_by_campaign(campaign)
+    appl = %HrApplicant{
+      partner_phone: msisdn,
+      partner_phone_sanitized: msisdn,
+      phone_sanitized: msisdn,
+      partner_mobile: msisdn,
+      partner_mobile_sanitized: msisdn,
+      name: job.name["en_US"],
+      job_id: job.id
+    }
+    Repo.insert!(appl)
+  end
 
 
 end

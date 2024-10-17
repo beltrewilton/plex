@@ -264,6 +264,50 @@ defmodule HrApplicant do
 end
 
 
+defmodule HrApplicantSkill do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "hr_applicant_skill" do
+    field :applicant_id, :integer
+    field :skill_id, :integer, default: 1
+    field :skill_level_id, :integer
+    field :skill_type_id, :integer, default: 1
+    field :create_uid, :integer, default: 1
+    field :write_uid, :integer, default: 1
+    field :create_date, :naive_datetime
+    field :write_date, :naive_datetime
+  end
+
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [:applicant_id, :skill_id, :skill_level_id, :skill_type_id, :create_uid, :write_uid])
+    |> validate_required([:applicant_id, :skill_level_id])
+  end
+end
+
+
+defmodule HrApplicantSkillRel do
+  use Ecto.Schema
+  import Ecto.Changeset
+  
+  @primary_key false
+  schema "hr_applicant_hr_skill_rel" do
+    field :hr_applicant_id, :integer #, primary_key: true
+    field :hr_skill_id, :integer, default: 1
+  end
+
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [:hr_applicant_id, :hr_skill_id])
+  end
+
+  # def insert(changeset) do
+  #   Machinery.Repo.insert(changeset)
+  # end
+end
+
+
 defmodule HrJob do
   use Ecto.Schema
   import Ecto.Changeset

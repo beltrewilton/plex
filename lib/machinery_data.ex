@@ -21,7 +21,7 @@ defmodule Machinery.Data do
     Logger.info("data in memory loaded.")
   end
 
-  def data_mem_loader do
+  defp data_mem_loader do
     chat_history = Repo.all(ChatHistory)
     Enum.each(
       chat_history,

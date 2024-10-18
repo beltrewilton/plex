@@ -21,6 +21,7 @@ defmodule Machinery.Data.Mem do
             type: :set,
             storage_properties: [ram_copies: [node()]]  
         ])
+        Mnesia.add_table_index(ChatHistory, [:msisdn, :campaign, :create_date])
 
         Mnesia.create_table(ApplicantStage, [
             attributes: Machinery.ApplicantStage.__schema__(:fields),
@@ -69,8 +70,23 @@ defmodule Machinery.Data.Mem do
                     appl_stage.write_date
                 })
             end
-        )
-        
+        ) 
+    end
+
+    def get_latest_chat(msisdn, campaign) do
+        Mnesia.transaction(fn -> 
+            Mnesia.select(
+                ChatHistory,
+                [
+                    {
+                        {ChatHistory, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10", :"$11", :"$12", :"$13", :"$14" },
+                        [{:==, :"$4", msisdn}],
+                        [:"$$"]
+                    }
+                ]
+            )
+            |> Enum.max_by(fn [id, _, _, _, _, _, _, _, _, _, _, _, _, _] -> id end)
+        end)
     end
 
     def write_somethin() do

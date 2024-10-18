@@ -13,10 +13,10 @@ defmodule Machinery.ChatHistory do
     field :message, :string
     field :readed, :boolean, default: false
     field :collected, :boolean, default: false
-    field :sending_date, :naive_datetime
+    field :sending_date, :naive_datetime_usec
     field :output_llm_booleans, :map
-    field :create_date, :naive_datetime
-    field :write_date, :naive_datetime
+    field :create_date, :naive_datetime_usec
+    field :write_date, :naive_datetime_usec
   end
 
   def changeset(struct, params \\ %{}) do

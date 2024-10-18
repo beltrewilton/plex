@@ -73,21 +73,99 @@ defmodule Machinery.Data.Mem do
         ) 
     end
 
-    def get_latest_chat(msisdn, campaign) do
-        Mnesia.transaction(fn -> 
+    defp filter_message(msisdn, campaign, filter_function) do
+        transaction = Mnesia.transaction(fn -> 
             Mnesia.select(
                 ChatHistory,
                 [
                     {
                         {ChatHistory, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10", :"$11", :"$12", :"$13", :"$14" },
-                        [{:==, :"$4", msisdn}],
+                        [{:==, :"$4", msisdn}, {:==, :"$5", campaign}],
                         [:"$$"]
                     }
                 ]
             )
-            |> Enum.max_by(fn [id, _, _, _, _, _, _, _, _, _, _, _, _, _] -> id end)
         end)
+        case transaction do
+            {:atomic, []} -> {:error, "No result found with #{msisdn} & #{campaign}"}
+            {:atomic, messages} -> filter_function.(messages)
+            _ -> {:error, "Unknow error"}
+        end
     end
+
+    def get_latest_message(msisdn, campaign) do
+        filter_function = fn messages -> Enum.max_by(
+            messages,
+            fn [id, _, _, _, _, _, _, _, _, _, _, _, _, _] -> id end
+            )
+        end
+        filter_message(msisdn, campaign, filter_function)
+    end
+
+    def get_unreaded_messages(msisdn, campaign) do
+        filter_function = fn messages -> Enum.filter(
+            messages,
+            fn [_, _, _, _, _, _, _, _, readed, _, _, _, _, _] -> readed == false end
+            )
+        end
+        filter_message(msisdn, campaign, filter_function)
+        #TODO: mark_as_read & JOB:mark_as_read_db 
+    end
+
+    def get_collected_messages(msisdn, campaign) do
+        filter_function = fn messages -> Enum.filter(
+            messages,
+            fn [_, _, _, _, _, _, _, _, _, collected, _, _, _, _] -> collected == true end
+            )
+        end
+        filter_message(msisdn, campaign, filter_function)
+    end
+
+    # Machinery.Repo.start_link
+    # List.first(Machinery.Repo.all(Machinery.ChatHistory))
+    #
+    # Machinery.Data.Mem.update_collected("18296456177", "CNVQSOUR84FK", "2024-09-29 11:47:33.406306")
+
+    def update_collected(msisdn, campaign, sending_date) do
+        {_, sending_date_iso} = NaiveDateTime.from_iso8601(sending_date)
+        # sending_date = DateTime.from_naive!(sending_date, "Etc/UTC")
+        # sending_date = DateTime.to_unix(sending_date, :microsecond)
+        transaction = Mnesia.transaction(fn -> 
+            Mnesia.select(
+                ChatHistory,
+                [
+                    {
+                        {ChatHistory, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10", :"$11", :"$12", :"$13", :"$14" },
+                        [{:==, :"$4", msisdn}, {:==, :"$5", campaign}],
+                        [:"$$"]
+                    }
+                ]
+            )
+        end)
+        case transaction do
+            {:atomic, []} -> {:error, "No result found with #{msisdn} & #{campaign} & #{inspect(sending_date_iso)}"}
+            {:atomic, messages} -> 
+                record = Enum.filter(messages, 
+                    fn [_, _, _, _, _, _, _, _, _, _, sending_date, _, _, _] -> 
+                        sending_date == sending_date_iso
+                    end
+                )
+                record = List.first(record) |> List.to_tuple |> Tuple.insert_at(0, ChatHistory)
+                updated_record = put_elem(record, 9, true)
+                Mnesia.dirty_write(updated_record)
+            error -> {:error, "Unknow error #{inspect(error)}"}
+        end
+    end
+
+
+
+
+
+
+
+
+    
+
 
     def write_somethin() do
         Mnesia.transaction(fn ->

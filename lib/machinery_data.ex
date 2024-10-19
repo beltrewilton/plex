@@ -3,6 +3,8 @@ defmodule Machinery.Data do
   alias Machinery.Repo
   alias Machinery.ChatHistory
   alias Machinery.ApplicantStage
+  alias Machinery.ApplicantCampaign
+  alias Machinery.HrRecruitmentStage
   alias Machinery.Data.Mem
 
   alias GrammarScore
@@ -37,6 +39,14 @@ defmodule Machinery.Data do
       applicant_stage,
       fn a -> 
         Mem.add_applicant_stage(a, a.id)
+      end
+    )
+
+    applicant_campaign = Repo.all(ApplicantCampaign)
+    Enum.each(
+      applicant_campaign,
+      fn a -> 
+        Mem.add_applicant_campaign(a, a.id)
       end
     )
   end
@@ -134,7 +144,7 @@ defmodule Machinery.Data do
       limit: 1
   end
 
-  def update_applicant_stage(msisdn, campaign, task) do
+  def update_hrapplicant(msisdn, campaign, task) do
     states = %{ # Odoo states/stages/kanva
       talent_entry_form: 1,
       grammar_assessment_form: 3,
@@ -148,9 +158,69 @@ defmodule Machinery.Data do
     case Repo.one(query) do
       nil -> Repo.rollback(:not_found)
 
-      record -> Ecto.Changeset.change(record, %{stage_id: states[task]}) |> Repo.update()
+      record -> 
+        Ecto.Changeset.change(record, %{stage_id: states[task], lead_last_update: NaiveDateTime.utc_now()}) 
+        |> Repo.update()
     end
   end
+
+  #old name: odoo_update_state
+  # TODO: call indepentdently
+  # def odoo_update_state(msisdn, campaign, task, previous_task, state) do
+  #   # juhhh? 
+  #   # if task in ["Talent entry form", "Grammar assessment form", "Scripted text", "Open question", "End_of_task"]:
+  #   update_hrapplicant(msisdn, campaign, task)
+
+  #   update_applicant_stage(msisdn, campaign, task, state)
+    
+  # end
+
+  #old name: update_stage
+  # really: update or insert
+  def update_applicant_stage(msisdn, campaign, task, state) do
+    query_update = from(a in ApplicantStage,
+      where: a.msisdn == ^msisdn and a.campaign == ^campaign
+    )
+    case Repo.update_all(query_update, set: [state: state, task: task]) do
+      {0, _} ->
+        # not found, insert
+        %ApplicantStage{}
+        |> ApplicantStage.changeset(%{
+          create_uid: 1,
+          write_uid: 1,
+          msisdn: msisdn,
+          campaign: campaign,
+          task: task,
+          state: state,
+          last_update: NaiveDateTime.utc_now(),
+          create_date: NaiveDateTime.utc_now(),
+          write_date: NaiveDateTime.utc_now() 
+        })
+        |> Repo.insert!()
+      
+      {1, _} -> :ok # found
+
+      error -> error
+    end
+  end
+
+  # old name: get_applicant_state
+  def get_applicant_stage_name(msisdn, campaign) do
+    query = get_hrapplicant(msisdn, campaign)
+    case Repo.one(query) do
+      nil -> :applican_not_found
+
+      applicant -> 
+        query = from(a in HrRecruitmentStage,
+          where: a.id == ^applicant.stage_id
+        )
+        case Repo.one(query) do
+          nil -> :recruitment_not_found
+          recuitment -> recuitment.name["en_US"]
+        end
+    end
+  end
+
 
   def get_job_by_campaign(campaign) do
     query = from j in HrJob,

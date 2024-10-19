@@ -3,6 +3,7 @@ defmodule Machinery.Data.Mem do
 
     def start do
         Mnesia.start()
+        
         case Mnesia.create_schema(node()) do
             {:ok, _} -> :ok
             {:error, {:already_exists, _}} -> :ok
@@ -10,6 +11,7 @@ defmodule Machinery.Data.Mem do
         end
 
         Mnesia.start()
+
         Mnesia.create_table(Person, [
             attributes: [:id, :value],
             type: :set,
@@ -27,6 +29,24 @@ defmodule Machinery.Data.Mem do
             attributes: Machinery.ApplicantStage.__schema__(:fields),
             type: :set,
             storage_properties: [ram_copies: [node()]]  
+        ])
+
+        Mnesia.create_table(ApplicantCampaign, [
+            attributes: Machinery.ApplicantCampaign.__schema__(:fields),
+            type: :set,
+            storage_properties: [ram_copies: [node()]]
+        ])
+
+        Mnesia.create_table(RefText, [
+            attributes: [:msisdn_campaign, :text],
+            type: :set,
+            storage_properties: [ram_copies: [node()]]
+        ])
+
+        Mnesia.create_table(OpenQuestion, [
+            attributes: [:msisdn_campaign, :question],
+            type: :set,
+            storage_properties: [ram_copies: [node()]]
         ])
     end
 
@@ -86,7 +106,7 @@ defmodule Machinery.Data.Mem do
                     appl_stage.write_date
                 })
             end
-        ) 
+        )
     end
 
     defp filter_message(msisdn, campaign, filter_function) do
@@ -111,8 +131,8 @@ defmodule Machinery.Data.Mem do
 
     def get_latest_message(msisdn, campaign) do
         filter_function = fn messages -> Enum.max_by(
-            messages,
-            fn [id, _, _, _, _, _, _, _, _, _, _, _, _, _] -> id end
+                messages,
+                fn [id, _, _, _, _, _, _, _, _, _, _, _, _, _] -> id end
             )
         end
         filter_message(msisdn, campaign, filter_function)
@@ -207,11 +227,86 @@ defmodule Machinery.Data.Mem do
         filter_message(msisdn, campaign, filter_function)
     end
 
-    def set_campaign(msisdn, campaign) do
+    # Python old name; set_campaign
+    def add_applicant_campaign(%Machinery.ApplicantCampaign{} = appl_campaign, id) do
         last_update = nil
+
+        appl_campaign = Map.drop(appl_campaign, [:id, :__struct__, :__meta__])
+        # Python philosophy: # Remove any existing record with the same msisdn and campaign.
+        # Elixir: if comme with the same id, perform an update.
+        Mnesia.transaction(
+            fn -> 
+                Mnesia.write({
+                    ApplicantCampaign, id, 
+                    appl_campaign.create_uid,
+                    appl_campaign.write_uid,
+                    appl_campaign.msisdn,
+                    appl_campaign.campaign,
+                    appl_campaign.last_update,
+                    appl_campaign.create_date,
+                    appl_campaign.write_date
+                })
+            end
+        )
     end
 
-    def get_latest_campaign(msisdn, campaign) do
-        
+    def get_latest_campaign(msisdn) do
+        filter_function = fn campaigns -> Enum.max_by(
+                campaigns,
+                fn [_, _, _, _, _, last_update, _, _] -> last_update end
+            )
+        end
+
+        transaction = Mnesia.transaction(fn -> 
+            Mnesia.select(
+                ApplicantCampaign,
+                [
+                    {
+                        {ApplicantCampaign, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8"},
+                        [{:==, :"$4", msisdn}],
+                        [:"$$"]
+                    }
+                ]
+            )
+        end)
+
+        case transaction do
+            {:atomic, []} -> 
+                dt = NaiveDateTime.utc_now()
+                [1, 1, 1, msisdn, "CNDEFAULT", dt, dt, dt]
+
+            {:atomic, campaigns} -> filter_function.(campaigns)
+
+            error -> {:error, "Unknow error #{inspect(error)}"}
+        end
+    end
+
+
+    def add_reftext(msisdn, campaign, text) do
+        msisdn_campaign = msisdn <> campaign
+        Mnesia.transaction(fn -> 
+            Mnesia.write({RefText, msisdn_campaign, text})
+        end)
+    end
+
+    def get_reftext(msisdn, campaign) do
+        msisdn_campaign = msisdn <> campaign
+        Mnesia.transaction(fn -> 
+            Mnesia.match_object({RefText, msisdn_campaign, :_})
+        end)
+    end
+
+    def add_open_question(msisdn, campaign, question) do
+        msisdn_campaign = msisdn <> campaign
+        Mnesia.transaction(fn -> 
+            Mnesia.write({OpenQuestion, msisdn_campaign, question})
+        end)
+    end
+
+    def get_open_question(msisdn, campaign) do
+        msisdn_campaign = msisdn <> campaign
+        Mnesia.transaction(fn -> 
+            Mnesia.match_object({OpenQuestion, msisdn_campaign, :_})
+        end)
     end
 end

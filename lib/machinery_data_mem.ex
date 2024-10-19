@@ -53,6 +53,22 @@ defmodule Machinery.Data.Mem do
         end)
     end
 
+    def get_applicant_state(msisdn, campaign) do
+        Mnesia.transaction(fn -> 
+            Mnesia.select(
+                ApplicantStage,
+                [
+                    {
+                        {ApplicantStage, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10"},
+                        [{:==, :"$4", msisdn}, {:==, :"$5", campaign}],
+                        [:"$$"]
+                    }
+                ]
+            )
+        end)
+    end
+
+    # set_state in Python
     def add_applicant_stage(%Machinery.ApplicantStage{} = appl_stage, id) do
         appl_stage = Map.drop(appl_stage, [:id, :__struct__, :__meta__])
         Mnesia.transaction(
@@ -121,6 +137,23 @@ defmodule Machinery.Data.Mem do
         filter_message(msisdn, campaign, filter_function)
     end
 
+    def select_all() do
+        Mnesia.transaction(fn -> 
+            Mnesia.select(
+                ChatHistory,
+                [
+                    {
+                        {ChatHistory, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10", :"$11", :"$12", :"$13", :"$14" },
+                        [],
+                        [:"$$"]
+                    }
+                ]
+            )
+        end)
+    end
+
+    # {_, result} = Machinery.Data.Mem.select_all
+    #
     # Machinery.Repo.start_link
     # List.first(Machinery.Repo.all(Machinery.ChatHistory))
     #
@@ -150,32 +183,35 @@ defmodule Machinery.Data.Mem do
                         sending_date == sending_date_iso
                     end
                 )
-                record = List.first(record) |> List.to_tuple |> Tuple.insert_at(0, ChatHistory)
-                updated_record = put_elem(record, 9, true)
-                Mnesia.dirty_write(updated_record)
+                List.first(record)
+                |> List.to_tuple()
+                |> Tuple.insert_at(0, ChatHistory)
+                |> put_elem(9, true)
+                |> Mnesia.dirty_write()
+
             error -> {:error, "Unknow error #{inspect(error)}"}
         end
     end
 
-
-
-
-
-
-
-
-    
-
-
-    def write_somethin() do
-        Mnesia.transaction(fn ->
-            Mnesia.write({Person, 1, "Some Value"})
-        end)
+    def mark_as_readed(msisdn, campaign) do
+        filter_function = fn messages -> Enum.each(
+            messages,
+            fn message -> 
+                List.replace_at(message, 9, true)
+                |> List.to_tuple
+                |> Tuple.insert_at(0, ChatHistory)
+                |> Mnesia.dirty_write() 
+            end
+        )
+        end
+        filter_message(msisdn, campaign, filter_function)
     end
 
-    def read_something() do
-        Mnesia.transaction(fn ->
-            Mnesia.read({Person, 1})
-        end)
+    def set_campaign(msisdn, campaign) do
+        last_update = nil
+    end
+
+    def get_latest_campaign(msisdn, campaign) do
+        
     end
 end

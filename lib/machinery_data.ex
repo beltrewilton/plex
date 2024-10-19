@@ -11,6 +11,9 @@ defmodule Machinery.Data do
 
   import Logger
 
+  #TODO: pending:
+  # updated_collected_db
+
   def start_link do
     Mem.start()
 
@@ -23,12 +26,11 @@ defmodule Machinery.Data do
 
   defp data_mem_loader do
     chat_history = Repo.all(ChatHistory)
-    Enum.each(
-      chat_history,
-      fn h -> 
-       Mem.add_chat_history(h, h.id)
-      end
-    )
+    chat_history = Enum.concat([chat_history | List.duplicate(chat_history, 100)])
+    Enum.reduce(chat_history, 1, fn h, counter -> 
+        Mem.add_chat_history(h, counter)
+        counter + 1
+    end)
 
     applicant_stage = Repo.all(ApplicantStage)
     Enum.each(
@@ -37,6 +39,46 @@ defmodule Machinery.Data do
         Mem.add_applicant_stage(a, a.id)
       end
     )
+  end
+
+  # TODO: ta reptiendo .... toy cansao
+  def get_state(msisdn, campaign, task \\ "Talent Entry Form", state \\ "In Progress") do
+    appl_state = Mem.get_applicant_state(msisdn, campaign)
+    case appl_state do
+      {:atomic, []} ->
+        query = from(s in ApplicantStage, where: s.msisdn == ^msisdn and s.campaign == ^campaign)
+        record = 
+        case Repo.one(query) do
+          nil -> 
+            changeset = %ApplicantStage{}
+            |> ApplicantStage.changeset(%{
+              create_uid: 1,
+              write_uid: 1,
+              msisdn: msisdn,
+              campaign: campaign,
+              task: task,
+              state: state,
+              last_update: NaiveDateTime.utc_now(),
+              create_date: NaiveDateTime.utc_now(),
+              write_date: NaiveDateTime.utc_now() 
+            })
+            case Repo.insert(changeset) do
+                {:ok, record} -> record
+                {:error, changeset} -> {:error, changeset}
+            end
+          
+          record -> record
+          
+          _ -> :error
+        end
+
+        Mem.add_applicant_stage(record, record.id)
+        Mem.get_applicant_state(msisdn, campaign)
+
+      {:atomic, appl_state} -> appl_state
+
+      _ -> {:error}
+    end
   end
 
   def mark_as_collected(msisdn, campaign, sending_date) do

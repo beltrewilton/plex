@@ -52,9 +52,9 @@ defmodule Machinery.ApplicantStage do
     field :campaign, :string
     field :task, :string
     field :state, :string
-    field :last_update, :naive_datetime
-    field :create_date, :naive_datetime
-    field :write_date, :naive_datetime
+    field :last_update, :naive_datetime_usec
+    field :create_date, :naive_datetime_usec
+    field :write_date, :naive_datetime_usec
   end
 
   def changeset(struct, params \\ %{}) do

@@ -5,6 +5,8 @@ defmodule Machinery.Data do
   alias Machinery.ApplicantStage
   alias Machinery.ApplicantCampaign
   alias Machinery.HrRecruitmentStage
+  alias Machinery.VaScheduler
+
   alias Machinery.Data.Mem
 
   alias GrammarScore
@@ -20,7 +22,7 @@ defmodule Machinery.Data do
     Mem.start()
 
     Repo.start_link()
-    
+
     data_mem_loader()
 
     Logger.info("data in memory loaded.")
@@ -29,7 +31,7 @@ defmodule Machinery.Data do
   defp data_mem_loader do
     chat_history = Repo.all(ChatHistory)
     chat_history = Enum.concat([chat_history | List.duplicate(chat_history, 100)])
-    Enum.reduce(chat_history, 1, fn h, counter -> 
+    Enum.reduce(chat_history, 1, fn h, counter ->
         Mem.add_chat_history(h, counter)
         counter + 1
     end)
@@ -37,7 +39,7 @@ defmodule Machinery.Data do
     applicant_stage = Repo.all(ApplicantStage)
     Enum.each(
       applicant_stage,
-      fn a -> 
+      fn a ->
         Mem.add_applicant_stage(a, a.id)
       end
     )
@@ -45,7 +47,7 @@ defmodule Machinery.Data do
     applicant_campaign = Repo.all(ApplicantCampaign)
     Enum.each(
       applicant_campaign,
-      fn a -> 
+      fn a ->
         Mem.add_applicant_campaign(a, a.id)
       end
     )
@@ -57,9 +59,9 @@ defmodule Machinery.Data do
     case appl_state do
       {:atomic, []} ->
         query = from(s in ApplicantStage, where: s.msisdn == ^msisdn and s.campaign == ^campaign)
-        record = 
+        record =
         case Repo.one(query) do
-          nil -> 
+          nil ->
             changeset = %ApplicantStage{}
             |> ApplicantStage.changeset(%{
               create_uid: 1,
@@ -70,15 +72,15 @@ defmodule Machinery.Data do
               state: state,
               last_update: NaiveDateTime.utc_now(),
               create_date: NaiveDateTime.utc_now(),
-              write_date: NaiveDateTime.utc_now() 
+              write_date: NaiveDateTime.utc_now()
             })
             case Repo.insert(changeset) do
                 {:ok, record} -> record
                 {:error, changeset} -> {:error, changeset}
             end
-          
+
           record -> record
-          
+
           _ -> :error
         end
 
@@ -158,8 +160,8 @@ defmodule Machinery.Data do
     case Repo.one(query) do
       nil -> Repo.rollback(:not_found)
 
-      record -> 
-        Ecto.Changeset.change(record, %{stage_id: states[task], lead_last_update: NaiveDateTime.utc_now()}) 
+      record ->
+        Ecto.Changeset.change(record, %{stage_id: states[task], lead_last_update: NaiveDateTime.utc_now()})
         |> Repo.update()
     end
   end
@@ -167,12 +169,12 @@ defmodule Machinery.Data do
   #old name: odoo_update_state
   # TODO: call indepentdently
   # def odoo_update_state(msisdn, campaign, task, previous_task, state) do
-  #   # juhhh? 
+  #   # juhhh?
   #   # if task in ["Talent entry form", "Grammar assessment form", "Scripted text", "Open question", "End_of_task"]:
   #   update_hrapplicant(msisdn, campaign, task)
 
   #   update_applicant_stage(msisdn, campaign, task, state)
-    
+
   # end
 
   #old name: update_stage
@@ -181,6 +183,8 @@ defmodule Machinery.Data do
     query_update = from(a in ApplicantStage,
       where: a.msisdn == ^msisdn and a.campaign == ^campaign
     )
+
+    applicant_stage =
     case Repo.update_all(query_update, set: [state: state, task: task]) do
       {0, _} ->
         # not found, insert
@@ -194,14 +198,16 @@ defmodule Machinery.Data do
           state: state,
           last_update: NaiveDateTime.utc_now(),
           create_date: NaiveDateTime.utc_now(),
-          write_date: NaiveDateTime.utc_now() 
+          write_date: NaiveDateTime.utc_now()
         })
         |> Repo.insert!()
-      
-      {1, _} -> :ok # found
+
+      {1, applicant_stage} -> applicant_stage
 
       error -> error
     end
+
+    Mem.add_applicant_stage(applicant_stage, applicant_stage.id)
   end
 
   # old name: get_applicant_state
@@ -210,7 +216,7 @@ defmodule Machinery.Data do
     case Repo.one(query) do
       nil -> :applican_not_found
 
-      applicant -> 
+      applicant ->
         query = from(a in HrRecruitmentStage,
           where: a.id == ^applicant.stage_id
         )
@@ -219,6 +225,21 @@ defmodule Machinery.Data do
           recuitment -> recuitment.name["en_US"]
         end
     end
+  end
+
+
+  # WTF with this name?
+  def set_state_all(msisdn, campaign, state) do
+    {_, mem_state} = Mem.get_applicant_state(msisdn, campaign)
+    current_task = Enum.at(mem_state, 5)
+    current_state = Enum.at(mem_state, 6)
+
+    # memory_set  ->  previous_state
+    Mem.transitivity_set("previous_state", msisdn, campaign, current_state)
+
+    # update_stage -->
+    update_applicant_stage(msisdn, campaign, current_task, state)
+
   end
 
 
@@ -290,7 +311,7 @@ defmodule Machinery.Data do
   def applicant_register(%HrApplicant{} = appl, english_level) do
     skill = %HrApplicantSkill{}
     rel = %HrApplicantSkillRel{}
-  
+
     Repo.transaction(fn ->
       appl
       |> Repo.insert!()
@@ -299,7 +320,7 @@ defmodule Machinery.Data do
         |> Map.put(:applicant_id, appl.id)
         |> Map.put(:skill_level_id, english_level)
         |> Repo.insert!()
-  
+
         rel
         |> Map.put(:hr_applicant_id, appl.id)
         |> Map.put(:hr_skill_id, 1)
@@ -391,5 +412,16 @@ defmodule Machinery.Data do
     Repo.insert!(appl)
   end
 
+
+  def applicant_scheduler(msisdn, campaign, scheduled_date) do
+    appl = %VaScheduler{
+      msisdn: msisdn,
+      campaign: campaign,
+      scheduled_date: scheduled_date,
+      create_date: NaiveDateTime.utc_now(),
+      write_date: NaiveDateTime.utc_now()
+    }
+    Repo.insert!(appl)
+  end
 
 end

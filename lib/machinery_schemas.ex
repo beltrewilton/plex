@@ -75,6 +75,34 @@ defmodule Machinery.ApplicantStage do
 end
 
 
+defmodule Machinery.VaScheduler do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "va_scheduler" do
+    field :write_uid, :integer, default: 1
+    field :msisdn, :string
+    field :campaign, :string
+    field :scheduled_date, :naive_datetime_usec
+    field :create_date, :naive_datetime_usec
+    field :write_date, :naive_datetime_usec
+  end
+
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [
+      :id,
+      :write_uid,
+      :msisdn,
+      :campaign,
+      :scheduled_date,
+      :create_date,
+      :write_date
+    ])
+  end
+end
+
+
 defmodule Machinery.HrRecruitmentStage do
   use Ecto.Schema
   import Ecto.Changeset
@@ -338,7 +366,7 @@ end
 defmodule HrApplicantSkillRel do
   use Ecto.Schema
   import Ecto.Changeset
-  
+
   @primary_key false
   schema "hr_applicant_hr_skill_rel" do
     field :hr_applicant_id, :integer #, primary_key: true

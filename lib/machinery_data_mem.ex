@@ -3,7 +3,7 @@ defmodule Machinery.Data.Mem do
 
     def start do
         Mnesia.start()
-        
+
         case Mnesia.create_schema(node()) do
             {:ok, _} -> :ok
             {:error, {:already_exists, _}} -> :ok
@@ -45,6 +45,12 @@ defmodule Machinery.Data.Mem do
 
         Mnesia.create_table(OpenQuestion, [
             attributes: [:msisdn_campaign, :question],
+            type: :set,
+            storage_properties: [ram_copies: [node()]]
+        ])
+
+        Mnesia.create_table(Transitivities, [
+            attributes: [:key, :value],
             type: :set,
             storage_properties: [ram_copies: [node()]]
         ])
@@ -307,6 +313,13 @@ defmodule Machinery.Data.Mem do
         msisdn_campaign = msisdn <> campaign
         Mnesia.transaction(fn -> 
             Mnesia.match_object({OpenQuestion, msisdn_campaign, :_})
+        end)
+    end
+
+    def transitivity_set(param, msisdn, campaign, value) do
+        key = param <> msisdn <> campaign
+        Mnesia.transaction(fn -> 
+            Mnesia.write({Transitivities, key, value})
         end)
     end
 end

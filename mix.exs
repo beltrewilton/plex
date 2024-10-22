@@ -30,7 +30,8 @@ defmodule Plex.MixProject do
       {:erlport, "~> 0.11.0"},
       {:plug_cowboy, "~> 2.7.2"  },
       {:jason, "~> 1.4"},
-      {:httpoison, "~> 2.2.1"}
+      {:httpoison, "~> 2.2.1"},
+      {:dotenv_parser, "~> 2.0"}
     ]
   end
 end

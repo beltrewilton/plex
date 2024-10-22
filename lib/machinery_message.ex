@@ -8,7 +8,7 @@ defmodule Machinery.Message do
 
 
   def message_deliver(message, whatsapp_id, flow, audio_id, scheduled, forwarded) do
-    tasks = %Machinery{}.tasks
+    tasks = %Machinery.State{}.tasks
     if forwarded, do: IO.puts("all logic to forwarded message, including call sync_chat_history")
 
     message = message_completion(message, flow, scheduled, :talent_entry_form, tasks, audio_id)
@@ -80,7 +80,7 @@ defmodule Machinery.Message do
   end
 
   def inactivity_firer do
-    
+
   end
 
 end

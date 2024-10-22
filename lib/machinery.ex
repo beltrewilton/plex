@@ -1,4 +1,4 @@
-defmodule Machinery do
+defmodule Machinery.State do
   @tasks %{
     talent_entry_form: 1,
     grammar_assessment_form: 2,
@@ -35,6 +35,9 @@ defmodule Machinery do
 
   require Logger
 
+  alias Machinery.Data.Mem
+  alias Machinery.Data
+
 
   defp new_n_request(utterance, current_state, previous_state, current_task, previous_conversation_history) do
     machinery = %__MODULE__{}
@@ -47,28 +50,72 @@ defmodule Machinery do
     n_request
   end
 
+  def new(msisdn, message, whatsapp_id, flow, audio_id, scheduled, forwarded, task \\ "Talent Entry Form", state \\ "In Progress") do
+    %ClientState{
+      msisdn: msisdn,
+      message: message,
+      whatsapp_id: whatsapp_id,
+      state: state,
+      task: task,
+      flow: flow,
+      audio_id: audio_id,
+      scheduled: scheduled,
+      forwarded: forwarded
+    }
+  end
 
-  @spec entry(any(), boolean(), any(), any()) ::
-          {%{
-             abort_scheduled_state: false,
-             company_question: false,
-             response: <<_::88>>,
-             schedule: false,
-             share_link: true
-           }, :flow_assesment | :flow_basic | nil}
-  def entry(message, flow, scheduled, audio_id) do
-    IO.inspect message
+  def extract_campaign(%ClientState{} = client) do
+    if is_nil(client.audio_id) do
+      if is_nil(client.task) or client.task == "Talent Entry Form" do
+        case UniqueCodeGenerator.extract_code(client.message) do
+          campaign_extracted ->
+            Data.add_applicant_stage(
+              client.msisdn,
+              campaign_extracted,
+              client.task,
+              client.state
+              )
+              Map.put(client, :campaign, campaign_extracted)
+              # try to change the default `client.message` variable for a generic one
+              # Map.put(client, :message, new_message_from_static)
 
-    if flow and not scheduled, do: task_completed("form_completed")
+          _ ->
+            IO.puts("Something wrong")
+            client
+        end
+      else
+        client
+      end
+    else
+      client
+    end
+  end
 
-    handle_audio(:scripted_text, audio_id)
+  # old name message_deliver
+  def message_handler(%ClientState{} = client) do
+    message_firer(client)
+  end
 
-    n_request = new_n_request(message, :in_progress, :in_progress, :talent_entry_form, [])
-    n_response = Machinery.Llm.generate(n_request)
-    flow_trigger = flow_trigger(:talent_entry_form, n_response)
-    n_response = process_response(:talent_entry_form, true, false, "123", n_response)
+  defp message_firer(%ClientState{} = client) do
+    client = extract_campaign(client)
 
-    {n_response, flow_trigger}
+    stage = Data.get_stage(client.msisdn, client.campaign)
+
+    # case client.forwarded do
+    #   false ->
+    #     #  if client.flow and not client.scheduled, do: task_completed("form_completed")
+
+    #     # handle_audio(:scripted_text, client.audio_id)
+
+    #     # n_request = new_n_request(client.message, :in_progress, :in_progress, :talent_entry_form, [])
+    #     # n_response = Machinery.Llm.generate(n_request)
+    #     # flow_trigger = flow_trigger(:talent_entry_form, n_response)
+    #     # n_response = process_response(:talent_entry_form, true, false, "123", n_response)
+
+    #     # {n_response, flow_trigger}
+
+    #   true -> {:ignore, "send wa message avoiding forwarder"}
+    # end
   end
 
 

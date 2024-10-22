@@ -140,3 +140,76 @@ defmodule CTALog do
     :received_at
   ]
 end
+
+
+defmodule ApplicantStageStruct do
+  @type t :: %__MODULE__{
+    id: integer() | nil,
+    create_uid: integer() | nil,
+    write_uid: integer() | nil,
+    msisdn: String.t() | nil,
+    campaign: String.t() | nil,
+    task: String.t() | nil,
+    state: String.t() | nil,
+    last_update: NaiveDateTime.t() | nil,
+    create_date: NaiveDateTime.t() | nil,
+    write_date: NaiveDateTime.t() | nil
+  }
+
+  defstruct [
+    :id,
+    :create_uid,
+    :write_uid,
+    :msisdn,
+    :campaign,
+    :task,
+    :state,
+    :last_update,
+    :create_date,
+    :write_date
+  ]
+
+  def from_record([id, create_uid, write_uid, msisdn, campaign, task, state, last_update, create_date, write_date]) do
+    %__MODULE__{
+      id: id,
+      create_uid: create_uid,
+      write_uid: write_uid,
+      msisdn: msisdn,
+      campaign: campaign,
+      task: task,
+      state: state,
+      last_update: last_update,
+      create_date: create_date,
+      write_date: write_date
+    }
+  end
+end
+
+
+defmodule ClientState do
+  @type t :: %__MODULE__{
+    msisdn: String.t() | nil,
+    message: String.t() | nil,
+    campaign: String.t() | nil,
+    whatsapp_id: String.t() | nil,
+    state: String.t() | nil,
+    task: String.t() | nil,
+    flow: boolean() | nil,
+    audio_id: String.t() | nil,
+    scheduled: boolean() | nil,
+    forwarded: boolean() | nil
+  }
+
+  defstruct [
+    :msisdn,
+    :message,
+    :campaign,
+    :whatsapp_id,
+    :state,
+    :task,
+    :flow,
+    :audio_id,
+    :scheduled,
+    :forwarded
+  ]
+end

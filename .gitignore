@@ -31,3 +31,6 @@ plex-*.tar
 /_build/
 /lib/__pycache__/
 /python/__pycache__/
+.secret
+ttb_last_config
+mix.lock

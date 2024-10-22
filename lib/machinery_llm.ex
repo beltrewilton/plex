@@ -23,7 +23,7 @@ defmodule Machinery.Llm do
       {:error, %HTTPoison.Error{reason: reason}} ->
         IO.puts("Error: #{reason}")
     end
-    %Machinery{}.n_response.output
+    %Machinery.State{}.n_response.output
   end
 end
 

@@ -41,6 +41,17 @@ defmodule Webhook.Router do
     send_resp(conn, 200, Jason.encode!(resp))
   end
 
+  get "/dummy_set" do
+    rdm = to_string(:erlang.ref_to_list(:erlang.make_ref()))
+    DummyStatemachine.set_msisdn(rdm)
+    send_resp(conn, 200, Jason.encode!(:ok))
+  end
+
+  get "/dummy_get" do
+    resp = DummyStatemachine.get_msisdn()
+    send_resp(conn, 200, Jason.encode!(resp))
+  end
+
   forward "/subtask", to: Subtask.Router
 
   match _ do

@@ -28,6 +28,10 @@ defmodule Machinery.Data do
     Logger.info("data in memory loaded.")
   end
 
+  def get_var(key) do
+    System.fetch_env!(key)
+  end
+
   defp data_mem_loader do
     chat_history = Repo.all(ChatHistory)
     chat_history = Enum.concat([chat_history | List.duplicate(chat_history, 100)])
@@ -53,39 +57,43 @@ defmodule Machinery.Data do
     )
   end
 
-  # TODO: ta reptiendo .... toy cansao
-  def get_state(msisdn, campaign, task \\ "Talent Entry Form", state \\ "In Progress") do
-    appl_state = Mem.get_applicant_state(msisdn, campaign)
+  def add_applicant_stage(msisdn, campaign, task, state) do
+    changeset = %ApplicantStage{}
+      |> ApplicantStage.changeset(%{
+        create_uid: 1,
+        write_uid: 1,
+        msisdn: msisdn,
+        campaign: campaign,
+        task: task,
+        state: state,
+        last_update: NaiveDateTime.utc_now(),
+        create_date: NaiveDateTime.utc_now(),
+        write_date: NaiveDateTime.utc_now()
+      })
+      case Repo.insert(changeset) do
+          {:ok, record} ->
+            Mem.add_applicant_stage(record, record.id)
+
+          {:error, changeset} -> {:error, changeset}
+      end
+  end
+
+  def get_stage(msisdn, campaign, task \\ "Talent Entry Form", state \\ "In Progress") do
+    appl_state = Mem.get_applicant_stage(msisdn, campaign)
     case appl_state do
-      {:atomic, []} ->
+      {:atomic, nil} ->
         query = from(s in ApplicantStage, where: s.msisdn == ^msisdn and s.campaign == ^campaign)
-        record =
         case Repo.one(query) do
           nil ->
-            changeset = %ApplicantStage{}
-            |> ApplicantStage.changeset(%{
-              create_uid: 1,
-              write_uid: 1,
-              msisdn: msisdn,
-              campaign: campaign,
-              task: task,
-              state: state,
-              last_update: NaiveDateTime.utc_now(),
-              create_date: NaiveDateTime.utc_now(),
-              write_date: NaiveDateTime.utc_now()
-            })
-            case Repo.insert(changeset) do
-                {:ok, record} -> record
-                {:error, changeset} -> {:error, changeset}
-            end
+            add_applicant_stage(msisdn, campaign, task, state)
 
           record -> record
 
           _ -> :error
         end
 
-        Mem.add_applicant_stage(record, record.id)
-        Mem.get_applicant_state(msisdn, campaign)
+        {:atomic, appl_state} = Mem.get_applicant_stage(msisdn, campaign)
+        appl_state
 
       {:atomic, appl_state} -> appl_state
 

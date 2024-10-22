@@ -62,6 +62,5 @@ defmodule UniqueCodeGenerator do
     ~r/\bCN[A-Z0-9]{10}\b/
     |> Regex.scan(text)
     |> List.flatten()
-    |> List.first()
   end
 end

@@ -267,16 +267,17 @@ defmodule Machinery.Data.Mem do
     def get_latest_campaign(msisdn) do
         filter_function = fn campaigns -> Enum.max_by(
                 campaigns,
-                fn [_, _, _, _, _, last_update, _, _] -> last_update end
+                fn [id, _, _, _, _, _, _, _, _, _] -> id end
             )
         end
 
-        transaction = Mnesia.transaction(fn ->
+        result =
+        Mnesia.transaction(fn ->
             Mnesia.select(
-                ApplicantCampaign,
+                ApplicantStage,
                 [
                     {
-                        {ApplicantCampaign, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8"},
+                        {ApplicantStage, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10"},
                         [{:==, :"$4", msisdn}],
                         [:"$$"]
                     }
@@ -284,15 +285,16 @@ defmodule Machinery.Data.Mem do
             )
         end)
 
-        case transaction do
-            {:atomic, []} ->
-                dt = NaiveDateTime.utc_now()
-                [1, 1, 1, msisdn, "CNDEFAULT", dt, dt, dt]
-
-            {:atomic, campaigns} -> filter_function.(campaigns)
+        case result do
+            {:atomic, stage} ->
+                filter_function.(stage) |> ApplicantStageStruct.from_record()
 
             error -> {:error, "Unknow error #{inspect(error)}"}
         end
+
+
+
+        #TODO: from_record maping????
     end
 
 

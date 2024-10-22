@@ -31,6 +31,8 @@ defmodule Machinery.State do
     previous_conversation_history: []
   }
 
+  @default_campaign "CNDEFAULT"
+
   defstruct tasks: @tasks, app_states: @app_states, n_response: @n_response, n_request: @n_request
 
   require Logger
@@ -68,26 +70,37 @@ defmodule Machinery.State do
     if is_nil(client.audio_id) do
       if is_nil(client.task) or client.task == "Talent Entry Form" do
         case UniqueCodeGenerator.extract_code(client.message) do
+          [] ->
+            Data.add_applicant_stage(
+              client.msisdn,
+              @default_campaign,
+              client.task,
+              client.state
+            )
+
           campaign_extracted ->
+            campaign_extracted = List.first(campaign_extracted)
             Data.add_applicant_stage(
               client.msisdn,
               campaign_extracted,
               client.task,
               client.state
-              )
-              Map.put(client, :campaign, campaign_extracted)
-              # try to change the default `client.message` variable for a generic one
-              # Map.put(client, :message, new_message_from_static)
-
-          _ ->
-            IO.puts("Something wrong")
-            client
+            )
+            # try to change the default `client.message` variable for a generic one
+            # Map.put(client, :message, new_message_from_static)
         end
-      else
-        client
       end
+    end
+
+    if not is_nil(client.audio_id) and is_nil(client.task) or client.task == "Talent Entry Form" do
+      #TODO:
+      #     si lo primero que tenemos es un audio, se debe abortar, la app no esta preparada, no
+      #     no tiene la campaign aun.
+      {:abort}
     else
-      client
+      #TODO: here get the last campaign no importa que sea la reciente o una anterior
+      # debe ser ''''the last'''''
+      Mem.get_latest_campaign(client.msisdn)
     end
   end
 
@@ -96,26 +109,29 @@ defmodule Machinery.State do
     message_firer(client)
   end
 
+  # merge : message_firer & entry
   defp message_firer(%ClientState{} = client) do
-    client = extract_campaign(client)
+    # case extract_campaign(client) do
+    #   {}
+    # end
 
     stage = Data.get_stage(client.msisdn, client.campaign)
 
-    # case client.forwarded do
-    #   false ->
-    #     #  if client.flow and not client.scheduled, do: task_completed("form_completed")
+    case client.forwarded do
+      false ->
+        if client.flow and not client.scheduled, do: task_completed("form_completed")
 
-    #     # handle_audio(:scripted_text, client.audio_id)
+        handle_audio(:scripted_text, client.audio_id)
 
-    #     # n_request = new_n_request(client.message, :in_progress, :in_progress, :talent_entry_form, [])
-    #     # n_response = Machinery.Llm.generate(n_request)
-    #     # flow_trigger = flow_trigger(:talent_entry_form, n_response)
-    #     # n_response = process_response(:talent_entry_form, true, false, "123", n_response)
+        n_request = new_n_request(client.message, :in_progress, :in_progress, :talent_entry_form, [])
+        n_response = Machinery.Llm.generate(n_request)
+        flow_trigger = flow_trigger(:talent_entry_form, n_response)
+        n_response = process_response(:talent_entry_form, true, false, "123", n_response)
 
-    #     # {n_response, flow_trigger}
+        {n_response, flow_trigger}
 
-    #   true -> {:ignore, "send wa message avoiding forwarder"}
-    # end
+      true -> {:ignore, "send wa message avoiding forwarder"}
+    end
   end
 
 

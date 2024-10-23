@@ -66,56 +66,79 @@ defmodule Machinery.State do
     }
   end
 
-  def extract_campaign(%ClientState{} = client) do
-    if is_nil(client.audio_id) do
-      if is_nil(client.task) or client.task == "Talent Entry Form" do
-        case UniqueCodeGenerator.extract_code(client.message) do
-          [] ->
-            Data.add_applicant_stage(
-              client.msisdn,
-              @default_campaign,
-              client.task,
-              client.state
-            )
+  defp extract_campaign(%ClientState{} = client) do
+    if is_nil(client.task) or client.task == "Talent Entry Form" do
+      case UniqueCodeGenerator.extract_code(client.message) do
+        [] ->
+          Data.add_applicant_stage(
+            client.msisdn,
+            @default_campaign,
+            client.task,
+            client.state
+          )
 
-          campaign_extracted ->
-            campaign_extracted = List.first(campaign_extracted)
-            Data.add_applicant_stage(
-              client.msisdn,
-              campaign_extracted,
-              client.task,
-              client.state
-            )
-            # try to change the default `client.message` variable for a generic one
-            # Map.put(client, :message, new_message_from_static)
-        end
+        campaign_extracted ->
+          campaign_extracted = List.first(campaign_extracted)
+          Data.add_applicant_stage(
+            client.msisdn,
+            campaign_extracted,
+            client.task,
+            client.state
+          )
+          # try to change the default `client.message` variable for a generic one
+          # Map.put(client, :message, new_message_from_static)
+      end
+    end
+  end
+
+  def solve_stage(%ClientState{} = client) do
+    if is_nil(client.audio_id) do
+      case Mem.get_latest_applicant_stage(client.msisdn) do # return ApplicantStageStruct
+        {:atomic, []} ->
+          extract_campaign(client)
+          Mem.get_latest_applicant_stage(client.msisdn)
+
+        {:atomic, stage} -> {:atomic, stage}
       end
     end
 
-    if not is_nil(client.audio_id) and is_nil(client.task) or client.task == "Talent Entry Form" do
+    if not is_nil(client.audio_id) and (is_nil(client.task) or client.task == "Talent Entry Form") do
       #TODO:
       #     si lo primero que tenemos es un audio, se debe abortar, la app no esta preparada, no
       #     no tiene la campaign aun.
       {:abort}
-    else
-      #TODO: here get the last campaign no importa que sea la reciente o una anterior
-      # debe ser ''''the last'''''
-      Mem.get_latest_campaign(client.msisdn)
     end
   end
 
   # old name message_deliver
   def message_handler(%ClientState{} = client) do
-    message_firer(client)
+  # client = Machinery.State.new("18092231620", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
+    message_handler(client, solve_stage(client)) # return ApplicantStageStruct
+  end
+
+  defp message_handler(%ClientState{} = client, {:atomic, stage}) do
+    IO.inspect(stage)
+    # client = Map.put(client, :campaign, stage.campaign) # stage.task, stage.state, etc.
+    IO.inspect(client)
+    # next: Taskear message_firer
+  end
+
+  # msisdn: "18092239090",
+  # campaign: "NOMOCA",
+
+  defp message_handler(%ClientState{} = client, {:atomic, []}) do
+    IO.puts("Esto nunca deberia ocurrir,")
+  end
+
+  defp message_handler(%ClientState{} = client, {:abort}) do
+    IO.puts("Esto nunca deberia ocurrir, enviaron audio asi no mas en lugar del welcome!")
   end
 
   # merge : message_firer & entry
   defp message_firer(%ClientState{} = client) do
-    # case extract_campaign(client) do
-    #   {}
-    # end
 
-    stage = Data.get_stage(client.msisdn, client.campaign)
+          # TODO: este metodo puede ser no necesario.
+    stage = Data.get_stage(client.msisdn, client.campaign) # return ApplicantStageStruct
 
     case client.forwarded do
       false ->

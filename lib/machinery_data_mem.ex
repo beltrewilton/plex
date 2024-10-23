@@ -264,11 +264,20 @@ defmodule Machinery.Data.Mem do
         )
     end
 
-    def get_latest_campaign(msisdn) do
-        filter_function = fn campaigns -> Enum.max_by(
-                campaigns,
-                fn [id, _, _, _, _, _, _, _, _, _] -> id end
+    def get_latest_applicant_stage(msisdn, min_days \\ 30) do
+        filter_function = fn stages ->
+            Enum.filter(stages,
+                fn [_, _, _, _, _, _, _, last_update, _, _] ->
+                    Date.diff(NaiveDateTime.utc_now(), last_update) < min_days
+                end
             )
+            |>
+            case do
+                [] -> []
+
+                result -> Enum.max_by(result, fn [id, _, _, _, _, _, _, _, _, _] -> id end)
+            end
+
         end
 
         result =
@@ -286,15 +295,18 @@ defmodule Machinery.Data.Mem do
         end)
 
         case result do
-            {:atomic, stage} ->
-                filter_function.(stage) |> ApplicantStageStruct.from_record()
+            {:atomic, []} -> {:atomic, []}
 
+            {:atomic, stage} ->
+                case filter_function.(stage) do
+                    [] -> {:atomic, []}
+
+                    stage ->
+                        stage = ApplicantStageStruct.from_record(stage)
+                        {:atomic, stage}
+                end
             error -> {:error, "Unknow error #{inspect(error)}"}
         end
-
-
-
-        #TODO: from_record maping????
     end
 
 

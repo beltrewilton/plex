@@ -58,24 +58,29 @@ defmodule Machinery.Data do
   end
 
   def add_applicant_stage(msisdn, campaign, task, state) do
-    changeset = %ApplicantStage{}
-      |> ApplicantStage.changeset(%{
-        create_uid: 1,
-        write_uid: 1,
-        msisdn: msisdn,
-        campaign: campaign,
-        task: task,
-        state: state,
-        last_update: NaiveDateTime.utc_now(),
-        create_date: NaiveDateTime.utc_now(),
-        write_date: NaiveDateTime.utc_now()
-      })
-      case Repo.insert(changeset) do
-          {:ok, record} ->
-            Mem.add_applicant_stage(record, record.id)
+    case Mem.get_applicant_stage(msisdn, campaign) do
+      {:atomic, nil} ->
+        changeset = %ApplicantStage{}
+          |> ApplicantStage.changeset(%{
+            create_uid: 1,
+            write_uid: 1,
+            msisdn: msisdn,
+            campaign: campaign,
+            task: task,
+            state: state,
+            last_update: NaiveDateTime.utc_now(),
+            create_date: NaiveDateTime.utc_now(),
+            write_date: NaiveDateTime.utc_now()
+          })
+        case Repo.insert(changeset) do
+            {:ok, record} ->
+              Mem.add_applicant_stage(record, record.id)
 
-          {:error, changeset} -> {:error, changeset}
-      end
+            {:error, changeset} -> {:error, changeset}
+        end
+
+      {:atomic, _} -> IO.puts("Ya existe el par #{msisdn} #{campaign}, nada por hacer.")
+     end
   end
 
   def get_stage(msisdn, campaign, task \\ "Talent Entry Form", state \\ "In Progress") do

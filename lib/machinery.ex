@@ -66,7 +66,7 @@ defmodule Machinery.State do
     }
   end
 
-  defp extract_campaign(%ClientState{} = client) do
+  def extract_campaign(%ClientState{} = client) do
     if is_nil(client.task) or client.task == "Talent Entry Form" do
       case UniqueCodeGenerator.extract_code(client.message) do
         [] ->
@@ -92,22 +92,29 @@ defmodule Machinery.State do
   end
 
   def solve_stage(%ClientState{} = client) do
-    if is_nil(client.audio_id) do
-      case Mem.get_latest_applicant_stage(client.msisdn) do # return ApplicantStageStruct
-        {:atomic, []} ->
-          extract_campaign(client)
-          Mem.get_latest_applicant_stage(client.msisdn)
+    cond do
+      is_nil(client.audio_id) ->
+        case Mem.get_latest_applicant_stage(client.msisdn) do # return ApplicantStageStruct
+          {:atomic, []} ->
+            extract_campaign(client)
+            Mem.get_latest_applicant_stage(client.msisdn)
 
-        {:atomic, stage} -> {:atomic, stage}
-      end
-    end
+          {:atomic, stage} -> {:atomic, stage}
+        end
 
-    if not is_nil(client.audio_id) and (is_nil(client.task) or client.task == "Talent Entry Form") do
-      #TODO:
-      #     si lo primero que tenemos es un audio, se debe abortar, la app no esta preparada, no
-      #     no tiene la campaign aun.
-      {:abort}
+      not is_nil(client.audio_id) and (is_nil(client.task) or client.task == "Talent Entry Form") ->
+        {:abort}
     end
+    # if is_nil(client.audio_id) do
+
+    # end
+
+    # if not is_nil(client.audio_id) and (is_nil(client.task) or client.task == "Talent Entry Form") do
+    #   #TODO:
+    #   #     si lo primero que tenemos es un audio, se debe abortar, la app no esta preparada, no
+    #   #     no tiene la campaign aun.
+    #   {:abort}
+    # end
   end
 
   # old name message_deliver
@@ -118,7 +125,7 @@ defmodule Machinery.State do
 
   defp message_handler(%ClientState{} = client, {:atomic, stage}) do
     IO.inspect(stage)
-    # client = Map.put(client, :campaign, stage.campaign) # stage.task, stage.state, etc.
+    client = Map.put(client, :campaign, stage.campaign) # stage.task, stage.state, etc.
     IO.inspect(client)
     # next: Taskear message_firer
   end

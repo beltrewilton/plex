@@ -107,6 +107,10 @@ defmodule Machinery.Data.Mem do
     # set_state in Python
     def add_applicant_stage(%Machinery.ApplicantStage{} = appl_stage, id) do
         appl_stage = Map.drop(appl_stage, [:id, :__struct__, :__meta__])
+        IO.inspect(appl_stage.task, label: "Task: ")
+        IO.inspect(appl_stage.state, label: "State: ")
+        task = if is_binary(appl_stage.task), do: String.to_atom(appl_stage.task), else: appl_stage.task
+        state = if is_binary(appl_stage.state), do: String.to_atom(appl_stage.state), else: appl_stage.state
         Mnesia.transaction(
             fn ->
                 Mnesia.write({
@@ -115,8 +119,8 @@ defmodule Machinery.Data.Mem do
                     appl_stage.write_uid,
                     appl_stage.msisdn,
                     appl_stage.campaign,
-                    appl_stage.task,
-                    appl_stage.state,
+                    task,
+                    state,
                     appl_stage.last_update,
                     appl_stage.create_date,
                     appl_stage.write_date

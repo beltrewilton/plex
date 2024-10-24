@@ -83,7 +83,7 @@ defmodule Machinery.Data do
      end
   end
 
-  def get_stage(msisdn, campaign, task \\ "Talent Entry Form", state \\ "In Progress") do
+  def get_stage(msisdn, campaign, task \\ :talent_entry_form, state \\ :in_progress) do
     appl_state = Mem.get_applicant_stage(msisdn, campaign)
     case appl_state do
       {:atomic, nil} ->
@@ -153,14 +153,14 @@ defmodule Machinery.Data do
   end
 
   def get_hrapplicant(msisdn, campaign) do
-    query = from a in HrApplicant,
+    from a in HrApplicant,
       join: j in HrJob, on: a.job_id == j.id,
       where: a.phone_sanitized == ^msisdn and j.va_campaign == ^campaign,
       limit: 1
   end
 
   def update_hrapplicant(msisdn, campaign, task) do
-    states = %{ # Odoo states/stages/kanva
+    odoo_states = %{ # Odoo states/stages/kanva
       talent_entry_form: 1,
       grammar_assessment_form: 3,
       scripted_text: 3,
@@ -174,7 +174,7 @@ defmodule Machinery.Data do
       nil -> Repo.rollback(:not_found)
 
       record ->
-        Ecto.Changeset.change(record, %{stage_id: states[task], lead_last_update: NaiveDateTime.utc_now()})
+        Ecto.Changeset.change(record, %{stage_id: odoo_states[task], lead_last_update: NaiveDateTime.utc_now()})
         |> Repo.update()
     end
   end
@@ -194,13 +194,15 @@ defmodule Machinery.Data do
   # really: update or insert
   def update_applicant_stage(msisdn, campaign, task, state) do
     query_update = from(a in ApplicantStage,
-      where: a.msisdn == ^msisdn and a.campaign == ^campaign
+      where: a.msisdn == ^msisdn and a.campaign == ^campaign,
+      select: a.id
     )
 
     applicant_stage =
-    case Repo.update_all(query_update, set: [state: state, task: task]) do
+    case Repo.update_all(query_update, set: [state: state, task: task, last_update: NaiveDateTime.utc_now()]) do
       {0, _} ->
         # not found, insert
+        IO.puts("Not found, INSERT")
         %ApplicantStage{}
         |> ApplicantStage.changeset(%{
           create_uid: 1,
@@ -215,7 +217,9 @@ defmodule Machinery.Data do
         })
         |> Repo.insert!()
 
-      {1, applicant_stage} -> applicant_stage
+      {1, _applicant_stage} ->
+        IO.puts("found, SO, GET applicant_stage")
+        Repo.one!(from a in ApplicantStage, where: a.msisdn == ^msisdn and a.campaign == ^campaign)
 
       error -> error
     end
@@ -241,7 +245,7 @@ defmodule Machinery.Data do
   end
 
 
-  # WTF with this name?
+  #TODO: revisar, funciones cambiaron y afectan esta def...  WTF with this name?
   def set_state_all(msisdn, campaign, state) do
     {_, mem_state} = Mem.get_applicant_state(msisdn, campaign)
     current_task = Enum.at(mem_state, 5)

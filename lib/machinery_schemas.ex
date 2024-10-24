@@ -50,8 +50,8 @@ defmodule Machinery.ApplicantStage do
     field :write_uid, :integer, default: 1
     field :msisdn, :string
     field :campaign, :string
-    field :task, :string
-    field :state, :string
+    field :task,  Plex.Type.AtomString
+    field :state, Plex.Type.AtomString
     field :last_update, :naive_datetime_usec
     field :create_date, :naive_datetime_usec
     field :write_date, :naive_datetime_usec
@@ -72,6 +72,7 @@ defmodule Machinery.ApplicantStage do
       :write_date
     ])
   end
+
 end
 
 
@@ -214,8 +215,8 @@ defmodule HrApplicant do
     field :user_question_2, :string
     field :user_input_answer_1, :string
     field :user_input_answer_2, :string
-    field :lead_last_update, :naive_datetime
-    field :lead_last_client_update, :naive_datetime
+    field :lead_last_update, :naive_datetime_usec
+    field :lead_last_client_update, :naive_datetime_usec
     field :lead_max_temperature, :float, default: 0.0
     field :speech_open_question, :string
     field :speech_unscripted_overall_score, :float, default: 0.0

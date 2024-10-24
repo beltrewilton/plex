@@ -1,11 +1,11 @@
 defmodule Machinery.State do
-  @tasks %{
-    talent_entry_form: 1,
-    grammar_assessment_form: 2,
-    scripted_text: 3,
-    open_question: 4,
-    end_of_task: 5
-  }
+  @tasks [
+    :talent_entry_form,
+    :grammar_assessment_form,
+    :scripted_text,
+    :open_question,
+    :end_of_task
+  ]
 
   @app_states [
     :in_progress, :scheduled, :completed
@@ -52,7 +52,7 @@ defmodule Machinery.State do
     n_request
   end
 
-  def new(msisdn, message, whatsapp_id, flow, audio_id, scheduled, forwarded, task \\ "Talent Entry Form", state \\ "In Progress") do
+  def new(msisdn, message, whatsapp_id, flow, audio_id, scheduled, forwarded, task \\ :talent_entry_form, state \\ :in_progress) do
     %ClientState{
       msisdn: msisdn,
       message: message,
@@ -67,7 +67,7 @@ defmodule Machinery.State do
   end
 
   def extract_campaign(%ClientState{} = client) do
-    if is_nil(client.task) or client.task == "Talent Entry Form" do
+    if is_nil(client.task) or client.task == :talent_entry_form do
       case UniqueCodeGenerator.extract_code(client.message) do
         [] ->
           Data.add_applicant_stage(
@@ -78,6 +78,8 @@ defmodule Machinery.State do
           )
 
         campaign_extracted ->
+          IO.inspect(client.task, label: "client.task: ")
+          IO.inspect(client.state, label: "client.state: ")
           campaign_extracted = List.first(campaign_extracted)
           Data.add_applicant_stage(
             client.msisdn,
@@ -102,14 +104,14 @@ defmodule Machinery.State do
           {:atomic, stage} -> {:atomic, stage}
         end
 
-      not is_nil(client.audio_id) and (is_nil(client.task) or client.task == "Talent Entry Form") ->
+      not is_nil(client.audio_id) and (is_nil(client.task) or client.task == :talent_entry_form) ->
         {:abort}
     end
     # if is_nil(client.audio_id) do
 
     # end
 
-    # if not is_nil(client.audio_id) and (is_nil(client.task) or client.task == "Talent Entry Form") do
+    # if not is_nil(client.audio_id) and (is_nil(client.task) or client.task == :talent_entry_form) do
     #   #TODO:
     #   #     si lo primero que tenemos es un audio, se debe abortar, la app no esta preparada, no
     #   #     no tiene la campaign aun.
@@ -119,19 +121,51 @@ defmodule Machinery.State do
 
   # old name message_deliver
   def message_handler(%ClientState{} = client) do
-  # client = Machinery.State.new("18092231620", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
+  # Machinery.Repo.start_link
+  # client = Machinery.State.new("18092231010", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
+  # {:ok, client} = Machinery.State.message_handler(client)
+  # ----- {:atomic, stage} = Machinery.State.solve_stage(client)
+  # Machinery.Data.register_or_update(client.msisdn, "Delta Magui", 1, true, "yes", "yes", "Bonao", client.campaign)
+  # client = Machinery.State.new(client.msisdn, "Okay, completed", "wa", true, nil, false, false)
+  # # {:ok, client} = Machinery.State.message_handler(client)
+  #------  {:atomic, stage} = Machinery.State.solve_stage(client)
+
+  # Machinery.Data.Mem.get_applicant_stage("18092231010", "CNVQSOUR84FK")
+
+
+
+  # Machinery.Data.update_hrapplicant(client.msisdn, stage.campaign, task)
+  # Machinery.Data.update_applicant_stage(client.msisdn, stage.campaign, task, stage.state)
+  #
+
+  #  Machinery.State.extract_campaign(client)
     message_handler(client, solve_stage(client)) # return ApplicantStageStruct
+  end
+
+  defp client_update(client, stage) do
+    Map.merge(client, %{
+      campaign: stage.campaign,
+      task: stage.task,
+      state: stage.state
+    })
+  end
+
+  defp client_update(client) do
+    {:atomic, stage} = Mem.get_applicant_stage(client.msisdn, client.campaign)
+    client_update(client, stage)
   end
 
   defp message_handler(%ClientState{} = client, {:atomic, stage}) do
     IO.inspect(stage)
-    client = Map.put(client, :campaign, stage.campaign) # stage.task, stage.state, etc.
+    client = client_update(client, stage)
     IO.inspect(client)
-    # next: Taskear message_firer
-  end
 
-  # msisdn: "18092239090",
-  # campaign: "NOMOCA",
+    message_firer(client)
+
+    client = client_update(client)
+
+    {:ok, client}
+  end
 
   defp message_handler(%ClientState{} = client, {:atomic, []}) do
     IO.puts("Esto nunca deberia ocurrir,")
@@ -145,20 +179,20 @@ defmodule Machinery.State do
   defp message_firer(%ClientState{} = client) do
 
           # TODO: este metodo puede ser no necesario.
-    stage = Data.get_stage(client.msisdn, client.campaign) # return ApplicantStageStruct
+    # stage = Data.get_stage(client.msisdn, client.campaign) # return ApplicantStageStruct
 
     case client.forwarded do
       false ->
-        if client.flow and not client.scheduled, do: task_completed("form_completed")
+        if client.flow and not client.scheduled, do: task_completed(client)
 
-        handle_audio(:scripted_text, client.audio_id)
+        # handle_audio(:scripted_text, client.audio_id)
 
-        n_request = new_n_request(client.message, :in_progress, :in_progress, :talent_entry_form, [])
-        n_response = Machinery.Llm.generate(n_request)
-        flow_trigger = flow_trigger(:talent_entry_form, n_response)
-        n_response = process_response(:talent_entry_form, true, false, "123", n_response)
+        # n_request = new_n_request(client.message, :in_progress, :in_progress, :talent_entry_form, [])
+        # n_response = Machinery.Llm.generate(n_request)
+        # flow_trigger = flow_trigger(:talent_entry_form, n_response)
+        # n_response = process_response(:talent_entry_form, true, false, "123", n_response)
 
-        {n_response, flow_trigger}
+        # {n_response, flow_trigger}
 
       true -> {:ignore, "send wa message avoiding forwarder"}
     end
@@ -182,7 +216,27 @@ defmodule Machinery.State do
   end
 
 
-  defp task_completed(message), do: IO.puts("task completed #{message}")
+  def next_task(key) do
+    tasks = %__MODULE__{}.tasks
+    index = Enum.find_index(tasks, &(&1 == key))
+    if index < length(tasks) - 1 do
+      Enum.at(tasks, index + 1)
+    else
+      key
+    end
+  end
+
+  def task_completed(%ClientState{} = client) do
+    client = Map.put(client, :task, next_task(client.task))
+
+    client = if client.task == :end_of_task, do: Map.put(client, :state, :completed), else: client
+
+    Data.update_hrapplicant(client.msisdn, client.campaign, client.task)
+
+    Data.update_applicant_stage(client.msisdn, client.campaign, client.task, client.state)
+
+    {:ok, client}
+  end
 
 
   defp flow_trigger(task_name, n_response) do

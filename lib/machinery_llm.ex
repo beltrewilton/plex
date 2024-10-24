@@ -14,7 +14,7 @@ defmodule Machinery.Llm do
     # IO.inspect(body)
     case HTTPoison.post(@url, body, @headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
-        IO.puts("Response: #{response_body}")
+        # IO.puts("Response: #{response_body}")
         Jason.decode!(response_body) |> Transformer.transform_output()
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
@@ -23,21 +23,25 @@ defmodule Machinery.Llm do
       {:error, %HTTPoison.Error{reason: reason}} ->
         IO.puts("Error: #{reason}")
     end
-    %Machinery.State{}.n_response.output
+    # %Machinery.State{}.n_response.output
   end
 end
 
 defmodule Transformer do
   def transform_output(%{"output" => output} = json) do
-    output = %{
-      response: "random text",
-      share_link: output["share_link"],
-      schedule: output["schedule"],
-      company_question: false,
-      abort_scheduled_state: output["abort_scheduled_state"]
+    response = %{
+      output: %{
+        response: json["output"]["response"],
+        share_link: json["output"]["share_link"],
+        schedule: json["output"]["schedule"],
+        company_question: json["output"]["company_question"],
+        abort_scheduled_state: json["output"]["abort_scheduled_state"]
+      },
+      previous_conversation_history: json["previous_conversation_history"]
     }
 
-    Map.put(json, "output", output)
+    # Map.put(json, "output", output)
+    response
   end
 
 
@@ -79,7 +83,7 @@ defmodule Transformer do
     end
   end
 
-  defp format_states(states) do
+  def format_states(states) do
     Enum.reduce(states, %{}, fn state, acc ->
       case state do
         :in_progress -> Map.put(acc, atom_to_str(:in_progress), "in_progress")
@@ -89,14 +93,14 @@ defmodule Transformer do
     end)
   end
 
-  defp format_tasks(tasks) do
-    Enum.reduce(tasks, %{}, fn {task, id}, acc ->
+  def format_tasks(tasks) do
+    Enum.reduce(tasks, %{}, fn task, acc ->
       case task do
-        :talent_entry_form -> Map.put(acc, "#{id}", atom_to_str(:talent_entry_form))
-        :grammar_assessment_form -> Map.put(acc, "#{id}", atom_to_str(:grammar_assessment_form))
-        :scripted_text -> Map.put(acc, "#{id}", atom_to_str(:scripted_text))
-        :open_question -> Map.put(acc, "#{id}", atom_to_str(:open_question))
-        :end_of_task -> Map.put(acc, "#{id}", atom_to_str(:end_of_task))
+        :talent_entry_form -> Map.put(acc, "1", atom_to_str(:talent_entry_form))
+        :grammar_assessment_form -> Map.put(acc, "2", atom_to_str(:grammar_assessment_form))
+        :scripted_text -> Map.put(acc, "3", atom_to_str(:scripted_text))
+        :open_question -> Map.put(acc, "4", atom_to_str(:open_question))
+        :end_of_task -> Map.put(acc, "5", atom_to_str(:end_of_task))
       end
     end)
   end

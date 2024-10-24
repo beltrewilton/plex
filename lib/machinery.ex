@@ -18,7 +18,8 @@ defmodule Machinery.State do
       schedule: false,
       company_question: false,
       abort_scheduled_state: false
-    }
+    },
+    previous_conversation_history: []
   }
 
   @n_request %{
@@ -41,15 +42,29 @@ defmodule Machinery.State do
   alias Machinery.Data
 
 
-  defp new_n_request(utterance, current_state, previous_state, current_task, previous_conversation_history) do
+  def new_n_request(utterance, current_state, previous_state, current_task, previous_conversation_history) do
     machinery = %__MODULE__{}
-    n_request = machinery.n_request
-    |> Map.put(:utterance, utterance)
-    |> Map.put(:current_state, current_state)
-    |> Map.put(:previous_state, previous_state)
-    |> Map.put(:current_task, current_task)
-    |> Map.put(:previous_conversation_history, previous_conversation_history)
-    n_request
+
+    # Map.merge(client, %{
+    #   campaign: stage.campaign,
+    #   task: stage.task,
+    #   state: stage.state
+    # })
+
+    Map.merge(machinery.n_request, %{
+      utterance: utterance,
+      current_state: current_state,
+      previous_state: previous_state,
+      current_task: current_task,
+      previous_conversation_history: previous_conversation_history
+    })
+
+    # |> Map.put(:utterance, utterance)
+    # |> Map.put(:current_state, current_state)
+    # |> Map.put(:previous_state, previous_state)
+    # |> Map.put(:current_task, current_task)
+    # |> Map.put(:previous_conversation_history, previous_conversation_history)
+    # n_request
   end
 
   def new(msisdn, message, whatsapp_id, flow, audio_id, scheduled, forwarded, task \\ :talent_entry_form, state \\ :in_progress) do
@@ -122,7 +137,7 @@ defmodule Machinery.State do
   # old name message_deliver
   def message_handler(%ClientState{} = client) do
   # Machinery.Repo.start_link
-  # client = Machinery.State.new("18092231010", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
+  # client = Machinery.State.new("18092231013", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
   # {:ok, client} = Machinery.State.message_handler(client)
   # ----- {:atomic, stage} = Machinery.State.solve_stage(client)
   # Machinery.Data.register_or_update(client.msisdn, "Delta Magui", 1, true, "yes", "yes", "Bonao", client.campaign)
@@ -176,7 +191,7 @@ defmodule Machinery.State do
   end
 
   # merge : message_firer & entry
-  defp message_firer(%ClientState{} = client) do
+  def message_firer(%ClientState{} = client) do
 
           # TODO: este metodo puede ser no necesario.
     # stage = Data.get_stage(client.msisdn, client.campaign) # return ApplicantStageStruct
@@ -185,12 +200,19 @@ defmodule Machinery.State do
       false ->
         if client.flow and not client.scheduled, do: task_completed(client)
 
-        # handle_audio(:scripted_text, client.audio_id)
+        handle_audio(client)
 
-        # n_request = new_n_request(client.message, :in_progress, :in_progress, :talent_entry_form, [])
-        # n_response = Machinery.Llm.generate(n_request)
-        # flow_trigger = flow_trigger(:talent_entry_form, n_response)
-        # n_response = process_response(:talent_entry_form, true, false, "123", n_response)
+        # defp new_n_request(utterance, current_state, previous_state, current_task, previous_conversation_history) do
+        client = client_update(client)
+        n_request = new_n_request(client.message, client.state, :in_progress, client.task, []) # TODO: read chat history from mem
+        n_response = Machinery.Llm.generate(n_request) #TODO: mas pruebas son requeridas LLM...
+        IO.inspect(n_response)
+
+        flow_trigger = flow_trigger(client.task, n_response)
+
+        # process_response(task, flow, scheduled, audio_id, n_response)
+        # TODO: me quede aqui <------- .....
+        n_response = process_response(client.task, client.flow, n_response.output.schedule, client.audio_id, n_response.output)
 
         # {n_response, flow_trigger}
 
@@ -199,19 +221,19 @@ defmodule Machinery.State do
   end
 
 
-  defp handle_audio(task_name, audio_id) when not is_nil(audio_id) do
-    machinery = struct(__MODULE__)
-    # IO.inspect machinery
-    case Map.get(machinery.tasks, task_name) do
-     3 -> task_completed("#3")
-     4 -> task_completed("#4")
-     _ ->
-      response = machinery.n_response
-      {response, _flow_trigger = nil}
+  defp handle_audio(%ClientState{} = client) when not is_nil(client.audio_id) do
+    client = client_update(client)
+    if client.task in [:scripted_text, :open_question] do
+      # manage audio with ffmpeg function
+      IO.puts("manage audio with ffmpeg function.")
+      task_completed(client)
+    else
+      # random_message(switch_to_text)
+      {:switch_to_text} # audio only accepted when :scripted_text or :open_question
     end
   end
 
-  defp handle_audio(task_name, _)  do
+  defp handle_audio(%ClientState{} = client)  do
     {:no_audio}
   end
 
@@ -239,38 +261,41 @@ defmodule Machinery.State do
   end
 
 
-  defp flow_trigger(task_name, n_response) do
+  defp flow_trigger(task, n_response) do
     machinery = struct(__MODULE__)
     cond do
-      n_response.share_link and 1 == Map.get(machinery.tasks, task_name) -> :flow_basic
-      n_response.share_link and 2 == Map.get(machinery.tasks, task_name) -> :flow_assesment
-      n_response.schedule and task_name in Enum.slice(machinery.tasks, 0..-2) -> :flow_scheduler
+      n_response.share_link and :talent_entry_form == task -> :flow_basic
+
+      n_response.share_link and :grammar_assessment_form == task -> :flow_assesment
+
+      n_response.schedule and task in Enum.drop(machinery.tasks, -1) -> :flow_scheduler
+
       true -> nil
     end
   end
 
 
-  defp process_response(task, flow, scheduled, audio_id, n_response) do
+  defp process_response(task, flow, scheduled, audio_id, output) do
     machinery = struct(__MODULE__)
-    if (flow && task == Map.get(machinery.tasks, 3) && !scheduled) || String.contains?(n_response.response, "PLACEHOLDER_1") do
+    if (flow && task == Map.get(machinery.tasks, 3) && !scheduled) || String.contains?(output.response, "PLACEHOLDER_1") do
       ref_text = "random_message"
-      n_response.response
+      output.response
       |> String.replace("PLACEHOLDER_1", "\n> ❝#{ref_text}❞\n\n\n_")
       |> String.replace("`", "")
     else
-      n_response.response
+      output.response
     end
 
     if (audio_id && task == Map.get(machinery.tasks, 4) && !scheduled) || String.contains?(n_response.response, "PLACEHOLDER_2") do
       question_1 = "random_message"
-      n_response.response
+      output.response
       |> String.replace("PLACEHOLDER_2", "\n> ❝#{question_1}❞\n\n\n_")
       |> String.replace("`", "")
     else
-      n_response.response
+      output.response
     end
 
-    n_response
+    output
   end
 
 end

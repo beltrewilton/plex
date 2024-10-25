@@ -11,7 +11,7 @@ defmodule GrammarScore do
           user_question_1: String.t() | nil,
           user_question_2: String.t() | nil,
           user_input_answer_1: String.t() | nil,
-          user_input_answer_2: String.t() | nil,
+          user_input_answer_2: String.t() | nil
         }
 
   defstruct [
@@ -30,75 +30,73 @@ defmodule GrammarScore do
   ]
 end
 
-
 defmodule SpeechScore do
   @type t :: %__MODULE__{
-      msisdn: String.t() | nil,
-      campaign: String.t() | nil,
-      speech_open_question: String.t() | nil,
-      speech_unscripted_overall_score: float() | nil,
-      speech_unscripted_length: float() | nil,
-      speech_unscripted_fluency_coherence: float() | nil,
-      speech_unscripted_grammar: float() | nil,
-      speech_unscripted_lexical_resource: float() | nil,
-      speech_unscripted_pause_filler: map() | nil,
-      speech_unscripted_pronunciation: float() | nil,
-      speech_unscripted_relevance: float() | nil,
-      speech_unscripted_speed: float() | nil,
-      speech_unscripted_audio_path: String.t()| nil,
-      speech_unscripted_transcription: String.t()| nil,
-      speech_unscripted_warning: String.t()| nil,
-      speech_overall: float() | nil,
-      speech_refText: String.t()| nil,
-      speech_duration: float() | nil,
-      speech_fluency: float() | nil,
-      speech_integrity: float() | nil,
-      speech_pronunciation: float() | nil,
-      speech_rhythm: float() | nil,
-      speech_speed: float() | nil,
-      speech_audio_path: String.t()| nil,
-      speech_warning: String.t()| nil
-  }
+          msisdn: String.t() | nil,
+          campaign: String.t() | nil,
+          speech_open_question: String.t() | nil,
+          speech_unscripted_overall_score: float() | nil,
+          speech_unscripted_length: float() | nil,
+          speech_unscripted_fluency_coherence: float() | nil,
+          speech_unscripted_grammar: float() | nil,
+          speech_unscripted_lexical_resource: float() | nil,
+          speech_unscripted_pause_filler: map() | nil,
+          speech_unscripted_pronunciation: float() | nil,
+          speech_unscripted_relevance: float() | nil,
+          speech_unscripted_speed: float() | nil,
+          speech_unscripted_audio_path: String.t() | nil,
+          speech_unscripted_transcription: String.t() | nil,
+          speech_unscripted_warning: String.t() | nil,
+          speech_overall: float() | nil,
+          speech_refText: String.t() | nil,
+          speech_duration: float() | nil,
+          speech_fluency: float() | nil,
+          speech_integrity: float() | nil,
+          speech_pronunciation: float() | nil,
+          speech_rhythm: float() | nil,
+          speech_speed: float() | nil,
+          speech_audio_path: String.t() | nil,
+          speech_warning: String.t() | nil
+        }
 
   defstruct [
-     :msisdn,
-     :campaign,
-     :speech_open_question,
-     :speech_unscripted_overall_score,
-     :speech_unscripted_length,
-     :speech_unscripted_fluency_coherence,
-     :speech_unscripted_grammar,
-     :speech_unscripted_lexical_resource,
-     :speech_unscripted_pause_filler,
-     :speech_unscripted_pronunciation,
-     :speech_unscripted_relevance,
-     :speech_unscripted_speed,
-     :speech_unscripted_audio_path,
-     :speech_unscripted_transcription,
-     :speech_unscripted_warning,
-     :speech_overall,
-     :speech_refText,
-     :speech_duration,
-     :speech_fluency,
-     :speech_integrity,
-     :speech_pronunciation,
-     :speech_rhythm,
-     :speech_speed,
-     :speech_audio_path,
-     :speech_warning,
+    :msisdn,
+    :campaign,
+    :speech_open_question,
+    :speech_unscripted_overall_score,
+    :speech_unscripted_length,
+    :speech_unscripted_fluency_coherence,
+    :speech_unscripted_grammar,
+    :speech_unscripted_lexical_resource,
+    :speech_unscripted_pause_filler,
+    :speech_unscripted_pronunciation,
+    :speech_unscripted_relevance,
+    :speech_unscripted_speed,
+    :speech_unscripted_audio_path,
+    :speech_unscripted_transcription,
+    :speech_unscripted_warning,
+    :speech_overall,
+    :speech_refText,
+    :speech_duration,
+    :speech_fluency,
+    :speech_integrity,
+    :speech_pronunciation,
+    :speech_rhythm,
+    :speech_speed,
+    :speech_audio_path,
+    :speech_warning
   ]
 end
 
-
 defmodule SpeechLog do
   @type t :: %__MODULE__{
-    create_uid: integer() | nil,
-    write_uid: integer() | nil,
-    msisdn: String.t() | nil,
-    campaign: String.t() | nil,
-    audio_path: String.t() | nil,
-    response: map() | nil,
-  }
+          create_uid: integer() | nil,
+          write_uid: integer() | nil,
+          msisdn: String.t() | nil,
+          campaign: String.t() | nil,
+          audio_path: String.t() | nil,
+          response: map() | nil
+        }
 
   defstruct [
     :create_uid,
@@ -112,10 +110,10 @@ end
 
 defmodule WebHookLog do
   @type t :: %__MODULE__{
-    source: String.t() | nil,
-    response: map() | nil,
-    received_at: NaiveDateTime.t() | nil
-  }
+          source: String.t() | nil,
+          response: map() | nil,
+          received_at: NaiveDateTime.t() | nil
+        }
 
   defstruct [
     :source,
@@ -124,14 +122,13 @@ defmodule WebHookLog do
   ]
 end
 
-
 defmodule CTALog do
   @type t :: %__MODULE__{
-    referer: String.t() | nil,
-    user_agent: String.t() | nil,
-    campaign: String.t() | nil,
-    received_at: NaiveDateTime.t() | nil
-  }
+          referer: String.t() | nil,
+          user_agent: String.t() | nil,
+          campaign: String.t() | nil,
+          received_at: NaiveDateTime.t() | nil
+        }
 
   defstruct [
     :referer,
@@ -141,20 +138,19 @@ defmodule CTALog do
   ]
 end
 
-
 defmodule ApplicantStageStruct do
   @type t :: %__MODULE__{
-    id: integer() | nil,
-    create_uid: integer() | nil,
-    write_uid: integer() | nil,
-    msisdn: String.t() | nil,
-    campaign: String.t() | nil,
-    task: String.t() | nil,
-    state: String.t() | nil,
-    last_update: NaiveDateTime.t() | nil,
-    create_date: NaiveDateTime.t() | nil,
-    write_date: NaiveDateTime.t() | nil
-  }
+          id: integer() | nil,
+          create_uid: integer() | nil,
+          write_uid: integer() | nil,
+          msisdn: String.t() | nil,
+          campaign: String.t() | nil,
+          task: String.t() | nil,
+          state: String.t() | nil,
+          last_update: NaiveDateTime.t() | nil,
+          create_date: NaiveDateTime.t() | nil,
+          write_date: NaiveDateTime.t() | nil
+        }
 
   defstruct [
     :id,
@@ -169,7 +165,18 @@ defmodule ApplicantStageStruct do
     :write_date
   ]
 
-  def from_record([id, create_uid, write_uid, msisdn, campaign, task, state, last_update, create_date, write_date]) do
+  def from_record([
+        id,
+        create_uid,
+        write_uid,
+        msisdn,
+        campaign,
+        task,
+        state,
+        last_update,
+        create_date,
+        write_date
+      ]) do
     %__MODULE__{
       id: id,
       create_uid: create_uid,
@@ -185,20 +192,19 @@ defmodule ApplicantStageStruct do
   end
 end
 
-
 defmodule ClientState do
   @type t :: %__MODULE__{
-    msisdn: String.t() | nil,
-    message: String.t() | nil,
-    campaign: String.t() | nil,
-    whatsapp_id: String.t() | nil,
-    state: String.t() | nil,
-    task: String.t() | nil,
-    flow: boolean() | nil,
-    audio_id: String.t() | nil,
-    scheduled: boolean() | nil,
-    forwarded: boolean() | nil
-  }
+          msisdn: String.t() | nil,
+          message: String.t() | nil,
+          campaign: String.t() | nil,
+          whatsapp_id: String.t() | nil,
+          state: String.t() | nil,
+          task: String.t() | nil,
+          flow: boolean() | nil,
+          audio_id: String.t() | nil,
+          scheduled: boolean() | nil,
+          forwarded: boolean() | nil
+        }
 
   defstruct [
     :msisdn,

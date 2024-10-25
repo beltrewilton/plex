@@ -1,7 +1,7 @@
 defmodule Plex.Llm do
   @url "http://localhost:9091/llm/generate"
 
-  @headers  [
+  @headers [
     {"accept", "application/json"},
     {"Content-Type", "application/json"}
   ]
@@ -23,6 +23,7 @@ defmodule Plex.Llm do
       {:error, %HTTPoison.Error{reason: reason}} ->
         IO.puts("Error: #{reason}")
     end
+
     # %Plex.State{}.n_response.output
   end
 end
@@ -44,7 +45,6 @@ defmodule Plex.Formater do
     response
   end
 
-
   def transform_request(n_request) do
     %{
       "utterance" => n_request.utterance,
@@ -54,14 +54,20 @@ defmodule Plex.Formater do
       "states" => format_states(n_request.app_states),
       "tasks" => format_tasks(n_request.tasks),
       "previous_conversation_history" => n_request.previous_conversation_history
-    } |> Jason.encode!()
+    }
+    |> Jason.encode!()
   end
 
   defp format_state(state) do
     case state do
-      :in_progress -> Atom.to_string(:in_progress) |> String.replace("_", " ") |> String.capitalize()
-      :scheduled -> "Scheduled"
-      :completed -> "Completed"
+      :in_progress ->
+        Atom.to_string(:in_progress) |> String.replace("_", " ") |> String.capitalize()
+
+      :scheduled ->
+        "Scheduled"
+
+      :completed ->
+        "Completed"
     end
   end
 

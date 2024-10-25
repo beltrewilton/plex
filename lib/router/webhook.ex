@@ -3,10 +3,9 @@ defmodule Webhook.Router do
 
   import Plug.Conn
 
-  plug :match
-  plug Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason
-  plug :dispatch
-
+  plug(:match)
+  plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason)
+  plug(:dispatch)
 
   post "/" do
     IO.inspect(conn.body_params)
@@ -18,10 +17,9 @@ defmodule Webhook.Router do
     send_resp(conn, 200, "this is the root [get]")
   end
 
-  forward "/subtask", to: Subtask.Router
+  forward("/subtask", to: Subtask.Router)
 
   match _ do
     send_resp(conn, 404, "You are trying something that does not exist.")
   end
-
 end

@@ -28,7 +28,7 @@ defmodule Plex.MixProject do
       {:postgrex, "~> 0.19.1"},
       {:export, "~> 0.1.1"},
       {:erlport, "~> 0.11.0"},
-      {:plug_cowboy, "~> 2.7.2"  },
+      {:plug_cowboy, "~> 2.7.2"},
       {:jason, "~> 1.4"},
       {:httpoison, "~> 2.2.1"},
       {:dotenv_parser, "~> 2.0"}

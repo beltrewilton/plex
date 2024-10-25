@@ -1,8 +1,8 @@
 defmodule Subtask.Router do
   use Plug.Router
 
-  plug :match
-  plug :dispatch
+  plug(:match)
+  plug(:dispatch)
 
   get "/" do
     IO.inspect("Inside subtask.")

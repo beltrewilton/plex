@@ -29,8 +29,14 @@ defmodule UniqueCodeGenerator do
   ## Returns
     A new unique code as a string.
   """
-  def generate_code(%UniqueCodeGenerator{prefix: prefix, length: length, generated_codes: generated_codes}) do
-    random_part = Enum.map(1..length, fn _ -> Enum.random(~c'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') end)
+  def generate_code(%UniqueCodeGenerator{
+        prefix: prefix,
+        length: length,
+        generated_codes: generated_codes
+      }) do
+    random_part =
+      Enum.map(1..length, fn _ -> Enum.random(~c'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') end)
+
     code = prefix <> to_string(random_part)
 
     if MapSet.member?(generated_codes, code) do
@@ -41,11 +47,13 @@ defmodule UniqueCodeGenerator do
       })
     else
       new_generated_codes = MapSet.put(generated_codes, code)
+
       %UniqueCodeGenerator{
         prefix: prefix,
         length: length,
         generated_codes: new_generated_codes
-      } |> Map.put(:code, code)
+      }
+      |> Map.put(:code, code)
     end
   end
 

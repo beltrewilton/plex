@@ -34,11 +34,17 @@ defmodule Plex.Data do
 
   defp data_mem_loader do
     chat_history = Repo.all(ChatHistory)
-    chat_history = Enum.concat([chat_history | List.duplicate(chat_history, 100)])
-    Enum.reduce(chat_history, 1, fn h, counter ->
-        Memory.add_chat_history(h, counter)
-        counter + 1
-    end)
+    Enum.each(
+      chat_history,
+      fn h ->
+        Memory.add_chat_history(h, h.id)
+      end
+    )
+    # chat_history = Enum.concat([chat_history | List.duplicate(chat_history, 100)])
+    # Enum.reduce(chat_history, 1, fn h, counter ->
+    #     Memory.add_chat_history(h, counter)
+    #     counter + 1
+    # end)
 
     applicant_stage = Repo.all(ApplicantStage)
     Enum.each(

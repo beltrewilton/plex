@@ -122,7 +122,7 @@ defmodule Plex.State do
   # old name message_deliver
   def message_handler(%ClientState{} = client) do
   # Plex.Repo.start_link
-  # client = Plex.State.new("18092231013", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
+  # client = Plex.State.new("18092231016", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
   # {:ok, client} = Plex.State.message_handler(client)
   # ----- {:atomic, stage} = Plex.State.solve_stage(client)
   # Plex.Data.register_or_update(client.msisdn, "Delta Magui", 1, true, "yes", "yes", "Bonao", client.campaign)
@@ -183,7 +183,7 @@ defmodule Plex.State do
 
         handle_audio(client)
 
-        client = client_update(client)
+        client = client_update(client) # TODO: register witout name !!
         n_request = new_n_request(client.message, client.state, :in_progress, client.task, []) # TODO: read chat history from mem
         n_response = Plex.Llm.generate(n_request) #TODO: mas pruebas son requeridas LLM...
         IO.inspect(n_response)
@@ -192,7 +192,7 @@ defmodule Plex.State do
 
         n_response = process_response(n_response, client.task, client.flow, client.audio_id)
 
-        send_text_message(client.msisdn, n_request.output.response)
+        send_text_message(client.msisdn, n_response.output.response)
 
         send_flow_message(trigger, client.msisdn, client.campaign)
 
@@ -200,7 +200,7 @@ defmodule Plex.State do
           client.msisdn,
           client.campaign,
           n_response.output.response,
-          "User",
+          "AI",
           client.whatsapp_id
         )
 
@@ -284,11 +284,11 @@ defmodule Plex.State do
   defp flow_trigger(task, n_response) do
     machinery = struct(__MODULE__)
     cond do
-      n_response.share_link and :talent_entry_form == task -> :flow_basic
+      n_response.output.share_link and :talent_entry_form == task -> :flow_basic
 
-      n_response.share_link and :grammar_assessment_form == task -> :flow_assesment
+      n_response.output.share_link and :grammar_assessment_form == task -> :flow_assesment
 
-      n_response.schedule and task in Enum.drop(machinery.tasks, -1) -> :flow_scheduler
+      n_response.output.schedule and task in Enum.drop(machinery.tasks, -1) -> :flow_scheduler
 
       true -> nil
     end

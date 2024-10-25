@@ -4,22 +4,22 @@ defmodule Plex.Type.AtomString do
   def type, do: :string
 
   # def cast(atom) when is_atom(atom) do
-  def cast(atom) do
-    IO.inspect(atom, label: "cast: ")
+  def cast(atom) when is_atom(atom) do
+    # IO.inspect(atom, label: "cast: ")
     {:ok, Atom.to_string(atom)}
   end
 
   def cast(_), do: :error
 
   def load(string) when is_binary(string) do
-    IO.inspect(string, label: "load: ")
+    # IO.inspect(string, label: "load: ")
     {:ok, String.to_atom(string)}
   end
 
   def load(_), do: :error
   # def dump(atom) when is_atom(atom) do
-  def dump(string) do
-    IO.inspect(string, label: "dump: ")
+  def dump(string) when is_binary(string) do
+    # IO.inspect(string, label: "dump: ")
     {:ok, string}
   end
 

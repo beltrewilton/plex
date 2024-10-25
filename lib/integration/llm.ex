@@ -1,4 +1,4 @@
-defmodule Machinery.Llm do
+defmodule Plex.Llm do
   @url "http://localhost:9091/llm/generate"
 
   @headers  [
@@ -7,7 +7,7 @@ defmodule Machinery.Llm do
   ]
 
   def generate(n_request) do
-    body = Transformer.transform_request(n_request)
+    body = Plex.Formater.transform_request(n_request)
     # n_request = Map.put(n_request, :state, n_request.app_states)
     # n_request = Map.delete(n_request, :app_states)
     # body = Jason.encode!(n_request)
@@ -15,7 +15,7 @@ defmodule Machinery.Llm do
     case HTTPoison.post(@url, body, @headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         # IO.puts("Response: #{response_body}")
-        Jason.decode!(response_body) |> Transformer.transform_output()
+        Jason.decode!(response_body) |> Plex.Formater.transform_output()
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
         IO.puts("Error: Received status code #{status_code}. Response: #{response_body}")
@@ -23,12 +23,12 @@ defmodule Machinery.Llm do
       {:error, %HTTPoison.Error{reason: reason}} ->
         IO.puts("Error: #{reason}")
     end
-    # %Machinery.State{}.n_response.output
+    # %Plex.State{}.n_response.output
   end
 end
 
-defmodule Transformer do
-  def transform_output(%{"output" => output} = json) do
+defmodule Plex.Formater do
+  def transform_output(%{"output" => _output} = json) do
     response = %{
       output: %{
         response: json["output"]["response"],
@@ -65,9 +65,9 @@ defmodule Transformer do
     end
   end
 
-  defp format_state(_) do
-    ""
-  end
+  # defp format_state(_) do
+  #   ""
+  # end
 
   defp atom_to_str(atom_ref) do
     Atom.to_string(atom_ref) |> String.replace("_", " ") |> String.capitalize()

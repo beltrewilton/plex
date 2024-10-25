@@ -1,31 +1,31 @@
-defmodule Machinery.Data do
+defmodule Plex.Data do
   import Ecto.Query
-  alias Machinery.Repo
-  alias Machinery.ChatHistory
-  alias Machinery.ApplicantStage
-  alias Machinery.ApplicantCampaign
-  alias Machinery.HrRecruitmentStage
-  alias Machinery.VaScheduler
 
-  alias Machinery.Data.Mem
+  alias Plex.Repo
+  alias Plex.ChatHistory
+  alias Plex.ApplicantStage
+  alias Plex.HrRecruitmentStage
+  alias Plex.VaScheduler
+
+  alias Plex.Data.Memory
 
   alias GrammarScore
   alias SpeechScore
   alias SpeechLog
 
-  import Logger
+  # import Logger
 
   #TODO: pending:
   # updated_collected_db
 
-  def start_link do
-    Mem.start()
+  def start_link(_args) do
+    Memory.start()
 
     Repo.start_link()
 
     data_mem_loader()
 
-    Logger.info("data in memory loaded.")
+    # Logger.info("data in memory loaded.")
   end
 
   def get_var(key) do
@@ -36,7 +36,7 @@ defmodule Machinery.Data do
     chat_history = Repo.all(ChatHistory)
     chat_history = Enum.concat([chat_history | List.duplicate(chat_history, 100)])
     Enum.reduce(chat_history, 1, fn h, counter ->
-        Mem.add_chat_history(h, counter)
+        Memory.add_chat_history(h, counter)
         counter + 1
     end)
 
@@ -44,21 +44,13 @@ defmodule Machinery.Data do
     Enum.each(
       applicant_stage,
       fn a ->
-        Mem.add_applicant_stage(a, a.id)
-      end
-    )
-
-    applicant_campaign = Repo.all(ApplicantCampaign)
-    Enum.each(
-      applicant_campaign,
-      fn a ->
-        Mem.add_applicant_campaign(a, a.id)
+        Memory.add_applicant_stage(a, a.id)
       end
     )
   end
 
   def add_applicant_stage(msisdn, campaign, task, state) do
-    case Mem.get_applicant_stage(msisdn, campaign) do
+    case Memory.get_applicant_stage(msisdn, campaign) do
       {:atomic, nil} ->
         changeset = %ApplicantStage{}
           |> ApplicantStage.changeset(%{
@@ -68,13 +60,11 @@ defmodule Machinery.Data do
             campaign: campaign,
             task: task,
             state: state,
-            last_update: NaiveDateTime.utc_now(),
-            create_date: NaiveDateTime.utc_now(),
-            write_date: NaiveDateTime.utc_now()
+            last_update: NaiveDateTime.utc_now()
           })
         case Repo.insert(changeset) do
             {:ok, record} ->
-              Mem.add_applicant_stage(record, record.id)
+              Memory.add_applicant_stage(record, record.id)
 
             {:error, changeset} -> {:error, changeset}
         end
@@ -84,7 +74,7 @@ defmodule Machinery.Data do
   end
 
   def get_stage(msisdn, campaign, task \\ :talent_entry_form, state \\ :in_progress) do
-    appl_state = Mem.get_applicant_stage(msisdn, campaign)
+    appl_state = Memory.get_applicant_stage(msisdn, campaign)
     case appl_state do
       {:atomic, nil} ->
         query = from(s in ApplicantStage, where: s.msisdn == ^msisdn and s.campaign == ^campaign)
@@ -97,7 +87,7 @@ defmodule Machinery.Data do
           _ -> :error
         end
 
-        {:atomic, appl_state} = Mem.get_applicant_stage(msisdn, campaign)
+        {:atomic, appl_state} = Memory.get_applicant_stage(msisdn, campaign)
         appl_state
 
       {:atomic, appl_state} -> appl_state
@@ -123,7 +113,23 @@ defmodule Machinery.Data do
     |> Repo.update_all(set: [readed: true])
   end
 
-  def add_chat_history_db(
+def add_chat_history(
+  msisdn,
+  campaign,
+  message,
+  source,
+  whatsapp_id
+) do
+
+  case add_chat_history_db(msisdn, campaign, message, source, whatsapp_id) do
+    {:ok, chat_history} ->
+      Memory.add_chat_history(chat_history, chat_history.id)
+
+    {:error, changeset} -> {:error, changeset}
+  end
+end
+
+  defp add_chat_history_db(
     msisdn,
     campaign,
     message,
@@ -147,7 +153,7 @@ defmodule Machinery.Data do
       output_llm_booleans: output_llm_booleans
     })
     case Repo.insert(changeset) do
-        {:ok, chat_record} -> {:ok, chat_record}
+        {:ok, chat_history} -> {:ok, chat_history}
         {:error, changeset} -> {:error, changeset}
     end
   end
@@ -211,9 +217,7 @@ defmodule Machinery.Data do
           campaign: campaign,
           task: task,
           state: state,
-          last_update: NaiveDateTime.utc_now(),
-          create_date: NaiveDateTime.utc_now(),
-          write_date: NaiveDateTime.utc_now()
+          last_update: NaiveDateTime.utc_now()
         })
         |> Repo.insert!()
 
@@ -224,7 +228,7 @@ defmodule Machinery.Data do
       error -> error
     end
 
-    Mem.add_applicant_stage(applicant_stage, applicant_stage.id)
+    Memory.add_applicant_stage(applicant_stage, applicant_stage.id)
   end
 
   # old name: get_applicant_state
@@ -246,17 +250,17 @@ defmodule Machinery.Data do
 
 
   #TODO: revisar, funciones cambiaron y afectan esta def...  WTF with this name?
-  def set_state_all(msisdn, campaign, state) do
-    {_, mem_state} = Mem.get_applicant_state(msisdn, campaign)
-    current_task = Enum.at(mem_state, 5)
-    current_state = Enum.at(mem_state, 6)
+  def set_state_all(_msisdn, _campaign, _state) do
+    # {_, mem_state} = Memory.get_applicant_state(msisdn, campaign)
+    # current_task = Enum.at(mem_state, 5)
+    # current_state = Enum.at(mem_state, 6)
 
-    # memory_set  ->  previous_state
-    Mem.transitivity_set("previous_state", msisdn, campaign, current_state)
+    # # memory_set  ->  previous_state
+    # Memory.transitivity_set("previous_state", msisdn, campaign, current_state)
 
-    # update_stage -->
-    update_applicant_stage(msisdn, campaign, current_task, state)
-
+    # # update_stage -->
+    # update_applicant_stage(msisdn, campaign, current_task, state)
+    {:reevaluate}
   end
 
 
@@ -409,9 +413,9 @@ defmodule Machinery.Data do
       end)
   end
 
-  rescue
-    e in Exception ->
-      IO.inspect(e)
+  # rescue
+  #   e in Exception ->
+  #     IO.inspect(e)
   end
 
   def register_without_name(msisdn, campaign) do
@@ -434,9 +438,7 @@ defmodule Machinery.Data do
     appl = %VaScheduler{
       msisdn: msisdn,
       campaign: campaign,
-      scheduled_date: scheduled_date,
-      create_date: NaiveDateTime.utc_now(),
-      write_date: NaiveDateTime.utc_now()
+      scheduled_date: scheduled_date
     }
     Repo.insert!(appl)
   end

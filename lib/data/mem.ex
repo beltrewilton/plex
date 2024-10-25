@@ -1,4 +1,4 @@
-defmodule Machinery.Data.Mem do
+defmodule Plex.Data.Memory do
     alias :mnesia, as: Mnesia
 
     def start do
@@ -19,20 +19,14 @@ defmodule Machinery.Data.Mem do
         ])
 
         Mnesia.create_table(ChatHistory, [
-            attributes: Machinery.ChatHistory.__schema__(:fields),
+            attributes: Plex.ChatHistory.__schema__(:fields),
             type: :set,
             storage_properties: [ram_copies: [node()]]
         ])
         Mnesia.add_table_index(ChatHistory, [:msisdn, :campaign, :create_date])
 
         Mnesia.create_table(ApplicantStage, [
-            attributes: Machinery.ApplicantStage.__schema__(:fields),
-            type: :set,
-            storage_properties: [ram_copies: [node()]]
-        ])
-
-        Mnesia.create_table(ApplicantCampaign, [
-            attributes: Machinery.ApplicantCampaign.__schema__(:fields),
+            attributes: Plex.ApplicantStage.__schema__(:fields),
             type: :set,
             storage_properties: [ram_copies: [node()]]
         ])
@@ -56,8 +50,8 @@ defmodule Machinery.Data.Mem do
         ])
     end
 
-    # chat_history = %Machinery.ChatHistory{msisdn: "18007653427", campaign: "XH000", source: "Github", whatsapp_id: "0009", message: "Hi all",  readed: true, collected: true, sending_date: NaiveDateTime.utc_now(), output_llm_booleans: %{}, create_date: NaiveDateTime.utc_now(), write_date: NaiveDateTime.utc_now()}
-    def add_chat_history(%Machinery.ChatHistory{} = chat_history, id) do
+    # chat_history = %Plex.ChatHistory{msisdn: "18007653427", campaign: "XH000", source: "Github", whatsapp_id: "0009", message: "Hi all",  readed: true, collected: true, sending_date: NaiveDateTime.utc_now(), output_llm_booleans: %{}, create_date: NaiveDateTime.utc_now(), write_date: NaiveDateTime.utc_now()}
+    def add_chat_history(%Plex.ChatHistory{} = chat_history, id) do
         chat_history = Map.drop(chat_history, [:id, :__struct__, :__meta__])
         Mnesia.transaction(fn ->
             Mnesia.write({
@@ -105,10 +99,10 @@ defmodule Machinery.Data.Mem do
     end
 
     # set_state in Python
-    def add_applicant_stage(%Machinery.ApplicantStage{} = appl_stage, id) do
+    def add_applicant_stage(%Plex.ApplicantStage{} = appl_stage, id) do
         appl_stage = Map.drop(appl_stage, [:id, :__struct__, :__meta__])
-        IO.inspect(appl_stage.task, label: "Task: ")
-        IO.inspect(appl_stage.state, label: "State: ")
+        # IO.inspect(appl_stage.task, label: "Task: ")
+        # IO.inspect(appl_stage.state, label: "State: ")
         task = if is_binary(appl_stage.task), do: String.to_atom(appl_stage.task), else: appl_stage.task
         state = if is_binary(appl_stage.state), do: String.to_atom(appl_stage.state), else: appl_stage.state
         Mnesia.transaction(
@@ -192,12 +186,12 @@ defmodule Machinery.Data.Mem do
         end)
     end
 
-    # {_, result} = Machinery.Data.Mem.select_all
+    # {_, result} = Plex.Data.Mem.select_all
     #
-    # Machinery.Repo.start_link
-    # List.first(Machinery.Repo.all(Machinery.ChatHistory))
+    # Plex.Repo.start_link
+    # List.first(Plex.Repo.all(Plex.ChatHistory))
     #
-    # Machinery.Data.Mem.update_collected("18296456177", "CNVQSOUR84FK", "2024-09-29 11:47:33.406306")
+    # Plex.Data.Mem.update_collected("18296456177", "CNVQSOUR84FK", "2024-09-29 11:47:33.406306")
 
     def update_collected(msisdn, campaign, sending_date) do
         {_, sending_date_iso} = NaiveDateTime.from_iso8601(sending_date)
@@ -245,27 +239,6 @@ defmodule Machinery.Data.Mem do
         )
         end
         filter_message(msisdn, campaign, filter_function)
-    end
-
-    # Python old name; set_campaign
-    def add_applicant_campaign(%Machinery.ApplicantCampaign{} = appl_campaign, id) do
-        appl_campaign = Map.drop(appl_campaign, [:id, :__struct__, :__meta__])
-        # Python philosophy: # Remove any existing record with the same msisdn and campaign.
-        # Elixir: if comme with the same id, perform an update.
-        Mnesia.transaction(
-            fn ->
-                Mnesia.write({
-                    ApplicantCampaign, id,
-                    appl_campaign.create_uid,
-                    appl_campaign.write_uid,
-                    appl_campaign.msisdn,
-                    appl_campaign.campaign,
-                    appl_campaign.last_update,
-                    appl_campaign.create_date,
-                    appl_campaign.write_date
-                })
-            end
-        )
     end
 
     def get_latest_applicant_stage(msisdn, min_days \\ 30) do

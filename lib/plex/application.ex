@@ -11,16 +11,14 @@ defmodule Plex.Application do
       # Starts a worker by calling: Plex.Worker.start_link(arg)
       # {Plex.Worker, arg}
       {Plug.Cowboy, scheme: :http, plug: Webhook.Router, options: [port: 8000]},
-      {Task, fn -> Machinery.Data.start_link() end},
-      {DummyStatemachine, []},
-      MyTask
+      {Task, fn -> Plex.Data.start_link([]) end }
       # {Venomous.SnakeSupervisor, [strategy: :one_for_one, max_restarts: 0, max_children: 50]},
       # {Venomous.PetSnakeSupervisor, [strategy: :one_for_one, max_children: 10]}
       # {Plug.Cowboy, scheme: :http, plug: Flow.Router,    options: [port: 9000]},
       # Protohackers.EchoServer,
     ]
 
-    Logger.info("Webhook and other components")
+    Logger.info("Webhook & Plex.Data")
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

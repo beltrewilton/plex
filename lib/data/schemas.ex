@@ -1,4 +1,4 @@
-defmodule Machinery.ChatHistory do
+defmodule Plex.ChatHistory do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -37,11 +37,13 @@ defmodule Machinery.ChatHistory do
       :create_date,
       :write_date
     ])
+    |> put_change(:create_date, NaiveDateTime.utc_now())
+    |> put_change(:write_date, NaiveDateTime.utc_now())
   end
 end
 
 
-defmodule Machinery.ApplicantStage do
+defmodule Plex.ApplicantStage do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -71,12 +73,14 @@ defmodule Machinery.ApplicantStage do
       :create_date,
       :write_date
     ])
+    |> put_change(:create_date, NaiveDateTime.utc_now())
+    |> put_change(:write_date, NaiveDateTime.utc_now())
   end
 
 end
 
 
-defmodule Machinery.VaScheduler do
+defmodule Plex.VaScheduler do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -100,11 +104,13 @@ defmodule Machinery.VaScheduler do
       :create_date,
       :write_date
     ])
+    |> put_change(:create_date, NaiveDateTime.utc_now())
+    |> put_change(:write_date, NaiveDateTime.utc_now())
   end
 end
 
 
-defmodule Machinery.HrRecruitmentStage do
+defmodule Plex.HrRecruitmentStage do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -117,36 +123,6 @@ defmodule Machinery.HrRecruitmentStage do
     |> cast(params, [
       :id,
       :name
-    ])
-  end
-end
-
-
-defmodule Machinery.ApplicantCampaign do
-  use Ecto.Schema
-  import Ecto.Changeset
-
-  schema "va_applicant_campaign" do
-    field :create_uid, :integer, default: 1
-    field :write_uid, :integer, default: 1
-    field :msisdn, :string
-    field :campaign, :string
-    field :last_update, :naive_datetime_usec
-    field :create_date, :naive_datetime_usec
-    field :write_date, :naive_datetime_usec
-  end
-
-  def changeset(struct, params \\ %{}) do
-    struct
-    |> cast(params, [
-      :id,
-      :create_uid,
-      :write_uid,
-      :msisdn,
-      :campaign,
-      :last_update,
-      :create_date,
-      :write_date
     ])
   end
 end
@@ -337,6 +313,8 @@ defmodule HrApplicant do
       :create_date,
       :write_date
     ])
+    |> put_change(:create_date, NaiveDateTime.utc_now())
+    |> put_change(:write_date, NaiveDateTime.utc_now())
   end
 end
 
@@ -380,7 +358,7 @@ defmodule HrApplicantSkillRel do
   end
 
   # def insert(changeset) do
-  #   Machinery.Repo.insert(changeset)
+  #   Plex.Repo.insert(changeset)
   # end
 end
 

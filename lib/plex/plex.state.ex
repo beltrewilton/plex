@@ -1,4 +1,4 @@
-defmodule Machinery.State do
+defmodule Plex.State do
   @tasks [
     :talent_entry_form,
     :grammar_assessment_form,
@@ -38,19 +38,11 @@ defmodule Machinery.State do
 
   require Logger
 
-  alias Machinery.Data.Mem
-  alias Machinery.Data
-
+  alias Plex.Data.Memory
+  alias Plex.Data
 
   def new_n_request(utterance, current_state, previous_state, current_task, previous_conversation_history) do
     machinery = %__MODULE__{}
-
-    # Map.merge(client, %{
-    #   campaign: stage.campaign,
-    #   task: stage.task,
-    #   state: stage.state
-    # })
-
     Map.merge(machinery.n_request, %{
       utterance: utterance,
       current_state: current_state,
@@ -58,13 +50,6 @@ defmodule Machinery.State do
       current_task: current_task,
       previous_conversation_history: previous_conversation_history
     })
-
-    # |> Map.put(:utterance, utterance)
-    # |> Map.put(:current_state, current_state)
-    # |> Map.put(:previous_state, previous_state)
-    # |> Map.put(:current_task, current_task)
-    # |> Map.put(:previous_conversation_history, previous_conversation_history)
-    # n_request
   end
 
   def new(msisdn, message, whatsapp_id, flow, audio_id, scheduled, forwarded, task \\ :talent_entry_form, state \\ :in_progress) do
@@ -111,10 +96,10 @@ defmodule Machinery.State do
   def solve_stage(%ClientState{} = client) do
     cond do
       is_nil(client.audio_id) ->
-        case Mem.get_latest_applicant_stage(client.msisdn) do # return ApplicantStageStruct
+        case Memory.get_latest_applicant_stage(client.msisdn) do # return ApplicantStageStruct
           {:atomic, []} ->
             extract_campaign(client)
-            Mem.get_latest_applicant_stage(client.msisdn)
+            Memory.get_latest_applicant_stage(client.msisdn)
 
           {:atomic, stage} -> {:atomic, stage}
         end
@@ -136,24 +121,24 @@ defmodule Machinery.State do
 
   # old name message_deliver
   def message_handler(%ClientState{} = client) do
-  # Machinery.Repo.start_link
-  # client = Machinery.State.new("18092231013", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
-  # {:ok, client} = Machinery.State.message_handler(client)
-  # ----- {:atomic, stage} = Machinery.State.solve_stage(client)
-  # Machinery.Data.register_or_update(client.msisdn, "Delta Magui", 1, true, "yes", "yes", "Bonao", client.campaign)
-  # client = Machinery.State.new(client.msisdn, "Okay, completed", "wa", true, nil, false, false)
-  # # {:ok, client} = Machinery.State.message_handler(client)
-  #------  {:atomic, stage} = Machinery.State.solve_stage(client)
+  # Plex.Repo.start_link
+  # client = Plex.State.new("18092231013", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
+  # {:ok, client} = Plex.State.message_handler(client)
+  # ----- {:atomic, stage} = Plex.State.solve_stage(client)
+  # Plex.Data.register_or_update(client.msisdn, "Delta Magui", 1, true, "yes", "yes", "Bonao", client.campaign)
+  # client = Plex.State.new(client.msisdn, "Okay, completed", "wa", true, nil, false, false)
+  # # {:ok, client} = Plex.State.message_handler(client)
+  #------  {:atomic, stage} = Plex.State.solve_stage(client)
 
-  # Machinery.Data.Mem.get_applicant_stage("18092231010", "CNVQSOUR84FK")
+  # Plex.Data.Memory.get_applicant_stage("18092231010", "CNVQSOUR84FK")
 
 
 
-  # Machinery.Data.update_hrapplicant(client.msisdn, stage.campaign, task)
-  # Machinery.Data.update_applicant_stage(client.msisdn, stage.campaign, task, stage.state)
+  # Plex.Data.update_hrapplicant(client.msisdn, stage.campaign, task)
+  # Plex.Data.update_applicant_stage(client.msisdn, stage.campaign, task, stage.state)
   #
 
-  #  Machinery.State.extract_campaign(client)
+  #  Plex.State.extract_campaign(client)
     message_handler(client, solve_stage(client)) # return ApplicantStageStruct
   end
 
@@ -166,8 +151,12 @@ defmodule Machinery.State do
   end
 
   defp client_update(client) do
-    {:atomic, stage} = Mem.get_applicant_stage(client.msisdn, client.campaign)
+    {:atomic, stage} = Memory.get_applicant_stage(client.msisdn, client.campaign)
     client_update(client, stage)
+  end
+
+  defp message_handler(%ClientState{} = _client, {:atomic, stage}) when stage == [] do
+    IO.puts("Esto nunca deberia ocurrir,")
   end
 
   defp message_handler(%ClientState{} = client, {:atomic, stage}) do
@@ -182,37 +171,48 @@ defmodule Machinery.State do
     {:ok, client}
   end
 
-  defp message_handler(%ClientState{} = client, {:atomic, []}) do
-    IO.puts("Esto nunca deberia ocurrir,")
-  end
-
-  defp message_handler(%ClientState{} = client, {:abort}) do
+  defp message_handler(%ClientState{} = _client, {:abort}) do
     IO.puts("Esto nunca deberia ocurrir, enviaron audio asi no mas en lugar del welcome!")
   end
 
   # merge : message_firer & entry
   def message_firer(%ClientState{} = client) do
-
-          # TODO: este metodo puede ser no necesario.
-    # stage = Data.get_stage(client.msisdn, client.campaign) # return ApplicantStageStruct
-
     case client.forwarded do
       false ->
         if client.flow and not client.scheduled, do: task_completed(client)
 
         handle_audio(client)
 
-        # defp new_n_request(utterance, current_state, previous_state, current_task, previous_conversation_history) do
         client = client_update(client)
         n_request = new_n_request(client.message, client.state, :in_progress, client.task, []) # TODO: read chat history from mem
-        n_response = Machinery.Llm.generate(n_request) #TODO: mas pruebas son requeridas LLM...
+        n_response = Plex.Llm.generate(n_request) #TODO: mas pruebas son requeridas LLM...
         IO.inspect(n_response)
 
-        flow_trigger = flow_trigger(client.task, n_response)
+        trigger = flow_trigger(client.task, n_response)
 
-        # process_response(task, flow, scheduled, audio_id, n_response)
-        # TODO: me quede aqui <------- .....
-        n_response = process_response(client.task, client.flow, n_response.output.schedule, client.audio_id, n_response.output)
+        n_response = process_response(n_response, client.task, client.flow, client.audio_id)
+
+        send_text_message(client.msisdn, n_request.output.response)
+
+        send_flow_message(trigger, client.msisdn, client.campaign)
+
+        Data.add_chat_history(
+          client.msisdn,
+          client.campaign,
+          n_response.output.response,
+          "User",
+          client.whatsapp_id
+        )
+
+        if n_response.output.schedule do
+          # TODO: remove the inactivity clock/job/task
+        end
+
+        if n_response.output.abort_scheduled_state do
+          # TODO: call the stupid set_state_all function
+          #       remove previous_scheduled_job_id
+        end
+
 
         # {n_response, flow_trigger}
 
@@ -220,6 +220,25 @@ defmodule Machinery.State do
     end
   end
 
+  def send_text_message(msisdn, message) do
+    IO.puts("Here send to WhatsApp client #{msisdn}: #{message}")
+  end
+
+  def send_flow_message(:flow_basic, msisdn, campaign) do
+    IO.puts("flow_basic - #{msisdn}: #{campaign}")
+  end
+
+  def send_flow_message(:flow_assesment, msisdn, campaign) do
+    IO.puts("flow_assesment - #{msisdn}: #{campaign}")
+  end
+
+  def send_flow_message(:flow_scheduler, msisdn, campaign) do
+    IO.puts("flow_scheduler - #{msisdn}: #{campaign}")
+  end
+
+  def send_flow_message(nil, msisdn, campaign) do
+    IO.puts("no flow trigger found - #{msisdn}: #{campaign}")
+  end
 
   defp handle_audio(%ClientState{} = client) when not is_nil(client.audio_id) do
     client = client_update(client)
@@ -233,8 +252,9 @@ defmodule Machinery.State do
     end
   end
 
-  defp handle_audio(%ClientState{} = client)  do
+  defp handle_audio(%ClientState{} = _client)  do
     {:no_audio}
+    #TODO: esto se supone que detiene el flujo `return en Python` con return response, flow_trigger
   end
 
 
@@ -275,27 +295,28 @@ defmodule Machinery.State do
   end
 
 
-  defp process_response(task, flow, scheduled, audio_id, output) do
-    machinery = struct(__MODULE__)
-    if (flow && task == Map.get(machinery.tasks, 3) && !scheduled) || String.contains?(output.response, "PLACEHOLDER_1") do
-      ref_text = "random_message"
-      output.response
-      |> String.replace("PLACEHOLDER_1", "\n> ❝#{ref_text}❞\n\n\n_")
-      |> String.replace("`", "")
-    else
-      output.response
+  def process_response(n_response, task, flow, audio_id) do
+    output = n_response.output
+    new_response =
+    cond do
+      (flow && task == :scripted_text && !output.scheduled) || String.contains?(output.response, "PLACEHOLDER_1") ->
+        ref_text = "random_message"
+          output.response
+          |> String.replace("PLACEHOLDER_1", "\n> ❝#{ref_text}❞\n\n\n_")
+          |> String.replace("`", "")
+
+
+      (audio_id && task == :open_question && !output.scheduled) || String.contains?(output.response, "PLACEHOLDER_2") ->
+        question_1 = "random_message"
+          output.response
+          |> String.replace("PLACEHOLDER_2", "\n> ❝#{question_1}❞\n\n\n_")
+          |> String.replace("`", "")
+
+      true -> output.response
     end
 
-    if (audio_id && task == Map.get(machinery.tasks, 4) && !scheduled) || String.contains?(n_response.response, "PLACEHOLDER_2") do
-      question_1 = "random_message"
-      output.response
-      |> String.replace("PLACEHOLDER_2", "\n> ❝#{question_1}❞\n\n\n_")
-      |> String.replace("`", "")
-    else
-      output.response
-    end
-
-    output
+    Map.put(output, :response, new_response)
+    Map.put(n_response, :output, output)
   end
 
 end

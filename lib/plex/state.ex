@@ -35,6 +35,8 @@ defmodule Plex.State do
   }
 
   @default_campaign "CNDEFAULT"
+  @user_source "User"
+  @ai_scource "AI"
 
   defstruct tasks: @tasks, app_states: @app_states, n_response: @n_response, n_request: @n_request
 
@@ -178,6 +180,20 @@ defmodule Plex.State do
     client_update(client, stage)
   end
 
+  defp process_message(task, flow, schedule, audio_id) do
+    cond do
+      flow and schedule -> "Scheduled done"
+
+      flow and task == :talent_entry_form -> "Talent entry form completed."
+
+      flow and task == :grammar_assessment_form -> "Grammar assessment form completed."
+
+      not is_nil(audio_id) and task == :scripted_text -> "Voice note for Scripted text sent."
+
+      not is_nil(audio_id) and task == :scripted_text -> "Voice note for Open question sent."
+    end
+  end
+
   defp message_handler(%ClientState{} = _client, {:atomic, stage}) when stage == [] do
     IO.puts("Esto nunca deberia ocurrir,")
   end
@@ -187,7 +203,38 @@ defmodule Plex.State do
     client = client_update(client, stage)
     IO.inspect(client)
 
-    message_firer(client)
+    #TODO: wtsapp_client.wa_readed(wamid=whatsapp_id)
+
+    case client.forwarded do
+      false ->
+        message = process_message(client.task, client.flow, client.scheduled, client.audio_id)
+
+        Data.add_chat_history(
+          client.msisdn,
+          client.campaign,
+          message,
+          @user_source,
+          client.whatsapp_id
+        )
+
+        #TODO: remove previous and inactivity jobs.
+
+        message_firer(client)
+
+
+
+      true ->
+        {:ignore, "send wa message avoiding forwarder"}
+        message = "random message" #random_message(forwarded_not_allowed)
+        # wtsapp_client.send_text_message
+        Data.add_chat_history(
+          client.msisdn,
+          client.campaign,
+          message,
+          @user_source,
+          client.whatsapp_id
+        )
+    end
 
     client = client_update(client)
 
@@ -200,50 +247,49 @@ defmodule Plex.State do
 
   # merge : message_firer & entry
   def message_firer(%ClientState{} = client) do
-    case client.forwarded do
-      false ->
-        if client.flow and not client.scheduled, do: task_completed(client)
+    unreaded_messages = Memory.get_unreaded_messages(client.msisdn, client.campaign) # no estan ordenados, por lo que seleccionar el ultimo no tiene sentido
 
-        handle_audio(client)
 
-        # TODO: register witout name !!
-        client = client_update(client)
-        # TODO: read chat history from mem
-        n_request = new_n_request(client.message, client.state, :in_progress, client.task, [])
-        # TODO: mas pruebas son requeridas LLM...
-        n_response = Plex.Llm.generate(n_request)
-        IO.inspect(n_response)
 
-        trigger = flow_trigger(client.task, n_response)
 
-        n_response = process_response(n_response, client.task, client.flow, client.audio_id)
+    if client.flow and not client.scheduled, do: task_completed(client)
 
-        send_text_message(client.msisdn, n_response.output.response)
+    handle_audio(client)
 
-        send_flow_message(trigger, client.msisdn, client.campaign)
+    # TODO: register witout name !!
+    client = client_update(client)
+    # TODO: read chat history from mem
+    n_request = new_n_request(client.message, client.state, :in_progress, client.task, [])
+    # TODO: mas pruebas son requeridas LLM...
+    n_response = Plex.Llm.generate(n_request)
+    IO.inspect(n_response)
 
-        Data.add_chat_history(
-          client.msisdn,
-          client.campaign,
-          n_response.output.response,
-          "AI",
-          client.whatsapp_id
-        )
+    trigger = flow_trigger(client.task, n_response)
 
-        if n_response.output.schedule do
-          # TODO: remove the inactivity clock/job/task
-        end
+    n_response = process_response(n_response, client.task, client.flow, client.audio_id)
 
-        if n_response.output.abort_scheduled_state do
-          # TODO: call the stupid set_state_all function
-          #       remove previous_scheduled_job_id
-        end
+    send_text_message(client.msisdn, n_response.output.response)
 
-      # {n_response, flow_trigger}
+    send_flow_message(trigger, client.msisdn, client.campaign)
 
-      true ->
-        {:ignore, "send wa message avoiding forwarder"}
+    Data.add_chat_history(
+      client.msisdn,
+      client.campaign,
+      n_response.output.response,
+      @ai_scource,
+      client.whatsapp_id
+    )
+
+    if n_response.output.schedule do
+      # TODO: remove the inactivity clock/job/task
     end
+
+    if n_response.output.abort_scheduled_state do
+      # TODO: call the stupid set_state_all function
+      #       remove previous_scheduled_job_id
+    end
+
+    # {n_response, flow_trigger}
   end
 
   def send_text_message(msisdn, message) do

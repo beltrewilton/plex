@@ -174,8 +174,13 @@ defmodule Plex.Data.Memory do
       )
     end
 
-    filter_message(msisdn, campaign, filter_function)
+    unreaded_messages = filter_message(msisdn, campaign, filter_function)
+    if length(unreaded_messages) == 1 do
+      sending_date = List.first(unreaded_messages) |> Enum.at(10)
+      update_collected(msisdn, campaign, sending_date)
+    end
     # TODO: mark_as_read & JOB:mark_as_read_db
+    unreaded_messages
   end
 
   def get_collected_messages(msisdn, campaign) do
@@ -213,7 +218,7 @@ defmodule Plex.Data.Memory do
   # Plex.Data.Mem.update_collected("18296456177", "CNVQSOUR84FK", "2024-09-29 11:47:33.406306")
 
   def update_collected(msisdn, campaign, sending_date) do
-    {_, sending_date_iso} = NaiveDateTime.from_iso8601(sending_date)
+    # {_, sending_date_iso} = NaiveDateTime.from_iso8601(sending_date)
     # sending_date = DateTime.from_naive!(sending_date, "Etc/UTC")
     # sending_date = DateTime.to_unix(sending_date, :microsecond)
     transaction =
@@ -233,14 +238,14 @@ defmodule Plex.Data.Memory do
 
     case transaction do
       {:atomic, []} ->
-        {:error, "No result found with #{msisdn} & #{campaign} & #{inspect(sending_date_iso)}"}
+        {:error, "No result found with #{msisdn} & #{campaign} & #{inspect(sending_date)}"}
 
       {:atomic, messages} ->
         record =
           Enum.filter(
             messages,
             fn [_, _, _, _, _, _, _, _, _, _, sending_date, _, _, _] ->
-              sending_date == sending_date_iso
+              sending_date == sending_date
             end
           )
 

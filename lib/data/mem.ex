@@ -174,12 +174,11 @@ defmodule Plex.Data.Memory do
       )
     end
 
+    # Plex.Data.Memory.get_unreaded_messages("18092231016", "CNVQSOUR84FK")
+
     unreaded_messages = filter_message(msisdn, campaign, filter_function)
-    if length(unreaded_messages) == 1 do
-      sending_date = List.first(unreaded_messages) |> Enum.at(10)
-      update_collected(msisdn, campaign, sending_date)
-    end
-    # TODO: mark_as_read & JOB:mark_as_read_db
+    # unreaded_messages = [Enum.at(unreaded_messages, 0)] # ~ debug
+
     unreaded_messages
   end
 
@@ -194,7 +193,7 @@ defmodule Plex.Data.Memory do
     filter_message(msisdn, campaign, filter_function)
   end
 
-  def select_all() do
+  def select_all(msisdn, campaign) do
     Mnesia.transaction(fn ->
       Mnesia.select(
         ChatHistory,
@@ -202,7 +201,7 @@ defmodule Plex.Data.Memory do
           {
             {ChatHistory, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10",
              :"$11", :"$12", :"$13", :"$14"},
-            [],
+             [{:==, :"$4", msisdn}, {:==, :"$5", campaign}],
             [:"$$"]
           }
         ]
@@ -217,7 +216,7 @@ defmodule Plex.Data.Memory do
   #
   # Plex.Data.Mem.update_collected("18296456177", "CNVQSOUR84FK", "2024-09-29 11:47:33.406306")
 
-  def update_collected(msisdn, campaign, sending_date) do
+  def update_collected(msisdn, campaign, in_sending_date) do
     # {_, sending_date_iso} = NaiveDateTime.from_iso8601(sending_date)
     # sending_date = DateTime.from_naive!(sending_date, "Etc/UTC")
     # sending_date = DateTime.to_unix(sending_date, :microsecond)
@@ -238,16 +237,19 @@ defmodule Plex.Data.Memory do
 
     case transaction do
       {:atomic, []} ->
-        {:error, "No result found with #{msisdn} & #{campaign} & #{inspect(sending_date)}"}
+        {:error, "No result found with #{msisdn} & #{campaign} & #{inspect(in_sending_date)}"}
 
       {:atomic, messages} ->
         record =
           Enum.filter(
             messages,
             fn [_, _, _, _, _, _, _, _, _, _, sending_date, _, _, _] ->
-              sending_date == sending_date
+              sending_date == in_sending_date
             end
           )
+
+          IO.inspect(in_sending_date)
+          IO.inspect(record)
 
         List.first(record)
         |> List.to_tuple()

@@ -167,6 +167,55 @@ defmodule Plex.State do
     message_handler(client, solve_stage(client))
   end
 
+  defp message_handler(%ClientState{} = _client, {:atomic, stage}) when stage == [] do
+    IO.puts("Esto nunca deberia ocurrir,")
+  end
+
+  defp message_handler(%ClientState{} = client, {:atomic, stage}) do
+    IO.inspect(stage)
+    client = client_update(client, stage)
+    IO.inspect(client)
+
+    #TODO: wtsapp_client.wa_readed(wamid=whatsapp_id)
+
+    case client.forwarded do
+      false ->
+        message = process_message(client.task, client.flow, client.scheduled, client.audio_id)
+
+        Data.add_chat_history(
+          client.msisdn,
+          client.campaign,
+          message,
+          @user_source,
+          client.whatsapp_id
+        )
+
+        #TODO: remove previous and inactivity jobs.
+
+        message_firer(client) # TODO: Task or something
+
+      true ->
+        {:ignore, "send wa message avoiding forwarder"}
+        message = "random message" #random_message(forwarded_not_allowed)
+        # wtsapp_client.send_text_message
+        Data.add_chat_history(
+          client.msisdn,
+          client.campaign,
+          message,
+          @user_source,
+          client.whatsapp_id
+        )
+    end
+
+    client = client_update(client)
+
+    {:ok, client}
+  end
+
+  defp message_handler(%ClientState{} = _client, {:abort}) do
+    IO.puts("Esto nunca deberia ocurrir, enviaron audio asi no mas en lugar del welcome!")
+  end
+
   defp client_update(client, stage) do
     Map.merge(client, %{
       campaign: stage.campaign,
@@ -194,72 +243,39 @@ defmodule Plex.State do
     end
   end
 
-  defp message_handler(%ClientState{} = _client, {:atomic, stage}) when stage == [] do
-    IO.puts("Esto nunca deberia ocurrir,")
-  end
+  # merge : message_firer & entry
+  def message_firer(%ClientState{} = client) do
+    # no estan ordenados, por lo que seleccionar el ultimo no tiene sentido
+    unreaded_messages = Memory.get_unreaded_messages(client.msisdn, client.campaign)
 
-  defp message_handler(%ClientState{} = client, {:atomic, stage}) do
-    IO.inspect(stage)
-    client = client_update(client, stage)
-    IO.inspect(client)
+    unreaded_messages_collected = Enum.map(unreaded_messages, fn m -> Enum.at(m, 7) end) |> Enum.join(" ")
 
-    #TODO: wtsapp_client.wa_readed(wamid=whatsapp_id)
+    Data.mark_as_readed(client.msisdn, client.campaign)
 
-    case client.forwarded do
-      false ->
-        message = process_message(client.task, client.flow, client.scheduled, client.audio_id)
+    cond do
+      length(unreaded_messages) == 1  ->
+        in_sending_date = List.first(unreaded_messages) |> Enum.at(10)
+        Memory.update_collected(client.msisdn, client.campaign, in_sending_date)
 
+      length(unreaded_messages) > 1 ->
         Data.add_chat_history(
           client.msisdn,
           client.campaign,
-          message,
+          unreaded_messages_collected,
           @user_source,
-          client.whatsapp_id
-        )
-
-        #TODO: remove previous and inactivity jobs.
-
-        message_firer(client)
-
-
-
-      true ->
-        {:ignore, "send wa message avoiding forwarder"}
-        message = "random message" #random_message(forwarded_not_allowed)
-        # wtsapp_client.send_text_message
-        Data.add_chat_history(
-          client.msisdn,
-          client.campaign,
-          message,
-          @user_source,
-          client.whatsapp_id
+          client.whatsapp_id,
+          true, #readed
+          true  #collected
         )
     end
 
-    client = client_update(client)
-
-    {:ok, client}
-  end
-
-  defp message_handler(%ClientState{} = _client, {:abort}) do
-    IO.puts("Esto nunca deberia ocurrir, enviaron audio asi no mas en lugar del welcome!")
-  end
-
-  # merge : message_firer & entry
-  def message_firer(%ClientState{} = client) do
-    unreaded_messages = Memory.get_unreaded_messages(client.msisdn, client.campaign) # no estan ordenados, por lo que seleccionar el ultimo no tiene sentido
-
-
-
-
     if client.flow and not client.scheduled, do: task_completed(client)
 
-    handle_audio(client)
+    handle_audio(client) # if switch_to_text, NO debe ejecutar mas nada.
 
-    # TODO: register witout name !!
     client = client_update(client)
     # TODO: read chat history from mem
-    n_request = new_n_request(client.message, client.state, :in_progress, client.task, [])
+    n_request = new_n_request(unreaded_messages_collected, client.state, :in_progress, client.task, [])
     # TODO: mas pruebas son requeridas LLM...
     n_response = Plex.Llm.generate(n_request)
     IO.inspect(n_response)

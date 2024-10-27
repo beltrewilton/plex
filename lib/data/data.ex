@@ -75,6 +75,7 @@ defmodule Plex.Data do
 
         case Repo.insert(changeset) do
           {:ok, record} ->
+            register_without_name(msisdn, campaign) #TODO: first time????
             Memory.add_applicant_stage(record, record.id)
 
           {:error, changeset} ->
@@ -132,6 +133,8 @@ defmodule Plex.Data do
           ch.campaign == ^campaign
     )
     |> Repo.update_all(set: [readed: true])
+
+    Memory.mark_as_readed(msisdn, campaign)
   end
 
   def add_chat_history(
@@ -139,9 +142,11 @@ defmodule Plex.Data do
         campaign,
         message,
         source,
-        whatsapp_id
+        whatsapp_id,
+        readed \\ false,
+        collected \\ false
       ) do
-    case add_chat_history_db(msisdn, campaign, message, source, whatsapp_id) do
+    case add_chat_history_db(msisdn, campaign, message, source, whatsapp_id, DateTime.utc_now(), readed, collected) do
       {:ok, chat_history} ->
         Memory.add_chat_history(chat_history, chat_history.id)
 

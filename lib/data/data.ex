@@ -75,7 +75,8 @@ defmodule Plex.Data do
 
         case Repo.insert(changeset) do
           {:ok, record} ->
-            register_without_name(msisdn, campaign) #TODO: first time????
+            # TODO: first time????
+            register_without_name(msisdn, campaign)
             Memory.add_applicant_stage(record, record.id)
 
           {:error, changeset} ->
@@ -144,9 +145,20 @@ defmodule Plex.Data do
         source,
         whatsapp_id,
         readed \\ false,
-        collected \\ false
+        collected \\ false,
+        output_llm_booleans \\ nil
       ) do
-    case add_chat_history_db(msisdn, campaign, message, source, whatsapp_id, DateTime.utc_now(), readed, collected) do
+    case add_chat_history_db(
+           msisdn,
+           campaign,
+           message,
+           source,
+           whatsapp_id,
+           DateTime.utc_now(),
+           readed,
+           collected,
+           output_llm_booleans
+         ) do
       {:ok, chat_history} ->
         Memory.add_chat_history(chat_history, chat_history.id)
 

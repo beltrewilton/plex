@@ -20,7 +20,7 @@ defmodule Plex.Data.Memory do
 
     Mnesia.create_table(ChatHistory,
       attributes: Plex.ChatHistory.__schema__(:fields),
-      type: :set,
+      type: :ordered_set,
       storage_properties: [ram_copies: [node()]]
     )
 
@@ -186,7 +186,7 @@ defmodule Plex.Data.Memory do
     filter_function = fn messages ->
       Enum.filter(
         messages,
-        fn [_, _, _, _, _, _, _, _, _, collected, _, _, _, _] -> collected == true end
+        fn [_, _, _, _, _, _, _, _, _, collected, _, _, _, _] -> collected == false end
       )
     end
 
@@ -201,7 +201,7 @@ defmodule Plex.Data.Memory do
           {
             {ChatHistory, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10",
              :"$11", :"$12", :"$13", :"$14"},
-             [{:==, :"$4", msisdn}, {:==, :"$5", campaign}],
+            [{:==, :"$4", msisdn}, {:==, :"$5", campaign}],
             [:"$$"]
           }
         ]
@@ -248,8 +248,8 @@ defmodule Plex.Data.Memory do
             end
           )
 
-          IO.inspect(in_sending_date)
-          IO.inspect(record)
+        IO.inspect(in_sending_date)
+        IO.inspect(record)
 
         List.first(record)
         |> List.to_tuple()

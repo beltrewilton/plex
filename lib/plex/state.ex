@@ -123,6 +123,7 @@ defmodule Plex.State do
         case Memory.get_latest_applicant_stage(client.msisdn) do
           {:atomic, []} ->
             extract_campaign(client)
+            # with recursivity solve_stage(client)
             Memory.get_latest_applicant_stage(client.msisdn)
 
           {:atomic, stage} ->
@@ -148,11 +149,11 @@ defmodule Plex.State do
   # old name message_deliver
   def message_handler(%ClientState{} = client) do
     # Plex.Repo.start_link
-    # client = Plex.State.new("18092231016", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
+    # client = Plex.State.new("18092239902", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
     # {:ok, client} = Plex.State.message_handler(client)
     # ----- {:atomic, stage} = Plex.State.solve_stage(client)
-    # Plex.Data.register_or_update(client.msisdn, "Delta Magui", 1, true, "yes", "yes", "Bonao", client.campaign)
-    # client = Plex.State.new(client.msisdn, "Okay, completed", "wa", true, nil, false, false)
+    # Plex.Data.register_or_update(client.msisdn, "Fidorit Garkonomoto", 1, true, "yes", "yes", "Bonao", client.campaign)
+    # client = Plex.State.new(client.msisdn, "Thanks", "wa", true, nil, false, false)
     # # {:ok, client} = Plex.State.message_handler(client)
     # ------  {:atomic, stage} = Plex.State.solve_stage(client)
 
@@ -176,11 +177,11 @@ defmodule Plex.State do
     client = client_update(client, stage)
     IO.inspect(client)
 
-    #TODO: wtsapp_client.wa_readed(wamid=whatsapp_id)
+    # TODO: wtsapp_client.wa_readed(wamid=whatsapp_id)
 
     case client.forwarded do
       false ->
-        message = process_message(client.task, client.flow, client.scheduled, client.audio_id)
+        message = process_message(client.message, client.task, client.flow, client.scheduled, client.audio_id)
 
         Data.add_chat_history(
           client.msisdn,
@@ -190,13 +191,15 @@ defmodule Plex.State do
           client.whatsapp_id
         )
 
-        #TODO: remove previous and inactivity jobs.
+        # TODO: remove previous and inactivity jobs.
 
-        message_firer(client) # TODO: Task or something
+        # TODO: Task or something
+        message_firer(client)
 
       true ->
         {:ignore, "send wa message avoiding forwarder"}
-        message = "random message" #random_message(forwarded_not_allowed)
+        # random_message(forwarded_not_allowed)
+        message = "random message"
         # wtsapp_client.send_text_message
         Data.add_chat_history(
           client.msisdn,
@@ -229,33 +232,31 @@ defmodule Plex.State do
     client_update(client, stage)
   end
 
-  defp process_message(task, flow, schedule, audio_id) do
+  defp process_message(message, task, flow, schedule, audio_id) do
     cond do
       flow and schedule -> "Scheduled done"
-
       flow and task == :talent_entry_form -> "Talent entry form completed."
-
       flow and task == :grammar_assessment_form -> "Grammar assessment form completed."
-
       not is_nil(audio_id) and task == :scripted_text -> "Voice note for Scripted text sent."
-
       not is_nil(audio_id) and task == :scripted_text -> "Voice note for Open question sent."
+      true -> message
     end
   end
 
   # merge : message_firer & entry
   def message_firer(%ClientState{} = client) do
-    # no estan ordenados, por lo que seleccionar el ultimo no tiene sentido
     unreaded_messages = Memory.get_unreaded_messages(client.msisdn, client.campaign)
 
-    unreaded_messages_collected = Enum.map(unreaded_messages, fn m -> Enum.at(m, 7) end) |> Enum.join(" ")
+    unreaded_messages_collected =
+      Enum.map(unreaded_messages, fn m -> Enum.at(m, 7) end) |> Enum.join(" ")
 
     Data.mark_as_readed(client.msisdn, client.campaign)
 
     cond do
-      length(unreaded_messages) == 1  ->
+      length(unreaded_messages) == 1 ->
         in_sending_date = List.first(unreaded_messages) |> Enum.at(10)
         Memory.update_collected(client.msisdn, client.campaign, in_sending_date)
+        Data.mark_as_collected(client.msisdn, client.campaign, in_sending_date)
 
       length(unreaded_messages) > 1 ->
         Data.add_chat_history(
@@ -264,18 +265,29 @@ defmodule Plex.State do
           unreaded_messages_collected,
           @user_source,
           client.whatsapp_id,
-          true, #readed
-          true  #collected
+          # readed
+          true,
+          # collected
+          true
         )
     end
 
     if client.flow and not client.scheduled, do: task_completed(client)
 
-    handle_audio(client) # if switch_to_text, NO debe ejecutar mas nada.
+    # if switch_to_text, NO debe ejecutar mas nada.
+    handle_audio(client)
 
     client = client_update(client)
     # TODO: read chat history from mem
-    n_request = new_n_request(unreaded_messages_collected, client.state, :in_progress, client.task, [])
+    n_request =
+      new_n_request(
+        unreaded_messages_collected,
+        client.state,
+        :in_progress,
+        client.task,
+        chat_history(client.msisdn, client.campaign)
+      )
+
     # TODO: mas pruebas son requeridas LLM...
     n_response = Plex.Llm.generate(n_request)
     IO.inspect(n_response)
@@ -288,12 +300,22 @@ defmodule Plex.State do
 
     send_flow_message(trigger, client.msisdn, client.campaign)
 
+    output_llm_booleans = %{
+      share_link: n_response.output.share_link,
+      schedule: n_response.output.schedule,
+      company_question: n_response.output.company_question,
+      abort_scheduled_state: n_response.output.abort_scheduled_state
+  }
+
     Data.add_chat_history(
       client.msisdn,
       client.campaign,
       n_response.output.response,
       @ai_scource,
-      client.whatsapp_id
+      client.whatsapp_id,
+      true,
+      true,
+      output_llm_booleans
     )
 
     if n_response.output.schedule do
@@ -387,7 +409,7 @@ defmodule Plex.State do
 
     new_response =
       cond do
-        (flow && task == :scripted_text && !output.scheduled) ||
+        (flow && task == :scripted_text && !output.schedule) ||
             String.contains?(output.response, "PLACEHOLDER_1") ->
           ref_text = "random_message"
 
@@ -395,7 +417,7 @@ defmodule Plex.State do
           |> String.replace("PLACEHOLDER_1", "\n> ❝#{ref_text}❞\n\n\n_")
           |> String.replace("`", "")
 
-        (audio_id && task == :open_question && !output.scheduled) ||
+        (audio_id && task == :open_question && !output.schedule) ||
             String.contains?(output.response, "PLACEHOLDER_2") ->
           question_1 = "random_message"
 
@@ -409,5 +431,11 @@ defmodule Plex.State do
 
     Map.put(output, :response, new_response)
     Map.put(n_response, :output, output)
+  end
+
+  defp chat_history(msisdn, campaign) do
+    Memory.get_collected_messages(msisdn, campaign)
+    |> Enum.slice(0..-2//-1)
+    |> Enum.map(fn h -> Enum.at(h, 7) end)
   end
 end

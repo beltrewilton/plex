@@ -117,22 +117,38 @@ defmodule Plex.State do
   end
 
   def solve_stage(%ClientState{} = client) do
-    cond do
-      is_nil(client.audio_id) ->
-        # return ApplicantStageStruct
-        case Memory.get_latest_applicant_stage(client.msisdn) do
-          {:atomic, []} ->
-            extract_campaign(client)
-            # with recursivity solve_stage(client)
-            Memory.get_latest_applicant_stage(client.msisdn)
+    case Memory.get_latest_applicant_stage(client.msisdn) do
+      {:atomic, []} ->
+        extract_campaign(client)
+        # with recursivity solve_stage(client)
+        Memory.get_latest_applicant_stage(client.msisdn)
 
-          {:atomic, stage} ->
-            {:atomic, stage}
+      {:atomic, stage} ->
+        client = client_update(client, stage)
+        cond do
+          not is_nil(client.audio_id) and (is_nil(client.task) or client.task == :talent_entry_form) ->
+            {:abort}
+
+          true -> {:atomic, stage}
         end
-
-      not is_nil(client.audio_id) and (is_nil(client.task) or client.task == :talent_entry_form) ->
-        {:abort}
     end
+
+    # cond do
+    #   is_nil(client.audio_id) ->
+    #     # return ApplicantStageStruct
+    #     case Memory.get_latest_applicant_stage(client.msisdn) do
+    #       {:atomic, []} ->
+    #         extract_campaign(client)
+    #         # with recursivity solve_stage(client)
+    #         Memory.get_latest_applicant_stage(client.msisdn)
+
+    #       {:atomic, stage} ->
+    #         {:atomic, stage}
+    #     end
+
+    #   not is_nil(client.audio_id) and (is_nil(client.task) or client.task == :talent_entry_form) ->
+    #     {:abort}
+    # end
 
     # if is_nil(client.audio_id) do
 
@@ -173,9 +189,7 @@ defmodule Plex.State do
   end
 
   defp message_handler(%ClientState{} = client, {:atomic, stage}) do
-    IO.inspect(stage)
     client = client_update(client, stage)
-    IO.inspect(client)
 
     # TODO: wtsapp_client.wa_readed(wamid=whatsapp_id)
 
@@ -238,7 +252,7 @@ defmodule Plex.State do
       flow and task == :talent_entry_form -> "Talent entry form completed."
       flow and task == :grammar_assessment_form -> "Grammar assessment form completed."
       not is_nil(audio_id) and task == :scripted_text -> "Voice note for Scripted text sent."
-      not is_nil(audio_id) and task == :scripted_text -> "Voice note for Open question sent."
+      not is_nil(audio_id) and task == :open_question -> "Voice note for Open question sent."
       true -> message
     end
   end
@@ -278,7 +292,7 @@ defmodule Plex.State do
     handle_audio(client)
 
     client = client_update(client)
-    # TODO: read chat history from mem
+
     n_request =
       new_n_request(
         unreaded_messages_collected,
@@ -289,7 +303,7 @@ defmodule Plex.State do
       )
 
     # TODO: mas pruebas son requeridas LLM...
-    n_response = Plex.Llm.generate(n_request)
+    n_response = Plex.LLM.generate(n_request)
     IO.inspect(n_response)
 
     trigger = flow_trigger(client.task, n_response)
@@ -435,7 +449,7 @@ defmodule Plex.State do
 
   defp chat_history(msisdn, campaign) do
     Memory.get_collected_messages(msisdn, campaign)
-    |> Enum.slice(0..-2//-1)
+    |> Enum.slice(0..-2//1)
     |> Enum.map(fn h -> Enum.at(h, 7) end)
   end
 end

@@ -1,4 +1,4 @@
-defmodule Plex.Llm do
+defmodule Plex.LLM do
   @url "http://localhost:9091/llm/generate"
 
   @headers [

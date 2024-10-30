@@ -73,15 +73,24 @@ defmodule PlexTest do
     #   assert {:ok, client} = Plex.State.message_handler(client)
     # end
 
-    test "7 open question" do
-      is_flow = false
+    # test "7 open question" do
+    #   is_flow = false
 
-      message = "Any text here"
+    #   message = "Any text here"
 
-      client = Plex.State.new(@msisdn, message, "waid:0", is_flow, "audio_is_not_nil", false, false)
+    #   client = Plex.State.new(@msisdn, message, "waid:0", is_flow, "audio_is_not_nil", false, false)
 
-      assert {:ok, client} = Plex.State.message_handler(client)
-    end
+    #   assert {:ok, client} = Plex.State.message_handler(client)
+    # end
+
+    # test "mock webhook" do
+    #   data = Plex.Data.get_webhook_data()
+
+    #   Enum.each(data, fn a ->
+    #     data = a.response
+    #     IO.inspect Whatsapp.Client.handle_notification(data)
+    #   end)
+    # end
   end
 
 

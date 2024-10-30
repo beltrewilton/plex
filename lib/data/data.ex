@@ -515,12 +515,13 @@ defmodule Plex.Data do
     Repo.insert!(appl)
   end
 
-  def util_all_webhooklogs do
-    query = from(w in WebHookLogSchema, where: w.source == "WEBHOOK", limit: 20)
-    all = Repo.all(query)
-    Enum.each(all, fn a ->
-      data = a.response
-      IO.inspect Whatsapp.Client.handle_notification(data)
-    end)
+  def get_webhook_data(id \\ 5)  do
+    # from(w in WebHookLogSchema, where: w.source == "WEBHOOK", limit: ^limit)
+    from(w in WebHookLogSchema,
+      where: fragment("response->'entry'->0->>'id' = ?", ^id),
+      where: w.source == "WEBHOOK",
+      order_by: [desc: w.id]
+    )
+    |> Repo.all()
   end
 end

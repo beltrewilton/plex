@@ -7,14 +7,22 @@ defmodule Webhook.Router do
   plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason)
   plug(:dispatch)
 
-  post "/" do
-    IO.inspect(conn.body_params)
-    send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
-  end
 
   get "/" do
-    IO.inspect("the -get- root of the webhook")
-    send_resp(conn, 200, "this is the root [get]")
+    verify_token = conn.query_params["hub.verify_token"]
+    local_hook_token = System.get_env("WHATSAPP_HOOK_TOKEN")
+    if verify_token == local_hook_token do
+      hub_challenge = conn.query_params["hub.challenge"]
+      send_resp(conn, 200, hub_challenge)
+    else
+      send_resp(conn, 403, "Authentication failed. Invalid Token.")
+    end
+  end
+
+  post "/" do
+    client = Whatsapp.Client.handle_notification(conn.body_params.response)
+    IO.inspect(client)
+    send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
   end
 
   forward("/subtask", to: Subtask.Router)

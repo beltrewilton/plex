@@ -87,7 +87,7 @@ defmodule Plex.State do
     }
   end
 
-  def extract_campaign(%ClientState{} = client) do
+  defp extract_campaign(%ClientState{} = client) do
     if is_nil(client.task) or client.task == :talent_entry_form do
       case UniqueCodeGenerator.extract_code(client.message) do
         [] ->
@@ -116,7 +116,7 @@ defmodule Plex.State do
     end
   end
 
-  def solve_stage(%ClientState{} = client) do
+  defp solve_stage(%ClientState{} = client) do
     case Memory.get_latest_applicant_stage(client.msisdn) do
       {:atomic, []} ->
         extract_campaign(client)
@@ -132,55 +132,10 @@ defmodule Plex.State do
           true -> {:atomic, stage}
         end
     end
-
-    # cond do
-    #   is_nil(client.audio_id) ->
-    #     # return ApplicantStageStruct
-    #     case Memory.get_latest_applicant_stage(client.msisdn) do
-    #       {:atomic, []} ->
-    #         extract_campaign(client)
-    #         # with recursivity solve_stage(client)
-    #         Memory.get_latest_applicant_stage(client.msisdn)
-
-    #       {:atomic, stage} ->
-    #         {:atomic, stage}
-    #     end
-
-    #   not is_nil(client.audio_id) and (is_nil(client.task) or client.task == :talent_entry_form) ->
-    #     {:abort}
-    # end
-
-    # if is_nil(client.audio_id) do
-
-    # end
-
-    # if not is_nil(client.audio_id) and (is_nil(client.task) or client.task == :talent_entry_form) do
-    #   #TODO:
-    #   #     si lo primero que tenemos es un audio, se debe abortar, la app no esta preparada, no
-    #   #     no tiene la campaign aun.
-    #   {:abort}
-    # end
   end
 
   # old name message_deliver
   def message_handler(%ClientState{} = client) do
-    # Plex.Repo.start_link
-    # client = Plex.State.new("18092239902", "Hi, this is my promo code CNVQSOUR84FK, I'm interested 💚!", "wa", false, nil, false, false)
-    # {:ok, client} = Plex.State.message_handler(client)
-    # ----- {:atomic, stage} = Plex.State.solve_stage(client)
-    # Plex.Data.register_or_update(client.msisdn, "Fidorit Garkonomoto", 1, true, "yes", "yes", "Bonao", client.campaign)
-    # client = Plex.State.new(client.msisdn, "Thanks", "wa", true, nil, false, false)
-    # # {:ok, client} = Plex.State.message_handler(client)
-    # ------  {:atomic, stage} = Plex.State.solve_stage(client)
-
-    # Plex.Data.Memory.get_applicant_stage("18092231010", "CNVQSOUR84FK")
-
-    # Plex.Data.update_hrapplicant(client.msisdn, stage.campaign, task)
-    # Plex.Data.update_applicant_stage(client.msisdn, stage.campaign, task, stage.state)
-    #
-
-    #  Plex.State.extract_campaign(client)
-    # return ApplicantStageStruct
     message_handler(client, solve_stage(client))
   end
 
@@ -269,7 +224,6 @@ defmodule Plex.State do
     cond do
       length(unreaded_messages) == 1 ->
         in_sending_date = List.first(unreaded_messages) |> Enum.at(10)
-        Memory.update_collected(client.msisdn, client.campaign, in_sending_date)
         Data.mark_as_collected(client.msisdn, client.campaign, in_sending_date)
 
       length(unreaded_messages) > 1 ->
@@ -384,7 +338,7 @@ defmodule Plex.State do
     # TODO: esto se supone que detiene el flujo `return en Python` con return response, flow_trigger
   end
 
-  def next_task(key) do
+  defp next_task(key) do
     tasks = %__MODULE__{}.tasks
     index = Enum.find_index(tasks, &(&1 == key))
 
@@ -395,7 +349,7 @@ defmodule Plex.State do
     end
   end
 
-  def task_completed(%ClientState{} = client) do
+  defp task_completed(%ClientState{} = client) do
     client = Map.put(client, :task, next_task(client.task))
 
     client = if client.task == :end_of_task, do: Map.put(client, :state, :completed), else: client
@@ -418,7 +372,7 @@ defmodule Plex.State do
     end
   end
 
-  def process_response(n_response, task, flow, audio_id) do
+  defp process_response(n_response, task, flow, audio_id) do
     output = n_response.output
 
     new_response =

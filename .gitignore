@@ -34,3 +34,4 @@ plex-*.tar
 .secret
 ttb_last_config
 mix.lock
+data.json

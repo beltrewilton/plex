@@ -125,6 +125,8 @@ defmodule Plex.Data do
           ch.sending_date == ^sending_date
     )
     |> Repo.update_all(set: [collected: true])
+
+    Memory.update_collected(msisdn, campaign, sending_date)
   end
 
   def mark_as_readed(msisdn, campaign) do
@@ -287,7 +289,7 @@ defmodule Plex.Data do
   end
 
   # old name: get_applicant_state
-  def get_applicant_stage_name(msisdn, campaign) do
+  defp get_applicant_stage_name(msisdn, campaign) do
     query = get_hrapplicant(msisdn, campaign)
 
     case Repo.one(query) do
@@ -321,7 +323,7 @@ defmodule Plex.Data do
     {:reevaluate}
   end
 
-  def get_job_by_campaign(campaign) do
+  defp get_job_by_campaign(campaign) do
     query =
       from(j in HrJob,
         where: j.va_campaign == ^campaign
@@ -394,7 +396,7 @@ defmodule Plex.Data do
     end
   end
 
-  def applicant_register(%HrApplicant{} = appl, english_level) do
+  defp applicant_register(%HrApplicant{} = appl, english_level) do
     skill = %HrApplicantSkill{}
     rel = %HrApplicantSkillRel{}
 
@@ -419,7 +421,7 @@ defmodule Plex.Data do
     end
   end
 
-  def register_or_update(
+  defp register_or_update(
         partner_phone,
         partner_name,
         english_level,
@@ -486,7 +488,7 @@ defmodule Plex.Data do
     #     IO.inspect(e)
   end
 
-  def register_without_name(msisdn, campaign) do
+  defp register_without_name(msisdn, campaign) do
     # TODO: first: perform some memory logic
     {:ok, job} = get_job_by_campaign(campaign)
 
@@ -511,5 +513,14 @@ defmodule Plex.Data do
     }
 
     Repo.insert!(appl)
+  end
+
+  def util_all_webhooklogs do
+    query = from(w in WebHookLogSchema, where: w.source == "WEBHOOK", limit: 20)
+    all = Repo.all(query)
+    Enum.each(all, fn a ->
+      data = a.response
+      IO.inspect Whatsapp.Client.handle_notification(data)
+    end)
   end
 end

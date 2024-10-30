@@ -25,13 +25,16 @@ plex-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
-/config/config.exs
+**/config/config.exs
 /.vscode/
 /.elixir_ls/
 /_build/
-/lib/__pycache__/
-/python/__pycache__/
+**/lib/__pycache__/
+**/python/__pycache__/
 .secret
 ttb_last_config
 mix.lock
 data.json
+
+/apps/plexcore/deps/
+/apps/plexgw/deps/

@@ -20,7 +20,7 @@ defmodule Webhook.Router do
   end
 
   post "/" do
-    client = Whatsapp.Client.handle_notification(conn.body_params.response)
+    client = WhatsappElixir.Static.handle_notification(conn.body_params.response)
     IO.inspect(client)
     send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
   end
@@ -31,3 +31,5 @@ defmodule Webhook.Router do
     send_resp(conn, 404, "You are trying something that does not exist.")
   end
 end
+
+# {time_microseconds, result} = :timer.tc(:rpc, :call, [:"plexcore1@10.0.0.28", Plex.Data, :get_webhook_data, ["442392808948818"]])

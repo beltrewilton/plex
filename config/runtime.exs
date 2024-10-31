@@ -1,1 +1,1 @@
-DotenvParser.load_file("../../.secret")
+DotenvParser.load_file(".secret")

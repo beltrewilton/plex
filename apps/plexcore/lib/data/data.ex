@@ -518,9 +518,10 @@ defmodule Plex.Data do
   def get_webhook_data(id \\ 5)  do
     # from(w in WebHookLogSchema, where: w.source == "WEBHOOK", limit: ^limit)
     from(w in WebHookLogSchema,
-      where: fragment("response->'entry'->0->>'id' = ?", ^id),
+      # where: fragment("response->'entry'->0->>'id' = ?", ^id),
       where: w.source == "WEBHOOK",
-      order_by: [desc: w.id]
+      order_by: [desc: w.id],
+      limit: 100
     )
     |> Repo.all()
   end

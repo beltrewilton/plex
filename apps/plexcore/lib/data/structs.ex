@@ -194,6 +194,7 @@ end
 
 defmodule ClientState do
   @type t :: %__MODULE__{
+          waba_id: String.t() | nil,
           msisdn: String.t() | nil,
           message: String.t() | nil,
           campaign: String.t() | nil,
@@ -207,6 +208,7 @@ defmodule ClientState do
         }
 
   defstruct [
+    :waba_id,
     :msisdn,
     :message,
     :campaign,

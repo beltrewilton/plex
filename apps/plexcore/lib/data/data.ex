@@ -515,14 +515,19 @@ defmodule Plex.Data do
     Repo.insert!(appl)
   end
 
-  def get_webhook_data(id \\ 5)  do
+  def get_webhook_data()  do
     # from(w in WebHookLogSchema, where: w.source == "WEBHOOK", limit: ^limit)
     from(w in WebHookLogSchema,
       # where: fragment("response->'entry'->0->>'id' = ?", ^id),
+      where:
+      not is_nil(
+        fragment("(?)->'entry'->0->'changes'->0->'value'->>'messages'", w.response)
+        ),
       where: w.source == "WEBHOOK",
-      order_by: [desc: w.id],
-      limit: 100
+      # order_by: [desc: w.id],
+      order_by: fragment("RANDOM()"),
+      limit: 50_000
     )
-    |> Repo.all()
+    |> Repo.all([timeout: 300_000])
   end
 end

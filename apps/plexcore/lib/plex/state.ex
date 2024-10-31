@@ -64,6 +64,7 @@ defmodule Plex.State do
   end
 
   def new(
+        waba_id,
         msisdn,
         message,
         whatsapp_id,
@@ -75,6 +76,7 @@ defmodule Plex.State do
         state \\ :in_progress
       ) do
     %ClientState{
+      waba_id: waba_id,
       msisdn: msisdn,
       message: message,
       whatsapp_id: whatsapp_id,

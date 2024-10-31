@@ -44,11 +44,11 @@ defmodule Plex.Data.Memory do
       storage_properties: [ram_copies: [node()]]
     )
 
-    Mnesia.create_table(Transitivities,
-      attributes: [:key, :value],
-      type: :set,
-      storage_properties: [ram_copies: [node()]]
-    )
+    # Mnesia.create_table(Transitivities,
+    #   attributes: [:key, :value],
+    #   type: :set,
+    #   storage_properties: [ram_copies: [node()]]
+    # )
   end
 
   # chat_history = %Plex.ChatHistory{msisdn: "18007653427", campaign: "XH000", source: "Github", whatsapp_id: "0009", message: "Hi all",  readed: true, collected: true, sending_date: NaiveDateTime.utc_now(), output_llm_booleans: %{}, create_date: NaiveDateTime.utc_now(), write_date: NaiveDateTime.utc_now()}
@@ -358,11 +358,11 @@ defmodule Plex.Data.Memory do
     end)
   end
 
-  def transitivity_set(param, msisdn, campaign, value) do
-    key = param <> msisdn <> campaign
+  # def transitivity_set(param, msisdn, campaign, value) do
+  #   key = param <> msisdn <> campaign
 
-    Mnesia.transaction(fn ->
-      Mnesia.write({Transitivities, key, value})
-    end)
-  end
+  #   Mnesia.transaction(fn ->
+  #     Mnesia.write({Transitivities, key, value})
+  #   end)
+  # end
 end

@@ -27,7 +27,7 @@ plex-*.tar
 
 **/config/config.exs
 /.vscode/
-/.elixir_ls/
+**/.elixir_ls/
 /_build/
 **/lib/__pycache__/
 **/python/__pycache__/

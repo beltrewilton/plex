@@ -15,7 +15,7 @@ defmodule EntryTest do
 
   describe "POST /" do
     test "returns a successful response" do
-      data_list = Plex.Data.get_webhook_data("442392808948818")
+      data_list = Plex.Data.get_webhook_data()
 
       results =
         Task.async_stream(data_list, fn data ->
@@ -27,9 +27,15 @@ defmodule EntryTest do
           assert conn.resp_body == Jason.encode!(%{"status" => "success"})
 
           :ok
-        end, max_concurrency: 50, timeout: :infinity)
+        end, max_concurrency: 2, timeout: :infinity)
 
-      Enum.each(results, fn {:ok, result} -> result end)
+      Enum.each(results, fn {:ok, result} ->
+        # IO.inspect(
+        #    :mnesia.transaction(fn ->  :mnesia.match_object({PlexConfig, :_, :_, :_}) end)
+        # )
+        Process.sleep(Enum.random(1500..2500))
+        result
+      end)
     end
   end
 end

@@ -56,6 +56,7 @@ defmodule Webhook.Router do
             Plex.State,
             :new,
             [
+              waba_id,
               Keyword.get(sender, :sender_phone_number),
               Keyword.get(sender, :message),
               Keyword.get(sender, :wa_message_id),

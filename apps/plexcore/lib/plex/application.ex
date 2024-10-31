@@ -15,6 +15,7 @@ defmodule Plex.Application do
     ]
 
     Logger.info("Webhook & Plex.Data")
+    Logger.info(Node.get_cookie())
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

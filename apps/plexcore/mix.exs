@@ -35,7 +35,6 @@ defmodule PlexCore.MixProject do
       {:jason, "~> 1.4"},
       {:httpoison, "~> 2.2.1"},
       {:dotenv_parser, "~> 2.0"},
-      {:req, "~> 0.5.6"},
       {:whatsapp_elixir, path: "/Users/beltre.wilton/apps/whatsapp_elixir"}
     ]
   end

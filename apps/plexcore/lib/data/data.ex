@@ -422,15 +422,15 @@ defmodule Plex.Data do
   end
 
   def register_or_update(
-         partner_phone,
-         partner_name,
-         english_level,
-         is_valid_dominican_id,
-         availability_tostart,
-         availability_towork,
-         city_residence,
-         campaign
-       ) do
+        partner_phone,
+        partner_name,
+        english_level,
+        is_valid_dominican_id,
+        availability_tostart,
+        availability_towork,
+        city_residence,
+        campaign
+      ) do
     appl = get_hrapplicant(partner_phone, campaign)
     IO.inspect(Repo.one(appl))
 

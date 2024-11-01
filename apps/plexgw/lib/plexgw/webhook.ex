@@ -40,25 +40,21 @@ defmodule Webhook.Router do
 
     case Plexgw.Setup.get(waba_id) do
       [_, target_node, :plex_app] ->
-        Task.async(fn ->
-          rpc_out =
-            :rpc.call(
-                target_node,
-                Plex.State,
-                :new,
-                [
-                  waba_id,
-                  Keyword.get(sender, :sender_phone_number),
-                  Keyword.get(sender, :message),
-                  Keyword.get(sender, :wa_message_id),
-                  Keyword.get(sender, :flow),
-                  Keyword.get(sender, :audio_id),
-                  Keyword.get(sender, :scheduled),
-                  Keyword.get(sender, :forwarded)
-                ]
-              )
-            IO.inspect(rpc_out)
-        end)
+        :rpc.cast(
+          target_node,
+          Plex.State,
+          :new,
+          [
+            waba_id,
+            Keyword.get(sender, :sender_phone_number),
+            Keyword.get(sender, :message),
+            Keyword.get(sender, :wa_message_id),
+            Keyword.get(sender, :flow),
+            Keyword.get(sender, :audio_id),
+            Keyword.get(sender, :scheduled),
+            Keyword.get(sender, :forwarded)
+          ]
+        )
 
       [_, _target_node, :chatbot] ->
         {:chatbot_woot}

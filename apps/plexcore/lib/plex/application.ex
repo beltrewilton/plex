@@ -12,7 +12,8 @@ defmodule Plex.Application do
       # {Plex.Worker, arg}
       # TODO: works for --no-halt recipe.
       {Plex.Repo, []},
-      {Task, fn -> Plex.Data.start_link([]) end}
+      {Task, fn -> Plex.Data.start_link([]) end},
+      {Finch, name: MyFinch}
     ]
 
     Logger.info("Webhook & Plex.Data")

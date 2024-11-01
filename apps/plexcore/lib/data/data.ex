@@ -421,16 +421,16 @@ defmodule Plex.Data do
     end
   end
 
-  defp register_or_update(
-        partner_phone,
-        partner_name,
-        english_level,
-        is_valid_dominican_id,
-        availability_tostart,
-        availability_towork,
-        city_residence,
-        campaign
-      ) do
+  def register_or_update(
+         partner_phone,
+         partner_name,
+         english_level,
+         is_valid_dominican_id,
+         availability_tostart,
+         availability_towork,
+         city_residence,
+         campaign
+       ) do
     appl = get_hrapplicant(partner_phone, campaign)
     IO.inspect(Repo.one(appl))
 
@@ -515,19 +515,17 @@ defmodule Plex.Data do
     Repo.insert!(appl)
   end
 
-  def get_webhook_data()  do
+  def get_webhook_data() do
     # from(w in WebHookLogSchema, where: w.source == "WEBHOOK", limit: ^limit)
     from(w in WebHookLogSchema,
       # where: fragment("response->'entry'->0->>'id' = ?", ^id),
       where:
-      not is_nil(
-        fragment("(?)->'entry'->0->'changes'->0->'value'->>'messages'", w.response)
-        ),
+        not is_nil(fragment("(?)->'entry'->0->'changes'->0->'value'->>'messages'", w.response)),
       where: w.source == "WEBHOOK",
       # order_by: [desc: w.id],
       order_by: fragment("RANDOM()"),
       limit: 50_000
     )
-    |> Repo.all([timeout: 300_000])
+    |> Repo.all(timeout: 300_000)
   end
 end

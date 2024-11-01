@@ -24,16 +24,17 @@ defmodule Plexgw.Setup do
   def setup do
     add("442392808948818", :"ccd@10.0.0.28", :plex_app)
   end
+
   # Util.Addnode.start(:"plexgw@10.0.0.28", :"synaia@10.0.0.28", "367131756473430")
   # Util.Addnode.start(:"plexgw@10.0.0.28", :"ceidi@10.0.0.28", "443834038808808")
 
-  #TODO: THE RECIPE FOR NODES
+  # TODO: THE RECIPE FOR NODES
   # start debug plexgw: bya launch -> iex --name plexgw@10.0.0.28 -S mix
   #
   # start console iex --name plexcore1@10.0.0.28 -S mix
   # connect Node.connect(:"plexgw@10.0.0.28")
   # MNESIA CONNECT
-  #.  :mnesia.stop()
+  # .  :mnesia.stop()
   #   :mnesia.start()
   #   :mnesia.change_config(:extra_db_nodes, [:"plexgw@10.0.0.28"])
   # READ
@@ -65,9 +66,7 @@ defmodule Plexgw.Setup do
 
     case transaction do
       {:atomic, []} -> [waba_id, nil, nil]
-
       {:atomic, config} -> config |> List.first()
-
       _ -> [waba_id, nil, nil]
     end
   end

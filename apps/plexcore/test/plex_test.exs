@@ -1,8 +1,8 @@
 defmodule PlexTest do
   use ExUnit.Case
-  ExUnit.configure([timeout: :infinity, seed: 0])
+  ExUnit.configure(timeout: :infinity, seed: 0)
 
-  @msisdn  "18092239916"
+  @msisdn "18092239916"
   @campaign "CNVQSOUR84FK"
   @client_name "Jeim Schugar"
 
@@ -92,6 +92,4 @@ defmodule PlexTest do
     #   end)
     # end
   end
-
-
 end

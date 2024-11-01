@@ -10,7 +10,8 @@ defmodule Plex.Application do
     children = [
       # Starts a worker by calling: Plex.Worker.start_link(arg)
       # {Plex.Worker, arg}
-      {Plex.Repo, []}, #TODO: works for --no-halt recipe.
+      # TODO: works for --no-halt recipe.
+      {Plex.Repo, []},
       {Task, fn -> Plex.Data.start_link([]) end}
     ]
 

@@ -127,17 +127,31 @@ defmodule Plex.State do
 
       {:atomic, stage} ->
         client = client_update(client, stage)
+
         cond do
-          not is_nil(client.audio_id) and (is_nil(client.task) or client.task == :talent_entry_form) ->
+          not is_nil(client.audio_id) and
+              (is_nil(client.task) or client.task == :talent_entry_form) ->
             {:abort}
 
-          true -> {:atomic, stage}
+          true ->
+            {:atomic, stage}
         end
     end
   end
 
   # old name message_deliver
-  def message_handler(%ClientState{} = client) do
+  def message_handler(
+        waba_id,
+        msisdn,
+        message,
+        whatsapp_id,
+        flow,
+        audio_id,
+        scheduled,
+        forwarded
+      ) do
+    client = new(waba_id, msisdn, message, whatsapp_id, flow, audio_id, scheduled, forwarded)
+
     message_handler(client, solve_stage(client))
   end
 
@@ -152,7 +166,14 @@ defmodule Plex.State do
 
     case client.forwarded do
       false ->
-        message = process_message(client.message, client.task, client.flow, client.scheduled, client.audio_id)
+        message =
+          process_message(
+            client.message,
+            client.task,
+            client.flow,
+            client.scheduled,
+            client.audio_id
+          )
 
         Data.add_chat_history(
           client.msisdn,
@@ -275,7 +296,7 @@ defmodule Plex.State do
       schedule: n_response.output.schedule,
       company_question: n_response.output.company_question,
       abort_scheduled_state: n_response.output.abort_scheduled_state
-  }
+    }
 
     Data.add_chat_history(
       client.msisdn,

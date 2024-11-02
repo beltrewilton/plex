@@ -202,4 +202,20 @@ defmodule SpeechSuperClient do
 
       IO.inspect(retrieve)
   end
+
+  def test_send() do
+    config = [
+      token: System.get_env("SYNAIA_META_USER_TOKEN"),
+      phone_number_id: System.get_env("MARIA_PHONE_NUMBER_ID"),
+      verify_token: "",
+      base_url: "https://graph.facebook.com",
+      api_version: "v20.0"
+    ]
+
+    WhatsappElixir.Messages.send_message(
+      "18296456177",
+      "Hi from Elixir",
+      config
+    )
+  end
 end

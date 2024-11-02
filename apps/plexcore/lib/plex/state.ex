@@ -44,6 +44,17 @@ defmodule Plex.State do
 
   alias Plex.Data.Memory
   alias Plex.Data
+  alias WhatsappElixir.Messages
+
+  defp get_config() do
+    [
+      token: System.get_env("SYNAIA_META_USER_TOKEN"),
+      phone_number_id: System.get_env("MARIA_PHONE_NUMBER_ID"),
+      verify_token: System.get_env("WHATSAPP_HOOK_TOKEN"),
+      base_url: "https://graph.facebook.com",
+      api_version: "v20.0"
+    ]
+  end
 
   def new_n_request(
         utterance,
@@ -162,7 +173,7 @@ defmodule Plex.State do
   defp message_handler(%ClientState{} = client, {:atomic, stage}) do
     client = client_update(client, stage)
 
-    # TODO: wtsapp_client.wa_readed(wamid=whatsapp_id)
+    # Messages.mark_as_read(client.whatsapp_id, get_config())
 
     case client.forwarded do
       false ->
@@ -323,6 +334,7 @@ defmodule Plex.State do
 
   def send_text_message(msisdn, message) do
     IO.puts("Here send to WhatsApp client #{msisdn}: #{message}")
+    # Messages.send_message(msisdn, message, get_config())
   end
 
   def send_flow_message(:flow_basic, msisdn, campaign) do

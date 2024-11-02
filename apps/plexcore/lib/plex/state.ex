@@ -45,6 +45,7 @@ defmodule Plex.State do
   alias Plex.Data.Memory
   alias Plex.Data
   alias WhatsappElixir.Messages
+  alias WhatsappElixir.Flow
 
   defp get_config() do
     [
@@ -339,10 +340,44 @@ defmodule Plex.State do
 
   def send_flow_message(:flow_basic, msisdn, campaign) do
     IO.puts("flow_basic - #{msisdn}: #{campaign}")
+
+    opts = [
+      flow_id: System.get_env("MARIA_FLOW_APP_BASIC_ID"),
+      cta: "Please fill this form",
+      screen: "APPLICANT_BASIC"
+    ]
+
+    data = %{
+      "msisdn" => msisdn,
+      "campaign" => campaign,
+      "min_date" => DateTime.utc_now() |> DateTime.to_date() |> Date.to_string(),
+      "max_date" => DateTime.utc_now() |> Date.add(90) |> Date.to_string()
+    }
+
+    Flow.send_flow(msisdn, data, get_config(), opts)
   end
 
   def send_flow_message(:flow_assesment, msisdn, campaign) do
     IO.puts("flow_assesment - #{msisdn}: #{campaign}")
+
+    opts = [
+      flow_id: System.get_env("MARIA_FLOW_ASSESSMENT_ID"),
+      cta: "Please fill this form",
+      screen: "APPLICANT_ASSESSMENT_ONE"
+    ]
+
+    data = %{
+      "msisdn" => msisdn,
+      "campaign" => campaign,
+      "question_one_error" => false,
+      "question_two_error" => false,
+      "random_question_one_sentence" => "random_question_one_sentence",
+      "random_question_two_sentence" => "random_question_two_sentence",
+      "random_question_one_resume" => "question_one_resume",
+      "random_question_two_resume" => "question_two_resume"
+    }
+
+    Flow.send_flow(msisdn, data, get_config(), opts)
   end
 
   def send_flow_message(:flow_scheduler, msisdn, campaign) do

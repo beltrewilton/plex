@@ -301,7 +301,7 @@ defmodule Plex.State do
 
     send_text_message(client.msisdn, n_response.output.response)
 
-    send_flow_message(trigger, client.msisdn, client.campaign)
+    send_flow_message(trigger, client.waba_id, client.msisdn, client.campaign)
 
     output_llm_booleans = %{
       share_link: n_response.output.share_link,
@@ -338,7 +338,7 @@ defmodule Plex.State do
     # Messages.send_message(msisdn, message, get_config())
   end
 
-  def send_flow_message(:flow_basic, msisdn, campaign) do
+  def send_flow_message(:flow_basic, waba_id, msisdn, campaign) do
     IO.puts("flow_basic - #{msisdn}: #{campaign}")
 
     opts = [
@@ -348,6 +348,7 @@ defmodule Plex.State do
     ]
 
     data = %{
+      "waba_id" => waba_id,
       "msisdn" => msisdn,
       "campaign" => campaign,
       "min_date" => DateTime.utc_now() |> DateTime.to_date() |> Date.to_string(),
@@ -357,7 +358,7 @@ defmodule Plex.State do
     Flow.send_flow(msisdn, data, get_config(), opts)
   end
 
-  def send_flow_message(:flow_assesment, msisdn, campaign) do
+  def send_flow_message(:flow_assesment, waba_id, msisdn, campaign) do
     IO.puts("flow_assesment - #{msisdn}: #{campaign}")
 
     opts = [
@@ -367,6 +368,7 @@ defmodule Plex.State do
     ]
 
     data = %{
+      "waba_id" => waba_id,
       "msisdn" => msisdn,
       "campaign" => campaign,
       "question_one_error" => false,
@@ -380,12 +382,12 @@ defmodule Plex.State do
     Flow.send_flow(msisdn, data, get_config(), opts)
   end
 
-  def send_flow_message(:flow_scheduler, msisdn, campaign) do
-    IO.puts("flow_scheduler - #{msisdn}: #{campaign}")
+  def send_flow_message(:flow_scheduler, waba_id, msisdn, campaign) do
+    IO.puts("flow_scheduler - #{waba_id} #{msisdn}: #{campaign}")
   end
 
-  def send_flow_message(nil, msisdn, campaign) do
-    IO.puts("no flow trigger found - #{msisdn}: #{campaign}")
+  def send_flow_message(nil, waba_id, msisdn, campaign) do
+    IO.puts("no flow trigger found - #{waba_id} #{msisdn} #{campaign}")
   end
 
   defp handle_audio(%ClientState{} = client) when not is_nil(client.audio_id) do

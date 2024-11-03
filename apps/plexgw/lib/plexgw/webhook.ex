@@ -28,7 +28,8 @@ defmodule Webhook.Router do
     send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
   end
 
-  forward("/subtask", to: Subtask.Router)
+  forward("/flow", to: Flow.Router)
+
 
   match _ do
     send_resp(conn, 404, "You are trying something that does not exist.")

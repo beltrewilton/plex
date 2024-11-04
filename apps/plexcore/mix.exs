@@ -36,6 +36,8 @@ defmodule PlexCore.MixProject do
       {:httpoison, "~> 2.2.1"},
       {:dotenv_parser, "~> 2.0"},
       {:json, "~> 1.4"},
+      #   TODO: this is for test -- remove...
+      {:plug_cowboy, "~> 2.7.2"},
       {:whatsapp_elixir, path: "/Users/beltre.wilton/apps/whatsapp_elixir"}
     ]
   end

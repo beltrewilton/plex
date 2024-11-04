@@ -37,6 +37,7 @@ defmodule Plex.State do
   @default_campaign "CNDEFAULT"
   @user_source "User"
   @ai_scource "AI"
+  @tolerance 3_000
 
   defstruct tasks: @tasks, app_states: @app_states, n_response: @n_response, n_request: @n_request
 
@@ -44,6 +45,7 @@ defmodule Plex.State do
 
   alias Plex.Data.Memory
   alias Plex.Data
+  alias Plex.Scheduler
   alias WhatsappElixir.Messages
   alias WhatsappElixir.Flow
 
@@ -196,9 +198,35 @@ defmodule Plex.State do
         )
 
         # TODO: remove previous and inactivity jobs.
+        Scheduler.calcel_execution(
+          client.msisdn,
+          client.campaign,
+          "_message_firer_job"
+        )
+
+        Scheduler.calcel_execution(
+          client.msisdn,
+          client.campaign,
+          "_inactivity_job"
+        )
 
         # TODO: Task or something
-        message_firer(client)
+        run_at = if client.flow or not is_nil(client.audio_id) or client.scheduled, do: 0, else: @tolerance
+        Scheduler.schedule(
+          client.msisdn,
+          client.campaign,
+          "_message_firer_job",
+          fn ->
+            message_firer(client)
+
+            Scheduler.calcel_execution(
+              client.msisdn,
+              client.campaign,
+              "_message_firer_job"
+            )
+          end,
+          run_at
+        )
 
       true ->
         {:ignore, "send wa message avoiding forwarder"}
@@ -323,11 +351,21 @@ defmodule Plex.State do
 
     if n_response.output.schedule do
       # TODO: remove the inactivity clock/job/task
+      Scheduler.calcel_execution(
+          client.msisdn,
+          client.campaign,
+          "_message_firer_job"
+        )
     end
 
     if n_response.output.abort_scheduled_state do
       # TODO: call the stupid set_state_all function
       #       remove previous_scheduled_job_id
+      Scheduler.calcel_execution(
+        client.msisdn,
+        client.campaign,
+        "_inactivity_job"
+      )
     end
 
     # {n_response, flow_trigger}

@@ -44,6 +44,13 @@ defmodule Plex.Data.Memory do
       storage_properties: [ram_copies: [node()]]
     )
 
+    Mnesia.create_table(RefSchedule,
+      attributes: [:key, :ref_string, :ref_type],
+      type: :set,
+      storage_properties: [ram_copies: [node()], disc_copies: [node()]]
+      # storage_properties: [ram_copies: [node()]]
+    )
+
     # Mnesia.create_table(Transitivities,
     #   attributes: [:key, :value],
     #   type: :set,
@@ -355,6 +362,30 @@ defmodule Plex.Data.Memory do
 
     Mnesia.transaction(fn ->
       Mnesia.match_object({OpenQuestion, msisdn_campaign, :_})
+    end)
+  end
+
+  def add_ref(msisdn, campaign, task_name, ref_string, ref_type) do
+    key = msisdn <> campaign <> task_name
+
+    Mnesia.transaction(fn ->
+      Mnesia.write({RefSchedule, key, ref_string, ref_type})
+    end)
+  end
+
+  def get_ref(msisdn, campaign, task_name) do
+    key = msisdn <> campaign <> task_name
+
+      Mnesia.transaction(fn ->
+        Mnesia.match_object({RefSchedule, key, :_, :_})
+      end)
+  end
+
+  def remove_ref(msisdn, campaign, task_name) do
+    key = msisdn <> campaign <> task_name
+
+    Mnesia.transaction(fn ->
+      Mnesia.delete({RefSchedule, key})
     end)
   end
 

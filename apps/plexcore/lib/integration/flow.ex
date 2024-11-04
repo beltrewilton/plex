@@ -3,13 +3,15 @@ defmodule Plex.Flow do
 
   def register(decrypted_data) do
     data = decrypted_data["data"]
-    partner_phone = "18779001200" #data["msisdn"]
+    # data["msisdn"]
+    partner_phone = "18779001200"
     is_valid_dominican_id = data["is_valid_dominican_id"] == "1"
     availability_tostart = data["availability_tostart"]
     availability_towork = data["availability_towork"]
     # data["city_residence"]
     city_residence = "N/A"
-    campaign = "CNVQSOUR84FK" #data["campaign"]
+    # data["campaign"]
+    campaign = "CNVQSOUR84FK"
     partner_name = data["full_name"]
     english_level = String.to_integer(data["english_level"])
 
@@ -36,7 +38,6 @@ defmodule Plex.Flow do
   end
 
   def scheduler(decrypted_data) do
-    #TODO: re-re-re-think scheduler MODULE
-
+    # TODO: re-re-re-think scheduler MODULE
   end
 end

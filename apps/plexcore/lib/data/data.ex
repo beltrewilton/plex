@@ -439,7 +439,7 @@ defmodule Plex.Data do
       nil ->
         # Create new
         IO.inspect(campaign, label: "campaign: ")
-        
+
         {:ok, job} = get_job_by_campaign(campaign)
 
         appl = %HrApplicant{

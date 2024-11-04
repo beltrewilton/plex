@@ -47,7 +47,6 @@ defmodule EntryTest do
     #   end)
     # end
 
-
     test "welcome" do
       data = Mockdata.text("Hi, this is the promo code CNVQSOUR84FK what's up 💚!", @msisdn)
 

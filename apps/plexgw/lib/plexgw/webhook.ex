@@ -9,6 +9,7 @@ defmodule Webhook.Router do
 
   # alias DBConnection.Task
   alias WhatsappElixir.Static, as: WS
+  alias Plexgw.Setup
 
   get "/" do
     verify_token = conn.query_params["hub.verify_token"]
@@ -23,13 +24,13 @@ defmodule Webhook.Router do
   end
 
   post "/" do
-    handle_notification(WS.handle_notification(conn.body_params)) #TODO: body_params.response
+    # TODO: body_params.response
+    handle_notification(WS.handle_notification(conn.body_params))
 
     send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
   end
 
   forward("/flow", to: Flow.Router)
-
 
   match _ do
     send_resp(conn, 404, "You are trying something that does not exist.")
@@ -39,7 +40,7 @@ defmodule Webhook.Router do
     sender = data.sender_request
     waba_id = Keyword.get(sender, :waba_id)
 
-    case Plexgw.Setup.get(waba_id) do
+    case Setup.get(waba_id) do
       [_, target_node, :plex_app] ->
         :rpc.cast(
           target_node,

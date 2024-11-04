@@ -27,7 +27,6 @@ defmodule SpeechSuperClient do
     )
   end
 
-
   def test_spon(wav \\ "Mario.wav") do
     s = struct(SpeechSuperClient).params
 
@@ -41,7 +40,6 @@ defmodule SpeechSuperClient do
       s.ielts_part3
     )
   end
-
 
   defp prepare_params do
     speechace_api_key = System.get_env("SPEECHACE_API_KEY")
@@ -127,10 +125,11 @@ defmodule SpeechSuperClient do
            {"audio", files.audio, [{"filename", Path.basename(audio_path)}]}
          ]},
         headers,
-        [recv_timeout: :timer.seconds(180), timeout: :timer.seconds(180)]
+        recv_timeout: :timer.seconds(180),
+        timeout: :timer.seconds(180)
       )
 
-      {_, retrieve} =
+    {_, retrieve} =
       case response do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
           {:ok, Jason.decode!(body)}
@@ -142,7 +141,7 @@ defmodule SpeechSuperClient do
           {:error, reason}
       end
 
-      IO.inspect(retrieve)
+    IO.inspect(retrieve)
   end
 
   def request_spontaneous_unscripted(audio_path, coreType, question_prompt, task_type) do
@@ -158,15 +157,19 @@ defmodule SpeechSuperClient do
         ["start", "param", "request"],
         %{
           "coreType" => coreType,
-          "tokenId" => synaia_token_id, #"tokenId",
-          "precision" =>  0.1,
-          "question_prompt" =>  question_prompt,
-          "test_type" =>  "ielts",
-          "task_type" =>  task_type, # ielts_part1, ielts_part2, ielts_part3
-          "phoneme_output" =>  0, # Return linking, loss of plosion and phoneme-level scores in the results
-          "model" =>  "non_native",
-          "penalize_offtopic" =>  1, # To penalize irrelevant response
-          "decimal_point" =>  1,
+          # "tokenId",
+          "tokenId" => synaia_token_id,
+          "precision" => 0.1,
+          "question_prompt" => question_prompt,
+          "test_type" => "ielts",
+          # ielts_part1, ielts_part2, ielts_part3
+          "task_type" => task_type,
+          # Return linking, loss of plosion and phoneme-level scores in the results
+          "phoneme_output" => 0,
+          "model" => "non_native",
+          # To penalize irrelevant response
+          "penalize_offtopic" => 1,
+          "decimal_point" => 1
         }
       )
 
@@ -185,10 +188,11 @@ defmodule SpeechSuperClient do
            {"audio", files.audio, [{"filename", Path.basename(audio_path)}]}
          ]},
         headers,
-        [recv_timeout: :timer.seconds(180), timeout: :timer.seconds(180)]
+        recv_timeout: :timer.seconds(180),
+        timeout: :timer.seconds(180)
       )
 
-      {_, retrieve} =
+    {_, retrieve} =
       case response do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
           {:ok, Jason.decode!(body)}
@@ -200,7 +204,7 @@ defmodule SpeechSuperClient do
           {:error, reason}
       end
 
-      IO.inspect(retrieve)
+    IO.inspect(retrieve)
   end
 
   def test_send() do

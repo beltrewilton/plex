@@ -60,7 +60,8 @@ defmodule Mockdata do
                       "nfm_reply" => %{
                         "body" => "Sent",
                         "name" => "flow",
-                        "response_json" => "{\"flow_token\":\"d4f06d12-e3db-44ac-b826-2e118aed941f\"}"
+                        "response_json" =>
+                          "{\"flow_token\":\"d4f06d12-e3db-44ac-b826-2e118aed941f\"}"
                       },
                       "type" => "nfm_reply"
                     },

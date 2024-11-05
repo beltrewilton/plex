@@ -47,7 +47,7 @@ defmodule Plex.Data.Memory do
     Mnesia.create_table(RefSchedule,
       attributes: [:key, :ref_string, :ref_type],
       type: :set,
-      storage_properties: [ram_copies: [node()], disc_copies: [node()]]
+      storage_properties: [ram_copies: [node()], disc_copies: [node()], load_order: 1]
       # storage_properties: [ram_copies: [node()]]
     )
 
@@ -376,9 +376,9 @@ defmodule Plex.Data.Memory do
   def get_ref(msisdn, campaign, task_name) do
     key = msisdn <> campaign <> task_name
 
-      Mnesia.transaction(fn ->
-        Mnesia.match_object({RefSchedule, key, :_, :_})
-      end)
+    Mnesia.transaction(fn ->
+      Mnesia.match_object({RefSchedule, key, :_, :_})
+    end)
   end
 
   def remove_ref(msisdn, campaign, task_name) do

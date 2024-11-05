@@ -1,5 +1,7 @@
 defmodule Plex.Scheduler do
+  alias Plex.Data
   alias Plex.Data.Memory
+  alias WhatsappElixir.Messages
   use GenServer
 
   # Client API
@@ -39,8 +41,27 @@ defmodule Plex.Scheduler do
         Memory.remove_ref(msisdn, campaign, task_name)
         0
 
-      _ -> 0
+      _ ->
+        0
     end
+  end
+
+  def applicant_scheduler(msisdn, campaign, scheduled_date, delay_ms \\ 10_000) do
+    Data.applicant_scheduler(msisdn, campaign, scheduled_date)
+
+    Process.send_after(
+      __MODULE__,
+      {
+        :applicant_scheduler,
+        fn ->
+          IO.puts("A beauty WhatsApp message ....")
+          #Messages.send_message(msisdn, "A beauty WhatsApp message ....", Plex.State.get_config())
+
+          # TODO: implement Data.complete_applicant_scheduler to avoid resend in future
+        end
+      },
+      delay_ms
+    )
   end
 
   def dummy(name) do
@@ -50,11 +71,20 @@ defmodule Plex.Scheduler do
   # Server (GenServer) callbacks
 
   def init(state) do
+    # TODO: load applicant_scheduler query `scheduled_date` >= now()
+    #      implement handle_continue for heavy loads.....
     {:ok, state}
   end
 
   @impl true
   def handle_info({:execute, funk}, state) do
+    # Call the function passed to schedule/2
+    funk.()
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:applicant_scheduler, funk}, state) do
     # Call the function passed to schedule/2
     funk.()
     {:noreply, state}

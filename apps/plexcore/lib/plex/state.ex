@@ -49,7 +49,7 @@ defmodule Plex.State do
   alias WhatsappElixir.Messages
   alias WhatsappElixir.Flow
 
-  defp get_config() do
+  def get_config() do
     [
       token: System.get_env("SYNAIA_META_USER_TOKEN"),
       phone_number_id: System.get_env("MARIA_PHONE_NUMBER_ID"),
@@ -211,7 +211,11 @@ defmodule Plex.State do
         )
 
         # TODO: Task or something
-        run_at = if client.flow or not is_nil(client.audio_id) or client.scheduled, do: 0, else: @tolerance
+        run_at =
+          if client.flow or not is_nil(client.audio_id) or client.scheduled,
+            do: 0,
+            else: @tolerance
+
         Scheduler.schedule(
           client.msisdn,
           client.campaign,
@@ -352,10 +356,10 @@ defmodule Plex.State do
     if n_response.output.schedule do
       # TODO: remove the inactivity clock/job/task
       Scheduler.calcel_execution(
-          client.msisdn,
-          client.campaign,
-          "_message_firer_job"
-        )
+        client.msisdn,
+        client.campaign,
+        "_message_firer_job"
+      )
     end
 
     if n_response.output.abort_scheduled_state do

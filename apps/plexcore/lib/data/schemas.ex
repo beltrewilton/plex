@@ -84,6 +84,7 @@ defmodule Plex.VaScheduler do
     field(:write_uid, :integer, default: 1)
     field(:msisdn, :string)
     field(:campaign, :string)
+    # TODO: field(:complete, :boolean)
     field(:scheduled_date, :naive_datetime_usec)
     field(:create_date, :naive_datetime_usec)
     field(:write_date, :naive_datetime_usec)
@@ -96,6 +97,7 @@ defmodule Plex.VaScheduler do
       :write_uid,
       :msisdn,
       :campaign,
+      # :complete,
       :scheduled_date,
       :create_date,
       :write_date

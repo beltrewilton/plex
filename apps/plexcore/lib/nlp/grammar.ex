@@ -42,7 +42,7 @@ defmodule Grammar do
         # for_token_classification
       )
 
-    IO.puts("Model loaded ...")
+    IO.puts("Model [distilbert-base] loaded ⚡️")
 
     {:noreply, %{model: model, tokenizer: tokenizer}}
   end

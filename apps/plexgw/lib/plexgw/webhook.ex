@@ -13,7 +13,7 @@ defmodule Webhook.Router do
 
   get "/" do
     verify_token = conn.query_params["hub.verify_token"]
-    local_hook_token = System.get_env("WHATSAPP_HOOK_TOKEN")
+    local_hook_token = System.get_env("CLOUD_API_TOKEN_VERIFY")
 
     if verify_token == local_hook_token do
       hub_challenge = conn.query_params["hub.challenge"]

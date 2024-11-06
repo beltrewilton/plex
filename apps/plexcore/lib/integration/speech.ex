@@ -209,8 +209,8 @@ defmodule SpeechSuperClient do
 
   def test_send() do
     config = [
-      token: System.get_env("SYNAIA_META_USER_TOKEN"),
-      phone_number_id: System.get_env("MARIA_PHONE_NUMBER_ID"),
+      token: System.get_env("CLOUD_API_TOKEN"),
+      phone_number_id: System.get_env("CLOUD_API_PHONE_NUMBER_ID"),
       verify_token: "",
       base_url: "https://graph.facebook.com",
       api_version: "v20.0"

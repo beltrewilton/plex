@@ -51,9 +51,9 @@ defmodule Plex.State do
 
   def get_config() do
     [
-      token: System.get_env("SYNAIA_META_USER_TOKEN"),
-      phone_number_id: System.get_env("MARIA_PHONE_NUMBER_ID"),
-      verify_token: System.get_env("WHATSAPP_HOOK_TOKEN"),
+      token: System.get_env("CLOUD_API_TOKEN"),
+      phone_number_id: System.get_env("CLOUD_API_PHONE_NUMBER_ID"),
+      verify_token: System.get_env("CLOUD_API_TOKEN_VERIFY"),
       base_url: "https://graph.facebook.com",
       api_version: "v20.0"
     ]
@@ -383,7 +383,7 @@ defmodule Plex.State do
     IO.puts("flow_basic - #{msisdn}: #{campaign}")
 
     opts = [
-      flow_id: System.get_env("MARIA_FLOW_APP_BASIC_ID"),
+      flow_id: System.get_env("FLOW_APPL_BASIC_ID"),
       cta: "Please fill this form",
       screen: "APPLICANT_BASIC"
     ]
@@ -403,7 +403,7 @@ defmodule Plex.State do
     IO.puts("flow_assesment - #{msisdn}: #{campaign}")
 
     opts = [
-      flow_id: System.get_env("MARIA_FLOW_ASSESSMENT_ID"),
+      flow_id: System.get_env("FLOW_APPL_ASSESSMENT_ID"),
       cta: "Please fill this form",
       screen: "APPLICANT_ASSESSMENT_ONE"
     ]

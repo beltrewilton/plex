@@ -25,7 +25,6 @@ plex-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
-**/config/config.exs
 /.vscode/
 **/.elixir_ls/
 /_build/
@@ -40,3 +39,4 @@ data.json
 /apps/plexgw/deps/
 /curls_test/
 .certs/
+/plex_cfg/

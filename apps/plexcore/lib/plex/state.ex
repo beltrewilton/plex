@@ -197,14 +197,13 @@ defmodule Plex.State do
           client.whatsapp_id
         )
 
-        # TODO: remove previous and inactivity jobs.
-        Scheduler.calcel_execution(
+        Scheduler.kill(
           client.msisdn,
           client.campaign,
           "_message_firer_job"
         )
 
-        Scheduler.calcel_execution(
+        Scheduler.kill(
           client.msisdn,
           client.campaign,
           "_inactivity_job"
@@ -216,14 +215,14 @@ defmodule Plex.State do
             do: 0,
             else: @tolerance
 
-        Scheduler.schedule(
+        Scheduler.delay(
           client.msisdn,
           client.campaign,
           "_message_firer_job",
           fn ->
             message_firer(client)
 
-            Scheduler.calcel_execution(
+            Scheduler.kill(
               client.msisdn,
               client.campaign,
               "_message_firer_job"
@@ -355,7 +354,7 @@ defmodule Plex.State do
 
     if n_response.output.schedule do
       # TODO: remove the inactivity clock/job/task
-      Scheduler.calcel_execution(
+      Scheduler.kill(
         client.msisdn,
         client.campaign,
         "_message_firer_job"
@@ -365,7 +364,7 @@ defmodule Plex.State do
     if n_response.output.abort_scheduled_state do
       # TODO: call the stupid set_state_all function
       #       remove previous_scheduled_job_id
-      Scheduler.calcel_execution(
+      Scheduler.kill(
         client.msisdn,
         client.campaign,
         "_inactivity_job"

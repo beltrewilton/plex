@@ -81,10 +81,11 @@ defmodule Plex.VaScheduler do
   import Ecto.Changeset
 
   schema "va_scheduler" do
+    field(:create_uid, :integer, default: 1)
     field(:write_uid, :integer, default: 1)
     field(:msisdn, :string)
     field(:campaign, :string)
-    # TODO: field(:complete, :boolean)
+    field(:done, :boolean, default: false)
     field(:scheduled_date, :naive_datetime_usec)
     field(:create_date, :naive_datetime_usec)
     field(:write_date, :naive_datetime_usec)
@@ -94,10 +95,11 @@ defmodule Plex.VaScheduler do
     struct
     |> cast(params, [
       :id,
+      :create_uid,
       :write_uid,
       :msisdn,
       :campaign,
-      # :complete,
+      :done,
       :scheduled_date,
       :create_date,
       :write_date

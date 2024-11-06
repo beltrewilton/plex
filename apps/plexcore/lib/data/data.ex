@@ -517,6 +517,23 @@ defmodule Plex.Data do
     Repo.insert!(appl)
   end
 
+  def done_scheduler(msisdn, campaign) do
+    Repo.update_all(
+      from(s in VaScheduler, where: s.msisdn == ^msisdn and s.campaign == ^campaign),
+      set: [done: true]
+    )
+  end
+
+  def get_scheduled_applicants do
+    from(
+      a in VaScheduler,
+      select: [:id, :msisdn, :campaign, :scheduled_date],
+      where: a.scheduled_date > ^NaiveDateTime.utc_now(),
+      where: a.done == false
+    )
+    |> Repo.all()
+  end
+
   def get_webhook_data() do
     # from(w in WebHookLogSchema, where: w.source == "WEBHOOK", limit: ^limit)
     from(w in WebHookLogSchema,

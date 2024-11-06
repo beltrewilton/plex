@@ -14,7 +14,8 @@ defmodule Plex.Application do
       {Plug.Cowboy, scheme: :http, plug: Scheduler.Tempendpoint, options: [port: 8001]},
       {Plex.Repo, []},
       {Task, fn -> Plex.Data.start_link([]) end},
-      Plex.Scheduler
+      Plex.Scheduler,
+      Grammar
     ]
 
     Logger.info("Webhook & Plex.Data")

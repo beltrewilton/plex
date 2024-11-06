@@ -29,12 +29,28 @@ defmodule Plex.Flow do
 
   def assessment(decrypted_data) do
     data = decrypted_data["data"]
-    questions = [data["question_one"], data["question_two"]]
     answers = [data["answer_one"], data["answer_two"]]
     msisdn = data["msisdn"]
     campaign = data["campaign"]
 
-    # TODO: validate grammar here:
+    {probas, _p_max} = Grammar.score(answers)
+    
+    score = %GrammarScore{
+      msisdn: msisdn,
+      campaign: campaign,
+      a1_score: probas[{0, "A1"}],
+      a2_score: probas[{1, "A2"}],
+      b1_score: probas[{2, "B1"}],
+      b2_score: probas[{3, "B2"}],
+      c1_score: probas[{4, "C1"}],
+      c2_score: probas[{5, "C2"}],
+      user_question_1: data["question_one"],
+      user_question_2: data["question_two"],
+      user_input_answer_1: data["answer_one"],
+      user_input_answer_2: data["answer_two"]
+    }
+
+    Data.set_grammar_score(score)
   end
 
   def scheduler(decrypted_data) do

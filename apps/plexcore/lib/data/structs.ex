@@ -108,35 +108,6 @@ defmodule SpeechLog do
   ]
 end
 
-defmodule WebHookLog do
-  @type t :: %__MODULE__{
-          source: String.t() | nil,
-          response: map() | nil,
-          received_at: NaiveDateTime.t() | nil
-        }
-
-  defstruct [
-    :source,
-    :response,
-    :received_at
-  ]
-end
-
-defmodule CTALog do
-  @type t :: %__MODULE__{
-          referer: String.t() | nil,
-          user_agent: String.t() | nil,
-          campaign: String.t() | nil,
-          received_at: NaiveDateTime.t() | nil
-        }
-
-  defstruct [
-    :referer,
-    :user_agent,
-    :campaign,
-    :received_at
-  ]
-end
 
 defmodule ApplicantStageStruct do
   @type t :: %__MODULE__{

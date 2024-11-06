@@ -26,6 +26,9 @@ defmodule Plexgw.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:ecto, "~> 3.12"},
+      {:ecto_sql, "~> 3.12"},
+      {:postgrex, "~> 0.19.1"},
       {:plug_cowboy, "~> 2.7.2"},
       {:jason, "~> 1.4"},
       {:httpoison, "~> 2.2.1"},

@@ -19,22 +19,35 @@ defmodule Redirect.Router do
 
       IO.inspect(Setup.get(waba_id), label: "Setup: ")
 
-      #TODO: register in centralized LOGS
+      log = %CTALog{
+        referer: referer,
+        user_agent: user_agent,
+        campaign: campaign,
+        waba_id: waba_id
+      }
+
+      Task.async(
+        fn ->
+          Plexgw.Data.cta_log(log)
+        end
+      )
 
       case Setup.get(waba_id) do
         [_, target_node, :plex_app] ->
-          {:ok, record} = :rpc.call(
-            target_node,
-            Plex.Data,
-            :get_job_by_campaign,
-            [
-              campaign
-            ]
-          )
+          {:ok, record} =
+            :rpc.call(
+              target_node,
+              Plex.Data,
+              :get_job_by_campaign,
+              [
+                campaign
+              ]
+            )
 
           IO.inspect(record, label: "rpc call record:")
 
-          whatsapp_url = "https://api.whatsapp.com/send?phone=#{record.wa_phone}&text=#{record.wa_text}"
+          whatsapp_url =
+            "https://api.whatsapp.com/send?phone=#{record.wa_phone}&text=#{record.wa_text}"
 
           conn
           |> put_resp_header("location", whatsapp_url)
@@ -55,7 +68,10 @@ defmodule Redirect.Router do
       e ->
         conn
         |> put_resp_header("content-type", "application/json")
-        |> send_resp(500, Jason.encode!(%{error: "Internal Server Error", detail: Exception.message(e)}))
+        |> send_resp(
+          500,
+          Jason.encode!(%{error: "Internal Server Error", detail: Exception.message(e)})
+        )
     end
   end
 end

@@ -88,9 +88,10 @@ defmodule Flow.Router do
     case Setup.get(waba_id) do
       [_, target_node, :plex_app] ->
         cond do
-          #TODO: considerar seriamente que los times esten hard-codeados en el flow.json en Meta para evitar esta llamada.
-          #TODO: esto es de mayor utilidad cuando el aplicante esté seleccionando una fecha de entrevista disponible en la que se requiera consultar la base de datos por disponibilidad del reclutador.
-          remote_function == :scheduler and Map.get(decrypted_data["data"], "trigger", nil) == "period_selected" ->
+          # TODO: considerar seriamente que los times esten hard-codeados en el flow.json en Meta para evitar esta llamada.
+          # TODO: esto es de mayor utilidad cuando el aplicante esté seleccionando una fecha de entrevista disponible en la que se requiera consultar la base de datos por disponibilidad del reclutador.
+          remote_function == :scheduler and
+              Map.get(decrypted_data["data"], "trigger", nil) == "period_selected" ->
             times =
               case decrypted_data["data"]["period"] do
                 "morning" -> TimeHelper.get_times(6, 6, "AM")
@@ -141,12 +142,11 @@ defmodule Flow.Router do
 
             Flow.encrypt(response, aes_key, iv)
 
-
           true ->
             :rpc.cast(
-            target_node,
-            Plex.Flow,
-            remote_function,
+              target_node,
+              Plex.Flow,
+              remote_function,
               [
                 decrypted_data
               ]

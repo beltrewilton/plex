@@ -20,8 +20,8 @@ defmodule SpeechSuperClient do
     text =
       "In my previous role at a call center, I managed customer inquiries and resolved issues efficiently. I utilized active listening and problem-solving skills to enhance customer satisfaction. My ability to handle high-stress situations and maintain a professional demeanor contributed to a positive customer experience. This role honed my communication and multitasking abilities."
 
-    request_scripted(
-      "/Users/beltre.wilton/apps/preescrening_audios/waves/#{wav}",
+    request_scripted( #TODO: fix abs paths
+      "#{System.get_env("AUDIO_RECORDING_PATH")}/waves/#{wav}",
       s.parag_eval,
       text
     )
@@ -34,7 +34,7 @@ defmodule SpeechSuperClient do
       "Describe a film character played by an actor/actress whom you admire."
 
     request_spontaneous_unscripted(
-      "/Users/beltre.wilton/apps/preescrening_audios/unscripted/#{wav}",
+      "#{System.get_env("AUDIO_RECORDING_PATH")}/unscripted/#{wav}",
       s.speak_eval_pro,
       question_prompt,
       s.ielts_part3

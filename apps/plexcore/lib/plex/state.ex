@@ -377,6 +377,8 @@ defmodule Plex.State do
   def send_text_message(msisdn, message) do
     IO.puts("Here send to WhatsApp client #{msisdn}: #{message}")
     # Messages.send_message(msisdn, message, get_config())
+    #TODO: hacer log source="REQUEST" del response que genera enviar un mensagge.
+    #      la vaina es que los logs son centralizados y esto es un nodo.....
   end
 
   def send_flow_message(:flow_basic, waba_id, msisdn, campaign) do

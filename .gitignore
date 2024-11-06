@@ -40,3 +40,4 @@ data.json
 /curls_test/
 .certs/
 /plex_cfg/
+plexgw.cfg

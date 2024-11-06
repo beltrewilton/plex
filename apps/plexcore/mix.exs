@@ -35,7 +35,6 @@ defmodule PlexCore.MixProject do
       {:jason, "~> 1.4"},
       {:httpoison, "~> 2.2.1"},
       {:dotenv_parser, "~> 2.0"},
-      {:json, "~> 1.4"},
       {:bumblebee, "~> 0.6.0"},
       {:exla, "~> 0.9.1"},
       #   TODO: this is for test -- remove...

@@ -11,6 +11,8 @@ defmodule Webhook.Router do
   alias WhatsappElixir.Static, as: WS
   alias Plexgw.Setup
 
+  @source_webhook "WEBHOOK"
+
   get "/" do
     verify_token = conn.query_params["hub.verify_token"]
     local_hook_token = System.get_env("CLOUD_API_TOKEN_VERIFY")
@@ -25,7 +27,8 @@ defmodule Webhook.Router do
 
   post "/" do
     # TODO: body_params.response
-    handle_notification(WS.handle_notification(conn.body_params))
+    data = conn.body_params
+    handle_notification(WS.handle_notification(data))
 
     send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
   end
@@ -58,6 +61,8 @@ defmodule Webhook.Router do
           ]
         )
 
+        log_notification(data, waba_id)
+
       [_, _target_node, :chatbot] ->
         {:chatbot_woot}
 
@@ -78,6 +83,19 @@ defmodule Webhook.Router do
 
   def handle_notification(_) do
     IO.puts("Nothing todo handle_notification !")
+  end
+
+  def log_notification(data, waba_id) do
+    Task.async(
+      fn ->
+        log = %WebHookLog{
+          source: @source_webhook,
+          response: data,
+          waba_id: waba_id
+        }
+        Plexgw.Data.webhook_log(log)
+      end
+    )
   end
 end
 

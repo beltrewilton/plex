@@ -323,7 +323,7 @@ defmodule Plex.Data do
     {:reevaluate}
   end
 
-  defp get_job_by_campaign(campaign) do
+  def get_job_by_campaign(campaign) do
     query =
       from(j in HrJob,
         where: j.va_campaign == ^campaign

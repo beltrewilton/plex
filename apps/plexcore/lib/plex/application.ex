@@ -11,7 +11,7 @@ defmodule Plex.Application do
       # Starts a worker by calling: Plex.Worker.start_link(arg)
       # {Plex.Worker, arg}
       # TODO: works for --no-halt recipe.
-      {Plug.Cowboy, scheme: :http, plug: Scheduler.Tempendpoint, options: [port: 8001]},
+      # {Plug.Cowboy, scheme: :http, plug: Scheduler.Tempendpoint, options: [port: 8001]},
       {Plex.Repo, []},
       {Task, fn -> Plex.Data.start_link([]) end},
       Plex.Scheduler,

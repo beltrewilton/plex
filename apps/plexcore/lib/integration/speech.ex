@@ -2,7 +2,7 @@ defmodule SpeechSuperClient do
   @appi_url "https://api.speechsuper.com/"
 
   defstruct params: %{
-              parag_eval: "para.eval",
+              para_eval: "para.eval",
               speak_eval_pro: "speak.eval.pro",
               ielts_part1: "ielts_part1",
               ielts_part2: "ielts_part2",
@@ -23,7 +23,7 @@ defmodule SpeechSuperClient do
     # TODO: fix abs paths
     request_scripted(
       "#{System.get_env("AUDIO_RECORDING_PATH")}/waves/#{wav}",
-      s.parag_eval,
+      s.para_eval,
       text
     )
   end
@@ -130,7 +130,6 @@ defmodule SpeechSuperClient do
         timeout: :timer.seconds(180)
       )
 
-    {_, retrieve} =
       case response do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
           {:ok, Jason.decode!(body)}
@@ -141,8 +140,6 @@ defmodule SpeechSuperClient do
         {:error, %HTTPoison.Error{reason: reason}} ->
           {:error, reason}
       end
-
-    IO.inspect(retrieve)
   end
 
   def request_spontaneous_unscripted(audio_path, coreType, question_prompt, task_type) do
@@ -193,7 +190,6 @@ defmodule SpeechSuperClient do
         timeout: :timer.seconds(180)
       )
 
-    {_, retrieve} =
       case response do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
           {:ok, Jason.decode!(body)}
@@ -204,8 +200,6 @@ defmodule SpeechSuperClient do
         {:error, %HTTPoison.Error{reason: reason}} ->
           {:error, reason}
       end
-
-    IO.inspect(retrieve)
   end
 
   def test_send() do

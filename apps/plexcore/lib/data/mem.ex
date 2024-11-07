@@ -341,11 +341,32 @@ defmodule Plex.Data.Memory do
     end)
   end
 
-  def get_reftext(msisdn, campaign) do
+  def get_reftext(msisdn, campaign, last_usage \\ false) do
+    msisdn_campaign = msisdn <> campaign
+
+    result =
+      Mnesia.transaction(fn ->
+        Mnesia.match_object({RefText, msisdn_campaign, :_})
+      end)
+
+    if last_usage do
+      remove_reftext(msisdn, campaign)
+    end
+
+    case result do
+      {_, [{_, _, refText}]} -> refText
+      {:atomic, []} ->
+        refText = Util.StaticMessages.random_message(Util.StaticMessages.scripted_text)
+        add_reftext(msisdn, campaign, refText)
+        refText
+    end
+  end
+
+  def remove_reftext(msisdn, campaign) do
     msisdn_campaign = msisdn <> campaign
 
     Mnesia.transaction(fn ->
-      Mnesia.match_object({RefText, msisdn_campaign, :_})
+      Mnesia.delete({RefText, msisdn_campaign})
     end)
   end
 
@@ -357,11 +378,32 @@ defmodule Plex.Data.Memory do
     end)
   end
 
-  def get_open_question(msisdn, campaign) do
+  def get_open_question(msisdn, campaign, last_usage \\ false) do
+    msisdn_campaign = msisdn <> campaign
+
+    result =
+      Mnesia.transaction(fn ->
+        Mnesia.match_object({OpenQuestion, msisdn_campaign, :_})
+      end)
+
+    if last_usage do
+      remove_open_question(msisdn, campaign)
+    end
+
+    case result do
+      {_, [{_, _, open_question}]} -> open_question
+      {:atomic, []} ->
+        open_question = Util.StaticMessages.random_message(Util.StaticMessages.open_question_1)
+        add_open_question(msisdn, campaign, open_question)
+        open_question
+    end
+  end
+
+  def remove_open_question(msisdn, campaign) do
     msisdn_campaign = msisdn <> campaign
 
     Mnesia.transaction(fn ->
-      Mnesia.match_object({OpenQuestion, msisdn_campaign, :_})
+      Mnesia.delete({OpenQuestion, msisdn_campaign})
     end)
   end
 

@@ -38,6 +38,7 @@ defmodule Plex.State do
   @user_source "User"
   @ai_scource "AI"
   @tolerance 3_000
+  @inactiviry_time 900 * 1_000
 
   defstruct tasks: @tasks, app_states: @app_states, n_response: @n_response, n_request: @n_request
 
@@ -48,6 +49,7 @@ defmodule Plex.State do
   alias Plex.Scheduler
   alias WhatsappElixir.Messages
   alias WhatsappElixir.Flow
+  alias WhatsappElixir.Audio
   alias Util.StaticMessages, as: S
 
   def get_config() do
@@ -210,7 +212,6 @@ defmodule Plex.State do
           "_inactivity_job"
         )
 
-        # TODO: Task or something
         run_at =
           if client.flow or not is_nil(client.audio_id) or client.scheduled,
             do: 0,
@@ -230,6 +231,22 @@ defmodule Plex.State do
             )
           end,
           run_at
+        )
+
+        Scheduler.delay(
+          client.msisdn,
+          client.campaign,
+          "_inactivity_job",
+          fn ->
+            inactivity_firer(client)
+
+            Scheduler.kill(
+              client.msisdn,
+              client.campaign,
+              "_inactivity_job"
+            )
+          end,
+          @inactiviry_time
         )
 
       true ->
@@ -330,7 +347,7 @@ defmodule Plex.State do
 
     trigger = flow_trigger(client.task, n_response)
 
-    n_response = process_response(n_response, client.task, client.flow, client.audio_id)
+    n_response = process_response(client.msisdn, client.campaign, n_response, client.task, client.flow, client.audio_id)
 
     send_text_message(client.msisdn, n_response.output.response)
 
@@ -374,6 +391,22 @@ defmodule Plex.State do
     end
 
     # {n_response, flow_trigger}
+  end
+
+  def inactivity_firer(%ClientState{} = client) do
+    message =
+    case client.task do
+      :talent_entry_form -> S.random_message(S.assignment_reminder)
+      :grammar_assessment_form -> S.random_message(S.friendly_reminder)
+      :scripted_text -> S.random_message(S.voice_note_reminder_1)
+      :open_question -> S.random_message(S.voice_note_2)
+      _ -> nil
+    end
+
+    if not is_nil(message) do
+      {:inactivity}
+      # Messages.send_message(client.msisdn, message, get_config())
+    end
   end
 
   def send_text_message(msisdn, message) do
@@ -444,6 +477,93 @@ defmodule Plex.State do
 
     if client.task in [:scripted_text, :open_question] do
       # manage audio with ffmpeg function
+      {:ok, audio_file} = Audio.get(client.audio_id, client.msisdn, client.campaign, client.waba_id)
+      {:ok, audio_file} = Audio.ogg_to_wav(audio_file)
+
+      if client.task == :scripted_text do
+        refText = Memory.get_reftext(client.msisdn, client.campaign, true)
+
+        {:ok, scores} = SpeechSuperClient.request_scripted(
+          audio_file,
+          %SpeechSuperClient{}.params.para_eval,
+          refText
+        )
+
+        #register scores.... here
+        result = scores["result"]
+        warning = result["warning"]
+
+        speech_score = %SpeechScore{
+          msisdn: client.msisdn,
+          campaign:  client.campaign,
+          speech_overall: result["overall"],
+          speech_refText: refText,
+          speech_duration: result["duration"],
+          speech_fluency: result["fluency"],
+          speech_integrity: result["integrity"],
+          speech_pronunciation: result["pronunciation"],
+          speech_rhythm: result["rhythm"],
+          speech_speed: result["speed"],
+          speech_audio_path: "https://audio.synaia.io/stream/#{String.split(audio_file, "/") |> List.last()}",
+          speech_warning: warning
+        }
+
+        Data.set_score(speech_score)
+
+        log = %SpeechLog{
+          msisdn: client.msisdn,
+          campaign:  client.campaign,
+          audio_path: audio_file,
+          response: scores
+        }
+
+        Data.speech_log(log)
+
+      else
+        open_question = Memory.get_open_question(client.msisdn, client.campaign, true)
+
+        {:ok, scores} = SpeechSuperClient.request_spontaneous_unscripted(
+          audio_file,
+          %SpeechSuperClient{}.params.speak_eval_pro,
+          open_question,
+          %SpeechSuperClient{}.params.ielts_part3
+        )
+
+        result = scores["result"]
+        warning = result["warning"]
+
+        speech_score = %SpeechScore{
+          msisdn: client.msisdn,
+          campaign:  client.campaign,
+          speech_open_question: open_question,
+          speech_unscripted_overall_score: result["overall"],
+          speech_unscripted_length: result["effective_speech_length"],
+          speech_unscripted_fluency_coherence: result["fluency_coherence"],
+          speech_unscripted_grammar: result["grammar"],
+          speech_unscripted_lexical_resource: result["lexical_resource"],
+          speech_unscripted_pause_filler: result["pause_filler"],
+          speech_unscripted_pronunciation: result["pronunciation"],
+          speech_unscripted_relevance: result["relevance"],
+          speech_unscripted_speed: result["speed"],
+          speech_unscripted_audio_path: "https://audio.synaia.io/stream/#{String.split(audio_file, "/") |> List.last()}",
+          speech_unscripted_transcription: result["transcription"],
+          speech_unscripted_warning: warning
+        }
+
+        Data.set_score(speech_score)
+
+        log = %SpeechLog{
+          msisdn: client.msisdn,
+          campaign:  client.campaign,
+          audio_path: audio_file,
+          response: scores
+        }
+
+        Data.speech_log(log)
+
+      end
+
+
       IO.puts("manage audio with ffmpeg function.")
       task_completed(client)
     else
@@ -494,25 +614,25 @@ defmodule Plex.State do
     end
   end
 
-  defp process_response(n_response, task, flow, audio_id) do
+  defp process_response(msisdn, campaign, n_response, task, flow, audio_id) do
     output = n_response.output
 
     new_response =
       cond do
         (flow && task == :scripted_text && !output.schedule) ||
             String.contains?(output.response, "PLACEHOLDER_1") ->
-          ref_text = S.random_message(S.scripted_text)
+          refText = Memory.get_reftext(msisdn, campaign)
 
           output.response
-          |> String.replace("PLACEHOLDER_1", "\n> ❝#{ref_text}❞\n\n\n_")
+          |> String.replace("PLACEHOLDER_1", "\n> ❝#{refText}❞\n\n\n_")
           |> String.replace("`", "")
 
         (audio_id && task == :open_question && !output.schedule) ||
             String.contains?(output.response, "PLACEHOLDER_2") ->
-          question_1 = S.random_message(S.open_question_1)
+          open_question = Memory.get_open_question(msisdn, campaign)
 
           output.response
-          |> String.replace("PLACEHOLDER_2", "\n> ❝#{question_1}❞\n\n\n_")
+          |> String.replace("PLACEHOLDER_2", "\n> ❝#{open_question}❞\n\n\n_")
           |> String.replace("`", "")
 
         true ->

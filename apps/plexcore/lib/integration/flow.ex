@@ -34,7 +34,7 @@ defmodule Plex.Flow do
     campaign = data["campaign"]
 
     {probas, _p_max} = Grammar.score(answers)
-    
+
     score = %GrammarScore{
       msisdn: msisdn,
       campaign: campaign,

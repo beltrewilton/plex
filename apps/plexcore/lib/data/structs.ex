@@ -108,7 +108,6 @@ defmodule SpeechLog do
   ]
 end
 
-
 defmodule ApplicantStageStruct do
   @type t :: %__MODULE__{
           id: integer() | nil,

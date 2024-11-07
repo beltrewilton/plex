@@ -48,6 +48,7 @@ defmodule Plex.State do
   alias Plex.Scheduler
   alias WhatsappElixir.Messages
   alias WhatsappElixir.Flow
+  alias Util.StaticMessages, as: S
 
   def get_config() do
     [
@@ -126,7 +127,7 @@ defmodule Plex.State do
             client.state
           )
 
-          # try to change the default `client.message` variable for a generic one
+          #TODO: try to change the default `client.message` variable for a generic one
           # Map.put(client, :message, new_message_from_static)
       end
     end
@@ -136,7 +137,7 @@ defmodule Plex.State do
     case Memory.get_latest_applicant_stage(client.msisdn) do
       {:atomic, []} ->
         extract_campaign(client)
-        # with recursivity solve_stage(client)
+        #TODO: with recursivity solve_stage(client)
         Memory.get_latest_applicant_stage(client.msisdn)
 
       {:atomic, stage} ->
@@ -233,9 +234,10 @@ defmodule Plex.State do
 
       true ->
         {:ignore, "send wa message avoiding forwarder"}
-        # random_message(forwarded_not_allowed)
-        message = "random message"
-        # wtsapp_client.send_text_message
+
+        message = S.random_message(S.forwarded_not_allowed)
+        # Messages.send_message(client.msisdn, message, get_config)
+
         Data.add_chat_history(
           client.msisdn,
           client.campaign,
@@ -377,7 +379,7 @@ defmodule Plex.State do
   def send_text_message(msisdn, message) do
     IO.puts("Here send to WhatsApp client #{msisdn}: #{message}")
     # Messages.send_message(msisdn, message, get_config())
-    #TODO: hacer log source="REQUEST" del response que genera enviar un mensagge.
+    # TODO: hacer log source="REQUEST" del response que genera enviar un mensagge.
     #      la vaina es que los logs son centralizados y esto es un nodo.....
   end
 
@@ -410,16 +412,20 @@ defmodule Plex.State do
       screen: "APPLICANT_ASSESSMENT_ONE"
     ]
 
+    questions = S.random_messages(S.applicant_assessment_question)
+    q1 = Enum.at(questions, 0)
+    q2 = Enum.at(questions, 1)
+
     data = %{
       "waba_id" => waba_id,
       "msisdn" => msisdn,
       "campaign" => campaign,
       "question_one_error" => false,
       "question_two_error" => false,
-      "random_question_one_sentence" => "random_question_one_sentence",
-      "random_question_two_sentence" => "random_question_two_sentence",
-      "random_question_one_resume" => "question_one_resume",
-      "random_question_two_resume" => "question_two_resume"
+      "random_question_one_sentence" => Map.get(q1, "sentence"),
+      "random_question_two_sentence" => Map.get(q2, "sentence"),
+      "random_question_one_resume" => Map.get(q1, "resume"),
+      "random_question_two_resume" => Map.get(q2, "resume")
     }
 
     Flow.send_flow(msisdn, data, get_config(), opts)
@@ -441,8 +447,9 @@ defmodule Plex.State do
       IO.puts("manage audio with ffmpeg function.")
       task_completed(client)
     else
-      # random_message(switch_to_text)
+      switch_to_text = S.random_message(S.switch_to_text)
       # audio only accepted when :scripted_text or :open_question
+      # Messages.send_message(client.msisdn, switch_to_text, get_config())
       {:switch_to_text}
     end
   end
@@ -494,7 +501,7 @@ defmodule Plex.State do
       cond do
         (flow && task == :scripted_text && !output.schedule) ||
             String.contains?(output.response, "PLACEHOLDER_1") ->
-          ref_text = "random_message"
+          ref_text = S.random_message(S.scripted_text)
 
           output.response
           |> String.replace("PLACEHOLDER_1", "\n> ❝#{ref_text}❞\n\n\n_")
@@ -502,7 +509,7 @@ defmodule Plex.State do
 
         (audio_id && task == :open_question && !output.schedule) ||
             String.contains?(output.response, "PLACEHOLDER_2") ->
-          question_1 = "random_message"
+          question_1 = S.random_message(S.open_question_1)
 
           output.response
           |> String.replace("PLACEHOLDER_2", "\n> ❝#{question_1}❞\n\n\n_")

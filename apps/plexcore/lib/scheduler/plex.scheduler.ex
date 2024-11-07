@@ -58,9 +58,10 @@ defmodule Plex.Scheduler do
       {
         :queue,
         fn ->
-          IO.puts("A beauty WhatsApp message ....")
-          #Messages.send_message(msisdn, "A beauty WhatsApp message ....", Plex.State.get_config())
-          #TODO: or generate a LLM message according to history.
+          IO.puts("WELCOME BACK??? A beauty WhatsApp message ....")
+
+          # Messages.send_message(msisdn, "A beauty WhatsApp message ....", Plex.State.get_config())
+          # TODO: or generate a LLM message according to history.
 
           Data.done_scheduler(msisdn, campaign)
         end
@@ -101,6 +102,7 @@ defmodule Plex.Scheduler do
     IO.puts("Restoring schedules ...")
 
     scheds = Data.get_scheduled_applicants()
+
     Enum.each(
       scheds,
       fn s ->

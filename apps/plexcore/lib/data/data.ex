@@ -515,5 +515,4 @@ defmodule Plex.Data do
     )
     |> Repo.all()
   end
-
 end

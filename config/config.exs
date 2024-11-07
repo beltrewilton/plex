@@ -11,3 +11,7 @@ import Config
 
 
 config :nx, default_backend: EXLA.Backend
+
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
+config :plex, :default_timezone, "America/La_Paz"

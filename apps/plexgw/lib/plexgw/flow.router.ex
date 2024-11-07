@@ -118,7 +118,7 @@ defmodule Flow.Router do
             date = data["date"]
             time = data["time"]
             # date_string = "2024-08-19 14:30:00"
-            scheduled_date = NaiveDateTime.from_iso8601("#{date} #{time}")
+            scheduled_date = NaiveDateTime.from_iso8601!("#{date} #{time}")
 
             :rpc.cast(
               target_node,

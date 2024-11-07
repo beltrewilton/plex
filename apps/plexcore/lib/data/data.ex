@@ -8,6 +8,7 @@ defmodule Plex.Data do
   alias Plex.VaScheduler
 
   alias Plex.Data.Memory
+  alias Util.Timez, as: T
 
   alias GrammarScore
   alias SpeechScore
@@ -70,7 +71,7 @@ defmodule Plex.Data do
             campaign: campaign,
             task: task,
             state: state,
-            last_update: NaiveDateTime.utc_now()
+            last_update: T.now()
           })
 
         case Repo.insert(changeset) do
@@ -156,7 +157,7 @@ defmodule Plex.Data do
            message,
            source,
            whatsapp_id,
-           DateTime.utc_now(),
+           T.now(),
            readed,
            collected,
            output_llm_booleans
@@ -175,7 +176,7 @@ defmodule Plex.Data do
          message,
          source,
          whatsapp_id,
-         sending_date \\ DateTime.utc_now(),
+         sending_date \\ T.now(),
          readed \\ false,
          collected \\ false,
          output_llm_booleans \\ nil
@@ -228,7 +229,7 @@ defmodule Plex.Data do
       record ->
         Ecto.Changeset.change(record, %{
           stage_id: odoo_states[task],
-          lead_last_update: NaiveDateTime.utc_now()
+          lead_last_update: T.now()
         })
         |> Repo.update()
     end
@@ -256,7 +257,7 @@ defmodule Plex.Data do
 
     applicant_stage =
       case Repo.update_all(query_update,
-             set: [state: state, task: task, last_update: NaiveDateTime.utc_now()]
+             set: [state: state, task: task, last_update: T.now()]
            ) do
         {0, _} ->
           # not found, insert
@@ -270,7 +271,7 @@ defmodule Plex.Data do
             campaign: campaign,
             task: task,
             state: state,
-            last_update: NaiveDateTime.utc_now()
+            last_update: T.now()
           })
           |> Repo.insert!()
 
@@ -490,11 +491,13 @@ defmodule Plex.Data do
   end
 
   def applicant_scheduler(msisdn, campaign, scheduled_date) do
-    appl = %VaScheduler{
+    params = %{
       msisdn: msisdn,
       campaign: campaign,
       scheduled_date: scheduled_date
     }
+
+    appl = VaScheduler.changeset(%VaScheduler{}, params)
 
     Repo.insert!(appl)
   end
@@ -510,7 +513,7 @@ defmodule Plex.Data do
     from(
       a in VaScheduler,
       select: [:id, :msisdn, :campaign, :scheduled_date],
-      where: a.scheduled_date > ^NaiveDateTime.utc_now(),
+      where: a.scheduled_date > ^T.now(),
       where: a.done == false
     )
     |> Repo.all()

@@ -2,6 +2,8 @@ defmodule Plex.Scheduler do
   alias Plex.Data
   alias Plex.Data.Memory
   alias WhatsappElixir.Messages
+  alias Util.Timez, as: T
+
   use GenServer
 
   # Client API
@@ -51,7 +53,7 @@ defmodule Plex.Scheduler do
       Data.applicant_scheduler(msisdn, campaign, scheduled_date)
     end
 
-    delay_ms = NaiveDateTime.diff(scheduled_date, NaiveDateTime.utc_now()) * 1_000
+    delay_ms = NaiveDateTime.diff(scheduled_date, T.now()) * 1_000
 
     Process.send_after(
       __MODULE__,

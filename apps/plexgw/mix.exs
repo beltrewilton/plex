@@ -33,6 +33,7 @@ defmodule Plexgw.MixProject do
       {:jason, "~> 1.4"},
       {:httpoison, "~> 2.2.1"},
       {:dotenv_parser, "~> 2.0"},
+      {:tzdata, "~> 1.1"},
       {:whatsapp_elixir, path: "/Users/beltre.wilton/apps/whatsapp_elixir"}
     ]
   end

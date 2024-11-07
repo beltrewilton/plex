@@ -1,5 +1,6 @@
 defmodule Plex.Data.Memory do
   alias :mnesia, as: Mnesia
+  alias Util.Timez, as: T
 
   def start do
     Mnesia.start()
@@ -58,7 +59,7 @@ defmodule Plex.Data.Memory do
     # )
   end
 
-  # chat_history = %Plex.ChatHistory{msisdn: "18007653427", campaign: "XH000", source: "Github", whatsapp_id: "0009", message: "Hi all",  readed: true, collected: true, sending_date: NaiveDateTime.utc_now(), output_llm_booleans: %{}, create_date: NaiveDateTime.utc_now(), write_date: NaiveDateTime.utc_now()}
+  # chat_history = %Plex.ChatHistory{msisdn: "18007653427", campaign: "XH000", source: "Github", whatsapp_id: "0009", message: "Hi all",  readed: true, collected: true, sending_date: T.now(), output_llm_booleans: %{}, create_date: T.now(), write_date: T.now()}
   def add_chat_history(%Plex.ChatHistory{} = chat_history, id) do
     chat_history = Map.drop(chat_history, [:id, :__struct__, :__meta__])
 
@@ -290,7 +291,7 @@ defmodule Plex.Data.Memory do
       Enum.filter(
         stages,
         fn [_, _, _, _, _, _, _, last_update, _, _] ->
-          Date.diff(NaiveDateTime.utc_now(), last_update) < min_days
+          Date.diff(T.now(), last_update) < min_days
         end
       )
       |> case do

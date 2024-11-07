@@ -1,6 +1,7 @@
 defmodule Plex.ChatHistory do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Util.Timez, as: T
 
   schema "va_chat_history" do
     field(:create_uid, :integer, default: 1)
@@ -36,14 +37,15 @@ defmodule Plex.ChatHistory do
       :create_date,
       :write_date
     ])
-    |> put_change(:create_date, NaiveDateTime.utc_now())
-    |> put_change(:write_date, NaiveDateTime.utc_now())
+    |> put_change(:create_date, T.now())
+    |> put_change(:write_date, T.now())
   end
 end
 
 defmodule Plex.ApplicantStage do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Util.Timez, as: T
 
   schema "va_applicant_stage" do
     field(:create_uid, :integer, default: 1)
@@ -71,14 +73,15 @@ defmodule Plex.ApplicantStage do
       :create_date,
       :write_date
     ])
-    |> put_change(:create_date, NaiveDateTime.utc_now())
-    |> put_change(:write_date, NaiveDateTime.utc_now())
+    |> put_change(:create_date, T.now())
+    |> put_change(:write_date, T.now())
   end
 end
 
 defmodule Plex.VaScheduler do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Util.Timez, as: T
 
   schema "va_scheduler" do
     field(:create_uid, :integer, default: 1)
@@ -104,8 +107,8 @@ defmodule Plex.VaScheduler do
       :create_date,
       :write_date
     ])
-    |> put_change(:create_date, NaiveDateTime.utc_now())
-    |> put_change(:write_date, NaiveDateTime.utc_now())
+    |> put_change(:create_date, T.now())
+    |> put_change(:write_date, T.now())
   end
 end
 
@@ -129,6 +132,7 @@ end
 defmodule HrApplicant do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Util.Timez, as: T
 
   schema "hr_applicant" do
     field(:campaign_id, :integer)
@@ -311,8 +315,8 @@ defmodule HrApplicant do
       :create_date,
       :write_date
     ])
-    |> put_change(:create_date, NaiveDateTime.utc_now())
-    |> put_change(:write_date, NaiveDateTime.utc_now())
+    |> put_change(:create_date, T.now())
+    |> put_change(:write_date, T.now())
   end
 end
 

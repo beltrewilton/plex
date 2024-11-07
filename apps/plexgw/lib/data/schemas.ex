@@ -1,6 +1,7 @@
 defmodule WebHookLogSchema do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Util.Timez, as: T
 
   schema "va_webhook_log" do
     field(:source, :string)
@@ -17,7 +18,7 @@ defmodule WebHookLogSchema do
       :waba_id,
       :received_at
     ])
-    |> put_change(:received_at, NaiveDateTime.utc_now())
+    |> put_change(:received_at, T.now())
     |> validate_required([
       :source
     ])
@@ -27,6 +28,7 @@ end
 defmodule CTALogSchema do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Util.Timez, as: T
 
   schema "va_cta_log" do
     field(:referer, :string)
@@ -45,7 +47,7 @@ defmodule CTALogSchema do
       :waba_id,
       :received_at
     ])
-    |> put_change(:received_at, NaiveDateTime.utc_now())
+    |> put_change(:received_at, T.now())
     |> validate_required([
       :referer,
       :user_agent,

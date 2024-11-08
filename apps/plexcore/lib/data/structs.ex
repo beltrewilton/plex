@@ -30,7 +30,40 @@ defmodule GrammarScore do
   ]
 end
 
-defmodule SpeechScore do
+defmodule SpeechScriptedScore do
+  @type t :: %__MODULE__{
+          msisdn: String.t() | nil,
+          campaign: String.t() | nil,
+          speech_overall: float() | nil,
+          speech_refText: String.t() | nil,
+          speech_duration: float() | nil,
+          speech_fluency: float() | nil,
+          speech_integrity: float() | nil,
+          speech_pronunciation: float() | nil,
+          speech_rhythm: float() | nil,
+          speech_speed: float() | nil,
+          speech_audio_path: String.t() | nil,
+          speech_warning: String.t() | nil
+        }
+
+  defstruct [
+    :msisdn,
+    :campaign,
+    :speech_overall,
+    :speech_refText,
+    :speech_duration,
+    :speech_fluency,
+    :speech_integrity,
+    :speech_pronunciation,
+    :speech_rhythm,
+    :speech_speed,
+    :speech_audio_path,
+    :speech_warning
+  ]
+end
+
+
+defmodule SpeechUnScriptedScore do
   @type t :: %__MODULE__{
           msisdn: String.t() | nil,
           campaign: String.t() | nil,
@@ -46,17 +79,7 @@ defmodule SpeechScore do
           speech_unscripted_speed: float() | nil,
           speech_unscripted_audio_path: String.t() | nil,
           speech_unscripted_transcription: String.t() | nil,
-          speech_unscripted_warning: String.t() | nil,
-          speech_overall: float() | nil,
-          speech_refText: String.t() | nil,
-          speech_duration: float() | nil,
-          speech_fluency: float() | nil,
-          speech_integrity: float() | nil,
-          speech_pronunciation: float() | nil,
-          speech_rhythm: float() | nil,
-          speech_speed: float() | nil,
-          speech_audio_path: String.t() | nil,
-          speech_warning: String.t() | nil
+          speech_unscripted_warning: String.t() | nil
         }
 
   defstruct [
@@ -74,17 +97,7 @@ defmodule SpeechScore do
     :speech_unscripted_speed,
     :speech_unscripted_audio_path,
     :speech_unscripted_transcription,
-    :speech_unscripted_warning,
-    :speech_overall,
-    :speech_refText,
-    :speech_duration,
-    :speech_fluency,
-    :speech_integrity,
-    :speech_pronunciation,
-    :speech_rhythm,
-    :speech_speed,
-    :speech_audio_path,
-    :speech_warning
+    :speech_unscripted_warning
   ]
 end
 

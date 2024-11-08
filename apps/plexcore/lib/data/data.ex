@@ -338,7 +338,7 @@ defmodule Plex.Data do
     end
   end
 
-  @spec set_score(GrammarScore.t() | SpeechScore.t()) ::
+  @spec set_score(GrammarScore.t() | SpeechScriptedScore.t() | SpeechUnScriptedScore.t()) ::
           {:not_found} | {:error, any()} | {:ok, atom() | struct()}
   def set_score(score) do
     query = get_hrapplicant(score.msisdn, score.campaign)
@@ -364,11 +364,6 @@ defmodule Plex.Data do
 
   @spec set_grammar_score(GrammarScore.t()) :: GrammarScore.t()
   def set_grammar_score(score \\ %GrammarScore{}) do
-    set_score(score)
-  end
-
-  @spec set_speech_unscripted_score(SpeechScore.t()) :: SpeechScore.t()
-  def set_speech_unscripted_score(score \\ %SpeechScore{}) do
     set_score(score)
   end
 
@@ -542,5 +537,36 @@ defmodule Plex.Data do
           |> ZohoToken.changeset(%{access_token: token, expires_at: expires_at})
           |> Repo.update!()
       end
+  end
+
+  def remove_from_chat_history(msisdn) do
+    from(ch in ChatHistory, where: ch.msisdn == ^msisdn)
+    |> Repo.delete_all()
+
+    Memory.remove_from_chat_history(msisdn)
+  end
+
+  def remove_from_applicant_stage(msisdn) do
+    from(ch in ApplicantStage, where: ch.msisdn == ^msisdn)
+    |> Repo.delete_all()
+
+    Memory.remove_from_applicant_stage(msisdn)
+  end
+
+  def remove_from_hrapplicant(msisdn) do
+    from(ch in HrApplicant, where: ch.phone_sanitized == ^msisdn)
+    |> Repo.delete_all()
+  end
+
+  def purge_applicant(msisdn, campaign) do
+    remove_from_chat_history(msisdn)
+
+    remove_from_applicant_stage(msisdn)
+
+    remove_from_hrapplicant(msisdn)
+
+    Plex.Scheduler.kill(msisdn, campaign, "_message_firer_job")
+
+    Plex.Scheduler.kill(msisdn, campaign, "_inactivity_job")
   end
 end

@@ -1,6 +1,7 @@
 defmodule Plexgw.Data do
   import Ecto.Query
 
+  alias Plex.Data.Memory
   alias Plexgw.Repo
 
   def start_link(_args) do

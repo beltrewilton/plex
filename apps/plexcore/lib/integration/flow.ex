@@ -22,6 +22,18 @@ defmodule Plex.Flow do
       city_residence,
       campaign
     )
+
+    {first_name, last_name} = split_name(partner_name)
+
+    Integration.Zoho.add_candidate(last_name, first_name, "no@email.com", partner_phone, city_residence, campaign)
+  end
+
+  def split_name(name) do
+    parts = String.split(name)
+    case length(parts) do
+      1 -> {name, ""}
+      _ -> {Enum.at(parts, 0), Enum.join(Enum.drop(parts, 1), " ")}
+    end
   end
 
   def assessment(decrypted_data) do

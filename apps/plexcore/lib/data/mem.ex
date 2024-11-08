@@ -13,12 +13,6 @@ defmodule Plex.Data.Memory do
 
     Mnesia.start()
 
-    Mnesia.create_table(Person,
-      attributes: [:id, :value],
-      type: :set,
-      storage_properties: [ram_copies: [node()]]
-    )
-
     Mnesia.create_table(ChatHistory,
       attributes: Plex.ChatHistory.__schema__(:fields),
       type: :ordered_set,
@@ -431,6 +425,54 @@ defmodule Plex.Data.Memory do
       Mnesia.delete({RefSchedule, key})
     end)
   end
+
+
+  def remove_from_chat_history(msisdn) do
+    Mnesia.transaction(fn ->
+      # Find all records matching the msisdn
+      matches = Mnesia.select(
+        ChatHistory,
+        [
+          {
+            {ChatHistory, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :"$10",
+             :"$11", :"$12", :"$13", :"$14"},
+            [{:==, :"$4", msisdn}],  # Assuming `msisdn` is the fourth attribute in the schema
+            [:"$$"]
+          }
+        ]
+      )
+
+      # Delete each matching record by its primary key
+      Enum.each(matches, fn [record_key | _rest] ->
+        Mnesia.delete({ChatHistory, record_key})
+      end)
+    end)
+  end
+
+  def remove_from_applicant_stage(msisdn) do
+    Mnesia.transaction(fn ->
+      # Find all records matching the msisdn
+      matches = Mnesia.select(
+        ApplicantStage,
+        [
+          {
+            {ApplicantStage, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9",
+             :"$10"},
+            [{:==, :"$4", msisdn}],
+            [:"$$"]
+          }
+        ]
+      )
+
+      # Delete each matching record by its primary key
+      Enum.each(matches, fn [record_key | _rest] ->
+        Mnesia.delete({ApplicantStage, record_key})
+      end)
+    end)
+  end
+
+
+
 
   # def transitivity_set(param, msisdn, campaign, value) do
   #   key = param <> msisdn <> campaign

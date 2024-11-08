@@ -499,7 +499,7 @@ defmodule Plex.State do
 
     if client.task in [:scripted_text, :open_question] do
       # manage audio with ffmpeg function
-      {:ok, audio_file} = Audio.get(client.audio_id, client.msisdn, client.campaign, client.waba_id)
+      {:ok, audio_file} = Audio.get(client.audio_id, client.msisdn, client.campaign, client.waba_id, client.task)
       {:ok, audio_file} = Audio.ogg_to_wav(audio_file)
 
       if client.task == :scripted_text do
@@ -511,11 +511,10 @@ defmodule Plex.State do
           refText
         )
 
-        #register scores.... here
         result = scores["result"]
         warning = result["warning"]
 
-        speech_score = %SpeechScore{
+        scripted_score = %SpeechScriptedScore{
           msisdn: client.msisdn,
           campaign:  client.campaign,
           speech_overall: result["overall"],
@@ -530,7 +529,7 @@ defmodule Plex.State do
           speech_warning: warning
         }
 
-        Data.set_score(speech_score)
+        Data.set_score(scripted_score)
 
         log = %SpeechLog{
           msisdn: client.msisdn,
@@ -556,7 +555,7 @@ defmodule Plex.State do
         result = scores["result"]
         warning = result["warning"]
 
-        speech_score = %SpeechScore{
+        un_scripted_score = %SpeechUnScriptedScore{
           msisdn: client.msisdn,
           campaign:  client.campaign,
           speech_open_question: open_question,
@@ -574,7 +573,7 @@ defmodule Plex.State do
           speech_unscripted_warning: warning
         }
 
-        Data.set_score(speech_score)
+        Data.set_score(un_scripted_score)
 
         log = %SpeechLog{
           msisdn: client.msisdn,

@@ -13,6 +13,10 @@ defmodule Webhook.Router do
 
   @source_webhook "WEBHOOK"
 
+  get "/yoh" do
+    send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
+  end
+
   get "/" do
     verify_token = conn.query_params["hub.verify_token"]
     local_hook_token = System.get_env("CLOUD_API_TOKEN_VERIFY")
@@ -48,7 +52,7 @@ defmodule Webhook.Router do
         :rpc.cast(
           target_node,
           Plex.State,
-          :new,
+          :message_handler,
           [
             waba_id,
             Keyword.get(sender, :sender_phone_number),
@@ -61,7 +65,7 @@ defmodule Webhook.Router do
           ]
         )
 
-        log_notification(data, waba_id)
+        # log_notification(data, waba_id)
 
       [_, _target_node, :chatbot] ->
         {:chatbot_woot}

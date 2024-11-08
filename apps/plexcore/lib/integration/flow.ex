@@ -3,15 +3,12 @@ defmodule Plex.Flow do
 
   def register(decrypted_data) do
     data = decrypted_data["data"]
-    # data["msisdn"]
-    partner_phone = "18779001200"
+    partner_phone = data["msisdn"]
     is_valid_dominican_id = data["is_valid_dominican_id"] == "1"
     availability_tostart = data["availability_tostart"]
     availability_towork = data["availability_towork"]
-    # data["city_residence"]
-    city_residence = "N/A"
-    # data["campaign"]
-    campaign = "CNVQSOUR84FK"
+    city_residence = "N/A"  # data["city_residence"]
+    campaign = data["campaign"]
     partner_name = data["full_name"]
     english_level = String.to_integer(data["english_level"])
 
@@ -29,7 +26,9 @@ defmodule Plex.Flow do
 
   def assessment(decrypted_data) do
     data = decrypted_data["data"]
-    answers = [data["answer_one"], data["answer_two"]]
+    answer_one = data["answer_one"]
+    answer_two = data["answer_two"]
+    answers = "#{answer_one},\n#{answer_two}"
     msisdn = data["msisdn"]
     campaign = data["campaign"]
 
@@ -38,12 +37,12 @@ defmodule Plex.Flow do
     score = %GrammarScore{
       msisdn: msisdn,
       campaign: campaign,
-      a1_score: probas[{0, "A1"}],
-      a2_score: probas[{1, "A2"}],
-      b1_score: probas[{2, "B1"}],
-      b2_score: probas[{3, "B2"}],
-      c1_score: probas[{4, "C1"}],
-      c2_score: probas[{5, "C2"}],
+      a1_score: probas[{0, "A1"}] * 100,
+      a2_score: probas[{1, "A2"}] * 100,
+      b1_score: probas[{2, "B1"}] * 100,
+      b2_score: probas[{3, "B2"}] * 100,
+      c1_score: probas[{4, "C1"}] * 100,
+      c2_score: probas[{5, "C2"}] * 100,
       user_question_1: data["question_one"],
       user_question_2: data["question_two"],
       user_input_answer_1: data["answer_one"],

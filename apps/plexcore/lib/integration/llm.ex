@@ -1,5 +1,5 @@
 defmodule Plex.LLM do
-  @url "http://localhost:9091/llm/generate"
+  @url "http://localhost:9091/generate"
 
   @headers [
     {"accept", "application/json"},

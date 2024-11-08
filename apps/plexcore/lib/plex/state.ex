@@ -37,8 +37,8 @@ defmodule Plex.State do
   @default_campaign "CNDEFAULT"
   @user_source "User"
   @ai_scource "AI"
-  @tolerance 3_000
-  @inactiviry_time 900 * 1_000
+  @tolerance 3_00
+  @inactiviry_time 180 * 1_000
 
   defstruct tasks: @tasks, app_states: @app_states, n_response: @n_response, n_request: @n_request
 
@@ -179,7 +179,11 @@ defmodule Plex.State do
   defp message_handler(%ClientState{} = client, {:atomic, stage}) do
     client = client_update(client, stage)
 
-    # Messages.mark_as_read(client.whatsapp_id, get_config())
+    Messages.mark_as_read(client.whatsapp_id, get_config())
+
+    IO.inspect(stage, label: "Stage Object")
+
+    IO.inspect(client, label: "Client Object")
 
     case client.forwarded do
       false ->
@@ -250,10 +254,8 @@ defmodule Plex.State do
         )
 
       true ->
-        {:ignore, "send wa message avoiding forwarder"}
-
         message = S.random_message(S.forwarded_not_allowed)
-        # Messages.send_message(client.msisdn, message, get_config)
+        Messages.send_message(client.msisdn, message, get_config())
 
         Data.add_chat_history(
           client.msisdn,
@@ -345,9 +347,13 @@ defmodule Plex.State do
     n_response = Plex.LLM.generate(n_request)
     IO.inspect(n_response)
 
+    client = client_update(client)
+
     trigger = flow_trigger(client.task, n_response)
 
-    n_response = process_response(client.msisdn, client.campaign, n_response, client.task, client.flow, client.audio_id)
+    n_response = process_response(client, n_response)
+
+    IO.inspect(n_response, label: "n_response")
 
     send_text_message(client.msisdn, n_response.output.response)
 
@@ -405,13 +411,13 @@ defmodule Plex.State do
 
     if not is_nil(message) do
       {:inactivity}
-      # Messages.send_message(client.msisdn, message, get_config())
+      Messages.send_message(client.msisdn, message, get_config())
     end
   end
 
   def send_text_message(msisdn, message) do
     IO.puts("Here send to WhatsApp client #{msisdn}: #{message}")
-    # Messages.send_message(msisdn, message, get_config())
+    Messages.send_message(msisdn, message, get_config())
     # TODO: hacer log source="REQUEST" del response que genera enviar un mensagge.
     #      la vaina es que los logs son centralizados y esto es un nodo.....
   end
@@ -529,6 +535,8 @@ defmodule Plex.State do
           %SpeechSuperClient{}.params.ielts_part3
         )
 
+        IO.inspect(scores, label: "request_spontaneous_unscripted")
+
         result = scores["result"]
         warning = result["warning"]
 
@@ -569,7 +577,7 @@ defmodule Plex.State do
     else
       switch_to_text = S.random_message(S.switch_to_text)
       # audio only accepted when :scripted_text or :open_question
-      # Messages.send_message(client.msisdn, switch_to_text, get_config())
+      Messages.send_message(client.msisdn, switch_to_text, get_config())
       {:switch_to_text}
     end
   end
@@ -614,22 +622,24 @@ defmodule Plex.State do
     end
   end
 
-  defp process_response(msisdn, campaign, n_response, task, flow, audio_id) do
+  defp process_response(%ClientState{} = client, n_response) do
     output = n_response.output
+
+    IO.inspect(client, label: "Client (process_response)")
 
     new_response =
       cond do
-        (flow && task == :scripted_text && !output.schedule) ||
+        (client.flow && client.task == :scripted_text && !output.schedule) ||
             String.contains?(output.response, "PLACEHOLDER_1") ->
-          refText = Memory.get_reftext(msisdn, campaign)
+          refText = Memory.get_reftext(client.msisdn, client.campaign)
 
           output.response
           |> String.replace("PLACEHOLDER_1", "\n> ❝#{refText}❞\n\n\n_")
           |> String.replace("`", "")
 
-        (audio_id && task == :open_question && !output.schedule) ||
+        (client.audio_id && client.task == :open_question && !output.schedule) ||
             String.contains?(output.response, "PLACEHOLDER_2") ->
-          open_question = Memory.get_open_question(msisdn, campaign)
+          open_question = Memory.get_open_question(client.msisdn, client.campaign)
 
           output.response
           |> String.replace("PLACEHOLDER_2", "\n> ❝#{open_question}❞\n\n\n_")
@@ -639,8 +649,11 @@ defmodule Plex.State do
           output.response
       end
 
-    Map.put(output, :response, new_response)
-    Map.put(n_response, :output, output)
+    IO.inspect(new_response, label: "new_response")
+
+    # Map.put(output, :response, new_response)
+    # Map.put(n_response, :output, output)
+    put_in(n_response[:output][:response], new_response)
   end
 
   defp chat_history(msisdn, campaign) do

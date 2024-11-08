@@ -41,3 +41,5 @@ data.json
 .certs/
 /plex_cfg/
 plexgw.cfg
+.VSCodeCounter/
+flows/

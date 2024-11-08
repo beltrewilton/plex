@@ -10,6 +10,10 @@ defmodule Flow.Router do
   plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason)
   plug(:dispatch)
 
+  get "/yoh" do
+    send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
+  end
+
   get "/" do
     IO.inspect(conn.body_params)
     send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))

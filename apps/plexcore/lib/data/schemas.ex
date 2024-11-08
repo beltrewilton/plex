@@ -176,9 +176,9 @@ defmodule HrApplicant do
     field(:applicant_properties, :map)
     field(:description, :string)
     field(:active, :boolean, default: true)
-    field(:date_closed, :naive_datetime)
-    field(:date_open, :naive_datetime)
-    field(:date_last_stage_update, :naive_datetime)
+    field(:date_closed, :naive_datetime_usec)
+    field(:date_open, :naive_datetime_usec)
+    field(:date_last_stage_update, :naive_datetime_usec)
     field(:probability, :float)
     field(:salary_proposed, :float, default: 0.0)
     field(:salary_expected, :float, default: 0.0)
@@ -219,8 +219,8 @@ defmodule HrApplicant do
     field(:speech_speed, :float, default: 0.0)
     field(:speech_audio_path, :string)
     field(:speech_warning, :string)
-    field(:create_date, :naive_datetime)
-    field(:write_date, :naive_datetime)
+    field(:create_date, :naive_datetime_usec)
+    field(:write_date, :naive_datetime_usec)
   end
 
   def changeset(struct, params \\ %{}) do
@@ -331,8 +331,8 @@ defmodule HrApplicantSkill do
     field(:skill_type_id, :integer, default: 1)
     field(:create_uid, :integer, default: 1)
     field(:write_uid, :integer, default: 1)
-    field(:create_date, :naive_datetime)
-    field(:write_date, :naive_datetime)
+    field(:create_date, :naive_datetime_usec)
+    field(:write_date, :naive_datetime_usec)
   end
 
   def changeset(struct, params \\ %{}) do
@@ -389,8 +389,8 @@ defmodule HrJob do
     field(:description, :string)
     field(:requirements, :string)
     field(:active, :boolean)
-    field(:create_date, :naive_datetime)
-    field(:write_date, :naive_datetime)
+    field(:create_date, :naive_datetime_usec)
+    field(:write_date, :naive_datetime_usec)
     field(:alias_id, :integer)
     field(:address_id, :integer)
     field(:manager_id, :integer)
@@ -446,8 +446,8 @@ defmodule SpeechLogSchema do
     field(:campaign, :string)
     field(:audio_path, :string)
     field(:response, :map)
-    field(:create_date, :naive_datetime)
-    field(:write_date, :naive_datetime)
+    field(:create_date, :naive_datetime_usec)
+    field(:write_date, :naive_datetime_usec)
   end
 
   def changeset(struct, params \\ %{}) do

@@ -7,7 +7,7 @@ defmodule WebHookLogSchema do
     field(:source, :string)
     field(:response, :map)
     field(:waba_id, :string)
-    field(:received_at, :naive_datetime)
+    field(:received_at, :naive_datetime_usec)
   end
 
   def changeset(struct, params \\ %{}) do
@@ -35,7 +35,7 @@ defmodule CTALogSchema do
     field(:user_agent, :string)
     field(:campaign, :string)
     field(:waba_id, :string)
-    field(:received_at, :naive_datetime)
+    field(:received_at, :naive_datetime_usec)
   end
 
   def changeset(struct, params \\ %{}) do

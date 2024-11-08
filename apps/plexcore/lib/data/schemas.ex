@@ -466,3 +466,23 @@ defmodule SpeechLogSchema do
     ])
   end
 end
+
+
+defmodule Plex.ZohoToken do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "va_zoho_token" do
+    field(:access_token, :string)
+    field(:expires_at, :naive_datetime_usec)
+  end
+
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [
+      :id,
+      :access_token,
+      :expires_at
+    ])
+  end
+end

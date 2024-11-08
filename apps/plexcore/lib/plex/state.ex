@@ -117,9 +117,9 @@ defmodule Plex.State do
             client.state
           )
 
+          {:no_replace_message}
+
         campaign_extracted ->
-          IO.inspect(client.task, label: "client.task: ")
-          IO.inspect(client.state, label: "client.state: ")
           campaign_extracted = List.first(campaign_extracted)
 
           Data.add_applicant_stage(
@@ -128,6 +128,9 @@ defmodule Plex.State do
             client.task,
             client.state
           )
+
+          # AQUI: fue encontrado `campaign_extracted` entonces remplazar ese mensaje por uno LLM friendly
+          {:replace_message, S.random_message(S.user_hello_replaced)}
 
           #TODO: try to change the default `client.message` variable for a generic one
           # Map.put(client, :message, new_message_from_static)
@@ -138,9 +141,11 @@ defmodule Plex.State do
   defp solve_stage(%ClientState{} = client) do
     case Memory.get_latest_applicant_stage(client.msisdn) do
       {:atomic, []} ->
-        extract_campaign(client)
-        #TODO: with recursivity solve_stage(client)
-        Memory.get_latest_applicant_stage(client.msisdn)
+        case extract_campaign(client) do
+          {:replace_message, new_message} -> {Memory.get_latest_applicant_stage(client.msisdn), new_message}
+
+          {:no_replace_message} -> {Memory.get_latest_applicant_stage(client.msisdn), :no_replace_message}
+        end
 
       {:atomic, stage} ->
         client = client_update(client, stage)
@@ -151,7 +156,7 @@ defmodule Plex.State do
             {:abort}
 
           true ->
-            {:atomic, stage}
+            {{:atomic, stage}, :no_replace_message}
         end
     end
   end
@@ -172,14 +177,16 @@ defmodule Plex.State do
     message_handler(client, solve_stage(client))
   end
 
-  defp message_handler(%ClientState{} = _client, {:atomic, stage}) when stage == [] do
+  defp message_handler(%ClientState{} = _client, {{:atomic, stage}, _}) when stage == [] do
     IO.puts("Esto nunca deberia ocurrir,")
   end
 
-  defp message_handler(%ClientState{} = client, {:atomic, stage}) do
-    client = client_update(client, stage)
+  defp message_handler(%ClientState{} = client, {{:atomic, stage}, new_message}) do
+    client = client_update(client, stage, new_message)
 
     Messages.mark_as_read(client.whatsapp_id, get_config())
+
+    IO.inspect(new_message, label: "new_message atom")
 
     IO.inspect(stage, label: "Stage Object")
 
@@ -275,12 +282,21 @@ defmodule Plex.State do
     IO.puts("Esto nunca deberia ocurrir, enviaron audio asi no mas en lugar del welcome!")
   end
 
-  defp client_update(client, stage) do
-    Map.merge(client, %{
-      campaign: stage.campaign,
-      task: stage.task,
-      state: stage.state
-    })
+  defp client_update(client, stage, new_message \\ :no_replace_message) do
+    if new_message == :no_replace_message do
+      Map.merge(client, %{
+        campaign: stage.campaign,
+        task: stage.task,
+        state: stage.state
+      })
+    else
+      Map.merge(client, %{
+        campaign: stage.campaign,
+        task: stage.task,
+        state: stage.state,
+        message: new_message
+      })
+    end
   end
 
   defp client_update(client) do

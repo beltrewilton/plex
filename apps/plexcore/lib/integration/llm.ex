@@ -53,7 +53,8 @@ defmodule Plex.Formater do
       "current_task" => format_task(n_request.current_task),
       "states" => format_states(n_request.app_states),
       "tasks" => format_tasks(n_request.tasks),
-      "previous_conversation_history" => n_request.previous_conversation_history
+      "previous_conversation_history" => n_request.previous_conversation_history,
+      "node" =>  Atom.to_string(node())
     }
     |> Jason.encode!()
   end

@@ -1,11 +1,13 @@
+import Ecto.Query
 defmodule Plex.Data do
-  import Ecto.Query
 
   alias Plex.Repo
   alias Plex.ChatHistory
   alias Plex.ApplicantStage
   alias Plex.HrRecruitmentStage
   alias Plex.VaScheduler
+
+  alias Plex.ZohoToken
 
   alias Plex.Data.Memory
   alias Util.Timez, as: T
@@ -517,5 +519,28 @@ defmodule Plex.Data do
       where: a.done == false
     )
     |> Repo.all()
+  end
+
+  def get_access_token() do
+    from(
+      t in ZohoToken,
+      limit: 1
+    ) |> Repo.one()
+  end
+
+  def upsert_access_token(token, expires_at, old_token \\ nil) do
+      case old_token do
+        nil ->
+          %ZohoToken{
+            access_token: token,
+            expires_at: expires_at
+          }
+          |> Repo.insert!()
+
+        _ ->
+          Repo.get_by(ZohoToken, access_token: old_token)
+          |> ZohoToken.changeset(%{access_token: token, expires_at: expires_at})
+          |> Repo.update!()
+      end
   end
 end

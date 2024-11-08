@@ -30,9 +30,8 @@ defmodule Webhook.Router do
   end
 
   post "/" do
-    # TODO: body_params.response
     data = conn.body_params
-    handle_notification(WS.handle_notification(data))
+    handle_notification(WS.handle_notification(data), data)
 
     send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
   end
@@ -43,7 +42,7 @@ defmodule Webhook.Router do
     send_resp(conn, 404, "You are trying something that does not exist.")
   end
 
-  def handle_notification(%Whatsapp.Client.Sender{} = data) do
+  def handle_notification(%Whatsapp.Client.Sender{} = data, rawdata) do
     sender = data.sender_request
     waba_id = Keyword.get(sender, :waba_id)
 
@@ -65,7 +64,7 @@ defmodule Webhook.Router do
           ]
         )
 
-        # log_notification(data, waba_id)
+        log_notification(rawdata, waba_id)
 
       [_, _target_node, :chatbot] ->
         {:chatbot_woot}
@@ -80,18 +79,24 @@ defmodule Webhook.Router do
     IO.puts("Termine esta vuelta!")
   end
 
-  def handle_notification(%Whatsapp.Meta.Request{} = data) do
+  def handle_notification(%Whatsapp.Meta.Request{} = data, rawdata) do
+    sender = data.meta_request
+    waba_id = Keyword.get(sender, :waba_id)
+
+    log_notification(rawdata, waba_id)
+
     IO.puts("No redirect for this content .. !")
     IO.inspect(data)
   end
 
-  def handle_notification(_) do
+  def handle_notification(_, _) do
     IO.puts("Nothing todo handle_notification !")
   end
 
   def log_notification(data, waba_id) do
     Task.async(
       fn ->
+        Process.sleep(10_000)
         log = %WebHookLog{
           source: @source_webhook,
           response: data,

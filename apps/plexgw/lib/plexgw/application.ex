@@ -11,6 +11,7 @@ defmodule Plexgw.Application do
       {Plexgw.Repo, []},
       {Plug.Cowboy, scheme: :http, plug: Webhook.Router, options: [port: 8000]},
       {Plug.Cowboy, scheme: :http, plug: Redirect.Router, options: [port: 8001]},
+      {Plug.Cowboy, scheme: :http, plug: AudioSrv.Router, options: [port: 8002]},
       {Task, fn -> Plexgw.Setup.start() end}
     ]
 

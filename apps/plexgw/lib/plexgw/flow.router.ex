@@ -10,6 +10,8 @@ defmodule Flow.Router do
   plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason)
   plug(:dispatch)
 
+  @min_worlds 20
+
   get "/yoh" do
     send_resp(conn, 200, Jason.encode!(%{"status" => "success"}))
   end
@@ -143,6 +145,83 @@ defmodule Flow.Router do
                 }
               }
             }
+
+            Flow.encrypt(response, aes_key, iv)
+
+          remote_function == :assessment ->
+            data = decrypted_data["data"]
+            IO.inspect(data, label: "Flow Data")
+
+            waba_id = data["waba_id"]
+            msisdn = data["msisdn"]
+            campaign = data["campaign"]
+
+            response =
+              cond do
+                Map.has_key?(data, "assessment_1") ->
+                  answer_one = data["answer_one"]
+
+                  {next_screen, question_one_error} =
+                    if length(String.split(answer_one)) < @min_worlds,
+                      do: {"APPLICANT_ASSESSMENT_ONE", true},
+                      else: {"APPLICANT_ASSESSMENT_TWO", false}
+
+                  %{
+                    "version" => decrypted_data["version"],
+                    "action" => decrypted_data["action"],
+                    "screen" => next_screen,
+                    "data" => %{
+                      "msisdn" => msisdn,
+                      "campaign" => campaign,
+                      "waba_id" => waba_id,
+                      "question_one_error" => question_one_error,
+                      "extension_message_response" => %{
+                        "params" => %{
+                          "flow_token" => decrypted_data["flow_token"]
+                        }
+                      }
+                    }
+                  }
+
+                Map.has_key?(data, "assessment_2") ->
+                  answer_two = data["answer_two"]
+
+                  {next_screen, question_two_error} =
+                    if length(String.split(answer_two)) < @min_worlds,
+                      do: {"APPLICANT_ASSESSMENT_TWO", true},
+                      else: {"SUCCESS", false}
+
+                  if not question_two_error do
+                    :rpc.cast(
+                      target_node,
+                      Plex.Flow,
+                      remote_function,
+                      [
+                        decrypted_data
+                      ]
+                    )
+                  end
+
+                  %{
+                    "version" => decrypted_data["version"],
+                    "action" => decrypted_data["action"],
+                    "screen" => next_screen,
+                    "data" => %{
+                      "msisdn" => msisdn,
+                      "campaign" => campaign,
+                      "waba_id" => waba_id,
+                      "question_two_error" => question_two_error,
+                      "extension_message_response" => %{
+                        "params" => %{
+                          "flow_token" => decrypted_data["flow_token"]
+                        }
+                      }
+                    }
+                  }
+
+                true ->
+                  {:error}
+              end
 
             Flow.encrypt(response, aes_key, iv)
 

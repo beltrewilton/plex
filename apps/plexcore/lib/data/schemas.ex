@@ -166,10 +166,16 @@ defmodule HrApplicant do
     field(:phone_sanitized, :string, default: nil)
     field(:partner_mobile, :string)
     field(:partner_mobile_sanitized, :string, default: nil)
-    field(:is_valid_dominican_id, :boolean, default: false)
     field(:availability_tostart, :string)
+
+    field(:type_document_id, :string)
+    field(:cedula_id, :string)
+    field(:work_permit, :string)
+    field(:business_location, :string)
+    field(:hear_about_us, :string)
+
     field(:availability_towork, :string)
-    field(:city_residence, :string)
+
     field(:kanban_state, :string, default: "normal")
     field(:linkedin_profile, :string)
     field(:availability, :date)
@@ -258,10 +264,15 @@ defmodule HrApplicant do
       :phone_sanitized,
       :partner_mobile,
       :partner_mobile_sanitized,
-      :is_valid_dominican_id,
+
       :availability_tostart,
+      :type_document_id,
+      :cedula_id,
+      :work_permit,
+      :business_location,
+      :hear_about_us,
       :availability_towork,
-      :city_residence,
+
       :kanban_state,
       :linkedin_profile,
       :availability,

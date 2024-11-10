@@ -403,13 +403,19 @@ defmodule Plex.Data do
 
   def register_or_update(
         partner_phone,
+        campaign,
+
         partner_name,
         english_level,
-        is_valid_dominican_id,
         availability_tostart,
+
+        type_document_id,
+        cedula_id,
+        work_permit,
+
         availability_towork,
-        city_residence,
-        campaign
+        business_location,
+        hear_about_us
       ) do
     appl = get_hrapplicant(partner_phone, campaign)
     IO.inspect(Repo.one(appl))
@@ -428,10 +434,15 @@ defmodule Plex.Data do
           phone_sanitized: partner_phone,
           partner_mobile: partner_phone,
           partner_mobile_sanitized: partner_phone,
-          is_valid_dominican_id: is_valid_dominican_id,
+
+          type_document_id: type_document_id,
+          cedula_id: cedula_id,
+          work_permit: work_permit,
           availability_tostart: availability_tostart,
           availability_towork: availability_towork,
-          city_residence: city_residence,
+          business_location: business_location,
+          hear_about_us: hear_about_us,
+
           name: job.name["en_US"],
           partner_name: partner_name,
           job_id: job.id
@@ -443,10 +454,13 @@ defmodule Plex.Data do
         # Update existing
         Ecto.Changeset.change(applicant, %{
           partner_name: partner_name,
-          is_valid_dominican_id: is_valid_dominican_id,
+          type_document_id: type_document_id,
+          cedula_id: cedula_id,
+          work_permit: work_permit,
           availability_tostart: availability_tostart,
           availability_towork: availability_towork,
-          city_residence: city_residence
+          business_location: business_location,
+          hear_about_us: hear_about_us,
         })
         |> Repo.update!()
         |> then(fn appl ->

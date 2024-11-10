@@ -451,8 +451,9 @@ defmodule Plex.State do
       "waba_id" => waba_id,
       "msisdn" => msisdn,
       "campaign" => campaign,
-      "min_date" => DateTime.utc_now() |> DateTime.to_date() |> Date.to_string(),
-      "max_date" => DateTime.utc_now() |> Date.add(90) |> Date.to_string()
+      "applicant_basic_header" => System.get_env("APPL_BASIC_HEADER"),
+      "applicant_extra_header" => System.get_env("APPL_EXTRA_HEADER"),
+      "applicant_extra_two_header" => System.get_env("APPL_EXTRA_TWO_HEADER")
     }
 
     Flow.send_flow(msisdn, data, get_config(), opts)

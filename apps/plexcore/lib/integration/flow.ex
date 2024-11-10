@@ -2,30 +2,66 @@ defmodule Plex.Flow do
   alias Plex.Data
 
   def register(decrypted_data) do
+  #   "payload": {
+  #     "full_name": "${screen.APPLICANT_BASIC.form.full_name}",
+  #     "english_level": "${screen.APPLICANT_BASIC.form.english_level}",
+  #     "availability_tostart": "${screen.APPLICANT_BASIC.form.availability_tostart}",
+
+  #     "type_document_id": "${screen.APPLICANT_BASIC_EXTRA.form.type_document_id}",
+  #     "cedula_id": "${screen.APPLICANT_BASIC_EXTRA.form.cedula_id}",
+  #     "work_permit": "${screen.APPLICANT_BASIC_EXTRA.form.work_permit}",
+
+
+  #     "availability_towork": "${form.availability_towork}",
+  #     "business_location": "${form.business_location}",
+  #     "hear_about_us": "${form.hear_about_us}",
+  #     "terms_agreement": "${form.terms_agreement}",
+
+  #     "msisdn": "${screen.APPLICANT_BASIC.data.msisdn}",
+  #     "campaign": "${screen.APPLICANT_BASIC.data.campaign}",
+  #     "waba_id": "${screen.APPLICANT_BASIC.data.waba_id}"
+  # }
     data = decrypted_data["data"]
-    partner_phone = data["msisdn"]
-    is_valid_dominican_id = data["is_valid_dominican_id"] == "1"
-    availability_tostart = data["availability_tostart"]
-    availability_towork = data["availability_towork"]
-    city_residence = "N/A"  # data["city_residence"]
-    campaign = data["campaign"]
+
+    IO.inspect(data, label: "Data Profile")
+
     partner_name = data["full_name"]
     english_level = String.to_integer(data["english_level"])
+    availability_tostart = data["availability_tostart"]
+
+    type_document_id = data["type_document_id"]
+    cedula_id = data["cedula_id"]
+    work_permit = data["work_permit"]
+
+    availability_towork = data["availability_towork"]
+    business_location = data["business_location"]
+    hear_about_us = data["hear_about_us"]
+
+    partner_phone = data["msisdn"]
+    campaign = data["campaign"]
+    # waba_id = data["waba_id"]
+
 
     Data.register_or_update(
       partner_phone,
+      campaign,
+
       partner_name,
       english_level,
-      is_valid_dominican_id,
       availability_tostart,
+
+      type_document_id,
+      cedula_id,
+      work_permit,
+
       availability_towork,
-      city_residence,
-      campaign
+      business_location,
+      hear_about_us
     )
 
     {first_name, last_name} = split_name(partner_name)
 
-    Integration.Zoho.add_candidate(last_name, first_name, "no@email.com", partner_phone, city_residence, campaign)
+    Integration.Zoho.add_candidate(last_name, first_name, "no@email.com", partner_phone, business_location, campaign)
   end
 
   def split_name(name) do

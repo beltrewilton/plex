@@ -49,7 +49,7 @@ defmodule Plex.State do
   alias Plex.Scheduler
   alias WhatsappElixir.Messages
   alias WhatsappElixir.Flow
-  alias WhatsappElixir.Audio
+  alias WhatsappElixir.MediaDl
   alias Util.StaticMessages, as: S
 
   def get_config() do
@@ -87,6 +87,7 @@ defmodule Plex.State do
         whatsapp_id,
         flow,
         audio_id,
+        video_id,
         scheduled,
         forwarded,
         task \\ :talent_entry_form,
@@ -101,6 +102,7 @@ defmodule Plex.State do
       task: task,
       flow: flow,
       audio_id: audio_id,
+      video_id: video_id,
       scheduled: scheduled,
       forwarded: forwarded
     }
@@ -169,10 +171,11 @@ defmodule Plex.State do
         whatsapp_id,
         flow,
         audio_id,
+        video_id,
         scheduled,
         forwarded
       ) do
-    client = new(waba_id, msisdn, message, whatsapp_id, flow, audio_id, scheduled, forwarded)
+    client = new(waba_id, msisdn, message, whatsapp_id, flow, audio_id, video_id, scheduled, forwarded)
 
     message_handler(client, solve_stage(client))
   end
@@ -348,6 +351,8 @@ defmodule Plex.State do
     # if switch_to_text, NO debe ejecutar mas nada.
     handle_audio(client)
 
+    handle_video(client)
+
     client = client_update(client)
 
     n_request =
@@ -451,6 +456,7 @@ defmodule Plex.State do
       "waba_id" => waba_id,
       "msisdn" => msisdn,
       "campaign" => campaign,
+
       "applicant_basic_header" => System.get_env("APPL_BASIC_HEADER"),
       "applicant_extra_header" => System.get_env("APPL_EXTRA_HEADER"),
       "applicant_extra_two_header" => System.get_env("APPL_EXTRA_TWO_HEADER")
@@ -486,11 +492,9 @@ defmodule Plex.State do
     IO.puts("flow_assesment - #{msisdn}: #{campaign}")
 
     opts = [
-      flow_id: System.get_env("FLOW_APPL_ASSESSMENT_ID"),
-      cta: "Click to start",
-      header: "Please fill the following assessment",
-      screen: "APPLICANT_ASSESSMENT_ONE",
-      mode: System.get_env("APPLICANT_EXTRA_MODE")
+      template_name: System.get_env("TEMPLATE_NAME_FLOW_ASSESSMENT"),
+      image_link: System.get_env("TEMPLATE_IMAGE_LINK_FLOW_ASSESSMENT"),
+      screen: "APPLICANT_ASSESSMENT_ONE"
     ]
 
     questions = S.random_messages(S.applicant_assessment_question)
@@ -501,6 +505,7 @@ defmodule Plex.State do
       "waba_id" => waba_id,
       "msisdn" => msisdn,
       "campaign" => campaign,
+
       "question_one_error" => false,
       "question_two_error" => false,
       "random_question_one_sentence" => Map.get(q1, "sentence"),
@@ -509,7 +514,7 @@ defmodule Plex.State do
       "random_question_two_resume" => Map.get(q2, "resume")
     }
 
-    Flow.send_flow(msisdn, data, get_config(), opts)
+    Flow.send_flow_as_message(msisdn, data, get_config(), opts)
   end
 
   def send_flow_message(:flow_scheduler, waba_id, msisdn, campaign) do
@@ -525,8 +530,8 @@ defmodule Plex.State do
 
     if client.task in [:scripted_text, :open_question] do
       # manage audio with ffmpeg function
-      {:ok, audio_file} = Audio.get(client.audio_id, client.msisdn, client.campaign, client.waba_id, client.task)
-      {:ok, audio_file} = Audio.ogg_to_wav(audio_file)
+      {:ok, audio_file} = MediaDl.get(client.audio_id, client.msisdn, client.campaign, client.waba_id, client.task, :audio)
+      {:ok, audio_file} = MediaDl.ogg_to_wav(audio_file)
 
       if client.task == :scripted_text do
         refText = Memory.get_reftext(client.msisdn, client.campaign, true)
@@ -628,6 +633,28 @@ defmodule Plex.State do
 
     # TODO: esto se supone que detiene el flujo `return en Python` con return response, flow_trigger
   end
+
+  def handle_video(%ClientState{} = client) when not is_nil(client.video_id) do
+    client = client_update(client)
+
+    if client.task == :end_of_task do
+      {:ok, video_file} = MediaDl.get(client.video_id, client.msisdn, client.campaign, client.waba_id, client.task, :video)
+
+      IO.inspect(video_file, label: "Video is here!")
+
+      Messages.send_message(client.msisdn, S.random_message(S.video_1), get_config())
+    else
+      switch_to_text = S.random_message(S.switch_to_text)
+      # audio only accepted when :scripted_text or :open_question
+      Messages.send_message(client.msisdn, switch_to_text, get_config())
+      {:switch_to_text}
+    end
+  end
+
+  def handle_video(%ClientState{} = _client) do
+    {:no_video}
+  end
+
 
   defp next_task(key) do
     tasks = %__MODULE__{}.tasks

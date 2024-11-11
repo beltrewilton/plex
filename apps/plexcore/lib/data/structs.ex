@@ -186,6 +186,7 @@ defmodule ClientState do
           task: String.t() | nil,
           flow: boolean() | nil,
           audio_id: String.t() | nil,
+          video_id: String.t() | nil,
           scheduled: boolean() | nil,
           forwarded: boolean() | nil
         }
@@ -200,6 +201,7 @@ defmodule ClientState do
     :task,
     :flow,
     :audio_id,
+    :video_id,
     :scheduled,
     :forwarded
   ]

@@ -94,6 +94,10 @@ defmodule Util.StaticMessages do
     "Got your voice note! ✅  You've made substantial progress—fantastic job! 🚀 The last task involves recording a voice note (1+ minute) that thoughtfully addresses the following prompt:"
   ]
 
+  @video_1 [
+    "Video received! ✅"
+  ]
+
   @open_question_1  [
     "If you could create a dream community or city from scratch, what would it look like, and what features would you include to make it the perfect place to live, work, and play?",
     "If you could switch lives with someone for a day, who would it be and why? What would you do during that day, and what do you think you would learn from the experience?",
@@ -203,6 +207,7 @@ defmodule Util.StaticMessages do
   def assesment_form, do: @assesment_form
   def scripted_text, do: @scripted_text
   def voice_note_1, do: @voice_note_1
+  def video_1, do: @video_1
   def open_question_1, do: @open_question_1
   def voice_note_2, do: @voice_note_2
   def voice_note_received_yet, do: @voice_note_received_yet

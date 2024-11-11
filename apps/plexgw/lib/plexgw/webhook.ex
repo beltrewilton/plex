@@ -59,6 +59,7 @@ defmodule Webhook.Router do
             Keyword.get(sender, :wa_message_id),
             Keyword.get(sender, :flow),
             Keyword.get(sender, :audio_id),
+            Keyword.get(sender, :video_id),
             Keyword.get(sender, :scheduled),
             Keyword.get(sender, :forwarded)
           ]

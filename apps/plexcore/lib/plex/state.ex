@@ -442,8 +442,8 @@ defmodule Plex.State do
     IO.puts("flow_basic - #{msisdn}: #{campaign}")
 
     opts = [
-      flow_id: System.get_env("FLOW_APPL_BASIC_ID"),
-      cta: "Please fill this form",
+      template_name: System.get_env("TEMPLATE_NAME_FLOW_APPL_BASIC"),
+      image_link: System.get_env("TEMPLATE_IMAGE_LINK_FLOW_APPL_BASIC"),
       screen: "APPLICANT_BASIC"
     ]
 
@@ -456,16 +456,41 @@ defmodule Plex.State do
       "applicant_extra_two_header" => System.get_env("APPL_EXTRA_TWO_HEADER")
     }
 
-    Flow.send_flow(msisdn, data, get_config(), opts)
+    Flow.send_flow_as_message(msisdn, data, get_config(), opts)
   end
+
+  # def send_flow_message(:flow_basic, waba_id, msisdn, campaign) do
+  #   IO.puts("flow_basic - #{msisdn}: #{campaign}")
+
+  #   opts = [
+  #     flow_id: System.get_env("FLOW_APPL_BASIC_ID"),
+  #     cta: "Click to start",
+  #     header: "Your journey starts here",
+  #     screen: "APPLICANT_BASIC",
+  #     mode: System.get_env("APPLICANT_BASIC_MODE")
+  #   ]
+
+  #   data = %{
+  #     "waba_id" => waba_id,
+  #     "msisdn" => msisdn,
+  #     "campaign" => campaign,
+  #     "applicant_basic_header" => System.get_env("APPL_BASIC_HEADER"),
+  #     "applicant_extra_header" => System.get_env("APPL_EXTRA_HEADER"),
+  #     "applicant_extra_two_header" => System.get_env("APPL_EXTRA_TWO_HEADER")
+  #   }
+
+  #   Flow.send_flow(msisdn, data, get_config(), opts)
+  # end
 
   def send_flow_message(:flow_assesment, waba_id, msisdn, campaign) do
     IO.puts("flow_assesment - #{msisdn}: #{campaign}")
 
     opts = [
       flow_id: System.get_env("FLOW_APPL_ASSESSMENT_ID"),
-      cta: "Please fill this form",
-      screen: "APPLICANT_ASSESSMENT_ONE"
+      cta: "Click to start",
+      header: "Please fill the following assessment",
+      screen: "APPLICANT_ASSESSMENT_ONE",
+      mode: System.get_env("APPLICANT_EXTRA_MODE")
     ]
 
     questions = S.random_messages(S.applicant_assessment_question)

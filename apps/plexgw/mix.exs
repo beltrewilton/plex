@@ -35,7 +35,7 @@ defmodule Plexgw.MixProject do
       {:dotenv_parser, "~> 2.0"},
       {:tzdata, "~> 1.1"},
       # {:whatsapp_elixir, path: "/Users/beltre.wilton/apps/whatsapp_elixir"}
-      {:whatsapp_flow_crypto, path: "/home/wilton/plex_env/whatsapp_elixir"}
+      {:whatsapp_elixir, path: "/home/wilton/plex_env/whatsapp_elixir"}
     ]
   end
 end

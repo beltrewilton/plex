@@ -2,14 +2,13 @@ import Config
 
 IO.inspect(System.get_env("PLEX_CFG"), label: "PLEX_CFG")
 
-plex_cfg = System.get_env("PLEX_CFG")
-
 IO.inspect(File.cwd!, label: "current path")
 
 private_key_pem = File.read!("../../.certs/private_unencrypted.pem")
 Application.put_env(:plexgw, :private_key_pem, private_key_pem)
 
-DotenvParser.load_file(plex_cfg)
+### THE BUGGY ####
+# DotenvParser.load_file(plex_cfg)
 
 IO.inspect(System.get_env("USERNAME"), label: "USERNAME")
 IO.inspect(System.get_env("DBPASSWORD"), label: "DBPASSWORD")

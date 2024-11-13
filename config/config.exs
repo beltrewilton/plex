@@ -9,6 +9,7 @@
 # move said applications out of the umbrella.
 import Config
 
+IO.inspect(System.get_env("DATABASE"), label: "LADATABASE")
 
 config :nx, default_backend: EXLA.Backend
 

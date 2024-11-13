@@ -224,6 +224,7 @@ defmodule HrApplicant do
     field(:speech_rhythm, :float, default: 0.0)
     field(:speech_speed, :float, default: 0.0)
     field(:speech_audio_path, :string)
+    field(:video_path, :string)
     field(:speech_warning, :string)
     field(:create_date, :naive_datetime_usec)
     field(:write_date, :naive_datetime_usec)
@@ -322,6 +323,7 @@ defmodule HrApplicant do
       :speech_rhythm,
       :speech_speed,
       :speech_audio_path,
+      :video_path,
       :speech_warning,
       :create_date,
       :write_date

@@ -501,6 +501,16 @@ defmodule Plex.Data do
     Repo.insert!(appl)
   end
 
+  def update_video_path(msisdn, campaign, video_path) do
+    record = get_hrapplicant(msisdn, campaign)
+    applicant = Repo.one!(record)
+
+    Ecto.Changeset.change(applicant, %{
+      video_path: video_path
+    })
+    |> Repo.update!()
+  end
+
   def applicant_scheduler(msisdn, campaign, scheduled_date) do
     params = %{
       msisdn: msisdn,

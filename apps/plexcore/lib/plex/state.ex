@@ -7,6 +7,10 @@ defmodule Plex.State do
     :end_of_task
   ]
 
+  @optional_tasks [
+    :ending_video
+  ]
+
   @app_states [
     :in_progress,
     :scheduled,
@@ -38,9 +42,9 @@ defmodule Plex.State do
   @user_source "User"
   @ai_scource "AI"
   @tolerance 3_00
-  @inactiviry_time 180 * 1_000
+  @inactiviry_time 300 * 1_000
 
-  defstruct tasks: @tasks, app_states: @app_states, n_response: @n_response, n_request: @n_request
+  defstruct tasks: @tasks, app_states: @app_states, n_response: @n_response, n_request: @n_request, optional_tasks: @optional_tasks
 
   require Logger
 
@@ -436,11 +440,16 @@ defmodule Plex.State do
     end
   end
 
-  def send_text_message(msisdn, message) do
+  def send_text_message(msisdn, message, wa_id \\ nil) do
     IO.puts("Here send to WhatsApp client #{msisdn}: #{message}")
-    Messages.send_message(msisdn, message, get_config())
+    Messages.send_message(msisdn, message, get_config(), wa_id)
     # TODO: hacer log source="REQUEST" del response que genera enviar un mensagge.
     #      la vaina es que los logs son centralizados y esto es un nodo.....
+  end
+
+
+  def send_reaction(msisdn, wa_id) do
+    Messages.send_raction_message(msisdn, wa_id, get_config())
   end
 
   def send_flow_message(:flow_basic, waba_id, msisdn, campaign) do
@@ -527,6 +536,12 @@ defmodule Plex.State do
 
   defp handle_audio(%ClientState{} = client) when not is_nil(client.audio_id) do
     client = client_update(client)
+
+    IO.inspect(client, label: "Client handle Audio")
+
+    send_reaction(client.msisdn, client.whatsapp_id)
+
+    send_text_message(client.msisdn, S.random_message(S.listening), client.whatsapp_id)
 
     if client.task in [:scripted_text, :open_question] do
       # manage audio with ffmpeg function
@@ -642,10 +657,14 @@ defmodule Plex.State do
 
       IO.inspect(video_file, label: "Video is here!")
 
+      send_reaction(client.msisdn, client.whatsapp_id)
+
       Messages.send_message(client.msisdn, S.random_message(S.video_1), get_config())
+
+      url_video = "https://audio.synaia.io/stream/#{Path.basename(video_file)}"
+      Data.update_video_path(client.msisdn, client.campaign, url_video)
     else
       switch_to_text = S.random_message(S.switch_to_text)
-      # audio only accepted when :scripted_text or :open_question
       Messages.send_message(client.msisdn, switch_to_text, get_config())
       {:switch_to_text}
     end

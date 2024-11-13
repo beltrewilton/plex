@@ -98,6 +98,16 @@ defmodule Util.StaticMessages do
     "Video received! ✅"
   ]
 
+  @listening [
+    "😊 One sec, I'm all ears 👂",
+    "Just a moment, I'm processing 😊",
+    "Hang on a sec, gotta tune in 👂",
+    "👂 Hold on, I'm listening!",
+    "Just a sec, I'm on it ✅",
+    "🎧 Hang in there, just a sec!",
+    "Just a sec, bear with me 🐻👂"
+  ]
+
   @open_question_1  [
     "If you could create a dream community or city from scratch, what would it look like, and what features would you include to make it the perfect place to live, work, and play?",
     "If you could switch lives with someone for a day, who would it be and why? What would you do during that day, and what do you think you would learn from the experience?",
@@ -208,6 +218,7 @@ defmodule Util.StaticMessages do
   def scripted_text, do: @scripted_text
   def voice_note_1, do: @voice_note_1
   def video_1, do: @video_1
+  def listening, do: @listening
   def open_question_1, do: @open_question_1
   def voice_note_2, do: @voice_note_2
   def voice_note_received_yet, do: @voice_note_received_yet

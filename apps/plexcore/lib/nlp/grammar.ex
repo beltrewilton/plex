@@ -32,13 +32,14 @@ defmodule Grammar do
   def handle_continue(:model_loader, _state) do
     {:ok, tokenizer} =
       Bumblebee.load_tokenizer(
-        {:hf, "hafidikhsan/distilbert-base-uncased-english-cefr-lexical-evaluation-dt-v1"}
+        {:hf, "hafidikhsan/distilbert-base-uncased-english-cefr-lexical-evaluation-dt-v1"},
+        timeout: 50_000
       )
 
     {:ok, model} =
       Bumblebee.load_model(
         {:hf, "hafidikhsan/distilbert-base-uncased-english-cefr-lexical-evaluation-dt-v1"},
-        architecture: :for_sequence_classification
+        architecture: :for_sequence_classification, timeout: 50_000
         # for_token_classification
       )
 

@@ -21,8 +21,12 @@ config :plex, Plex.Repo,
   password: System.get_env("DBPASSWORD"),
   database: System.get_env("DATABASE"),
   hostname: System.get_env("HOSTNAME"),
+  pool_timeout: 50_000,
+  queue_target: 50_000,
+  queue_interval: 50_000,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 10,
+  after_connect: {Plex.Repo, :go, []}
 
 DotenvParser.load_file("../../config/plexgw.cfg")
 
@@ -36,5 +40,8 @@ config :plexgw, Plexgw.Repo,
   password: System.get_env("GW_DBPASSWORD"),
   database: System.get_env("GW_DATABASE"),
   hostname: System.get_env("GW_HOSTNAME"),
+  pool_timeout: 50_000,
+  queue_target: 50_000,
+  queue_interval: 50_000,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

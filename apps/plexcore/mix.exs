@@ -40,7 +40,7 @@ defmodule PlexCore.MixProject do
       #   TODO: this is for test -- remove...
       {:plug_cowboy, "~> 2.7.2"},
       {:tzdata, "~> 1.1"},
-      {:whatsapp_elixir, path: "/Users/beltre.wilton/apps/whatsapp_elixir"}
+      {:whatsapp_elixir, path: "/home/wilton/plex_env/whatsapp_elixir"}
     ]
   end
 end

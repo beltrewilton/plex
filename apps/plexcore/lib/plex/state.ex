@@ -654,7 +654,6 @@ defmodule Plex.State do
 
     if client.task == :end_of_task do
       {:ok, video_file} = MediaDl.get(client.video_id, client.msisdn, client.campaign, client.waba_id, client.task, :video)
-
       IO.inspect(video_file, label: "Video is here!")
 
       send_reaction(client.msisdn, client.whatsapp_id)

@@ -9,9 +9,9 @@ defmodule Plexgw.Application do
   def start(_type, _args) do
     children = [
       {Plexgw.Repo, []},
-      {Plug.Cowboy, scheme: :http, plug: Webhook.Router, options: [port: 8000]},
-      {Plug.Cowboy, scheme: :http, plug: Redirect.Router, options: [port: 8001]},
-      {Plug.Cowboy, scheme: :http, plug: AudioSrv.Router, options: [port: 8002]},
+      {Plug.Cowboy, scheme: :http, plug: Webhook.Router, options: [port: 9091]},
+      {Plug.Cowboy, scheme: :http, plug: Redirect.Router, options: [port: 9092]},
+      {Plug.Cowboy, scheme: :http, plug: AudioSrv.Router, options: [port: 8010]},
       {Task, fn -> Plexgw.Setup.start() end}
     ]
 

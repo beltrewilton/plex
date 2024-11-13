@@ -11,6 +11,11 @@ Application.put_env(:plexgw, :private_key_pem, private_key_pem)
 
 DotenvParser.load_file(plex_cfg)
 
+IO.inspect(System.get_env("USERNAME"), label: "USERNAME")
+IO.inspect(System.get_env("DBPASSWORD"), label: "DBPASSWORD")
+IO.inspect(System.get_env("DATABASE"), label: "DATABASE")
+IO.inspect(System.get_env("HOSTNAME"), label: "HOSTNAME")
+
 config :plex, Plex.Repo,
   username: System.get_env("USERNAME"),
   password: System.get_env("DBPASSWORD"),
@@ -20,6 +25,11 @@ config :plex, Plex.Repo,
   pool_size: 10
 
 DotenvParser.load_file("../../config/plexgw.cfg")
+
+IO.inspect(System.get_env("GW_USERNAME"), label: "GW_USERNAME")
+IO.inspect(System.get_env("DBPASSWORD"), label: "DBPASSWORD")
+IO.inspect(System.get_env("GW_DATABASE"), label: "GW_DATABASE")
+IO.inspect(System.get_env("GW_HOSTNAME"), label: "GW_HOSTNAME")
 
 config :plexgw, Plexgw.Repo,
   username: System.get_env("GW_USERNAME"),

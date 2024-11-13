@@ -481,6 +481,25 @@ defmodule SpeechLogSchema do
 end
 
 
+defmodule Plex.FlowHeaders do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "va_flow_headers" do
+    field(:header_name, :string)
+    field(:base64_string, :string)
+  end
+
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [
+      :id,
+      :header_name,
+      :base64_string
+    ])
+  end
+end
+
 defmodule Plex.ZohoToken do
   use Ecto.Schema
   import Ecto.Changeset

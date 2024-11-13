@@ -461,14 +461,24 @@ defmodule Plex.State do
       screen: "APPLICANT_BASIC"
     ]
 
+
+    {:atomic, appl_basic} = Plex.Data.Memory.get_flow_headers("APPL_BASIC_HEADER")
+    appl_basic |> List.first() |> Enum.at(2)
+
+    {:atomic, appl_extra} = Plex.Data.Memory.get_flow_headers("APPL_EXTRA_HEADER")
+    appl_basic |> List.first() |> Enum.at(2)
+
+    {:atomic, appl_extra_two} = Plex.Data.Memory.get_flow_headers("APPL_EXTRA_TWO_HEADER")
+    appl_basic |> List.first() |> Enum.at(2)
+
     data = %{
       "waba_id" => waba_id,
       "msisdn" => msisdn,
       "campaign" => campaign,
 
-      "applicant_basic_header" => System.get_env("APPL_BASIC_HEADER"),
-      "applicant_extra_header" => System.get_env("APPL_EXTRA_HEADER"),
-      "applicant_extra_two_header" => System.get_env("APPL_EXTRA_TWO_HEADER")
+      "applicant_basic_header" => appl_basic,
+      "applicant_extra_header" => appl_extra,
+      "applicant_extra_two_header" => appl_extra_two
     }
 
     Flow.send_flow_as_message(msisdn, data, get_config(), opts)

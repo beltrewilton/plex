@@ -27,6 +27,13 @@ defmodule Plex.Data.Memory do
       storage_properties: [ram_copies: [node()]]
     )
 
+    Mnesia.create_table(FlowHeaders,
+      attributes: Plex.FlowHeaders.__schema__(:fields),
+      type: :set,
+      storage_properties: [ram_copies: [node()]]
+    )
+
+
     Mnesia.create_table(RefText,
       attributes: [:msisdn_campaign, :text],
       type: :set,
@@ -131,6 +138,34 @@ defmodule Plex.Data.Memory do
         appl_stage.create_date,
         appl_stage.write_date
       })
+    end)
+  end
+
+  def add_flow_headers(%Plex.FlowHeaders{} = flows, id) do
+    flows = Map.drop(flows, [:id, :__struct__, :__meta__])
+
+    Mnesia.transaction(fn ->
+      Mnesia.write({
+        FlowHeaders,
+        id,
+        flows.header_name,
+        flows.base64_string
+      })
+    end)
+  end
+
+  def get_flow_headers(header_name) do
+    Mnesia.transaction(fn ->
+      Mnesia.select(
+        FlowHeaders,
+        [
+          {
+            {FlowHeaders, :"$1", :"$2", :"$3"},
+            [{:==, :"$2", header_name}],
+            [:"$$"]
+          }
+        ]
+      )
     end)
   end
 

@@ -6,6 +6,7 @@ defmodule Plex.Data do
   alias Plex.ApplicantStage
   alias Plex.HrRecruitmentStage
   alias Plex.VaScheduler
+  alias Plex.FlowHeaders
 
   alias Plex.ZohoToken
 
@@ -57,6 +58,14 @@ defmodule Plex.Data do
       applicant_stage,
       fn a ->
         Memory.add_applicant_stage(a, a.id)
+      end
+    )
+
+    flow_headers = Repo.all(FlowHeaders)
+    Enum.each(
+      flow_headers,
+      fn a ->
+        Memory.add_flow_headers(a, a.id)
       end
     )
   end

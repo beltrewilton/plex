@@ -1,7 +1,7 @@
 defmodule Integration.Zoho do
   alias Util.Timez, as: T
   @base_url "https://accounts.zoho.eu/oauth/v2/token"
-  @candidates_url "https://recruit.zoho.eu/recruit/v2/Candidates"
+  @candidates_url "https://recruit.zoho.eu/recruit/v2/Candidates/upsert"
 
   def add_candidate(
     last_name,

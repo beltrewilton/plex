@@ -7,6 +7,8 @@ defmodule AudioSrv.Router do
   @chunk_size 1_048_576
   @valid_token "your_valid_token"
 
+
+  plug Corsica, origins: "*", allow_credentials: true, allow_methods: :all, allow_headers: :all
   plug(:match)
   plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason)
   plug(:dispatch)

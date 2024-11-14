@@ -324,7 +324,6 @@ defmodule HrApplicant do
       :speech_speed,
       :speech_audio_path,
       :video_path,
-      :speech_warning,
       :create_date,
       :write_date
     ])

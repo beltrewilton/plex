@@ -571,6 +571,7 @@ defmodule Plex.State do
 
         result = scores["result"]
         warning = result["warning"]
+        IO.inspect(warning, label: "scripted_text warning here")
 
         scripted_score = %SpeechScriptedScore{
           msisdn: client.msisdn,
@@ -584,7 +585,7 @@ defmodule Plex.State do
           speech_rhythm: result["rhythm"],
           speech_speed: result["speed"],
           speech_audio_path: "https://audio.synaia.io/stream/#{String.split(audio_file, "/") |> List.last()}",
-          speech_warning: warning
+          speech_warning: "warning"
         }
 
         Data.set_score(scripted_score)
@@ -612,6 +613,7 @@ defmodule Plex.State do
 
         result = scores["result"]
         warning = result["warning"]
+        IO.inspect(warning, label: "unscripted warning here")
 
         un_scripted_score = %SpeechUnScriptedScore{
           msisdn: client.msisdn,
@@ -628,7 +630,7 @@ defmodule Plex.State do
           speech_unscripted_speed: result["speed"],
           speech_unscripted_audio_path: "https://audio.synaia.io/stream/#{String.split(audio_file, "/") |> List.last()}",
           speech_unscripted_transcription: result["transcription"],
-          speech_unscripted_warning: warning
+          speech_unscripted_warning: "warning"
         }
 
         Data.set_score(un_scripted_score)

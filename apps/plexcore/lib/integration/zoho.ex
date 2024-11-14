@@ -11,6 +11,8 @@ defmodule Integration.Zoho do
     city,
     cedula
   ) do
+    email = "#{UUID.uuid1}@xteam.com"
+    
     json_data = %{
       "data" => [
         %{

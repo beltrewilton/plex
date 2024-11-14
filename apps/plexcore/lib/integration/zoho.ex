@@ -24,12 +24,16 @@ defmodule Integration.Zoho do
       ]
     }
 
+    IO.inspect(json_data, label: "Zoho Client")
+
     token = get_token()
 
     headers = %{
       "Authorization" => "Bearer #{token}",
       "Content-Type" => "application/json"
     }
+
+    IO.inspect(headers, label: "Zoho Headers")
 
     case HTTPoison.post(@candidates_url, Jason.encode!(json_data), headers, timeout: 60_000 * 5, recv_timeout: 60_000 * 5) do
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} when status_code in 200..300 ->

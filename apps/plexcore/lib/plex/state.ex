@@ -463,15 +463,15 @@ defmodule Plex.State do
 
 
     {:atomic, appl_basic} = Plex.Data.Memory.get_flow_headers("APPL_BASIC_HEADER")
-    appl_basic |> List.first() |> Enum.at(2)
+    appl_basic = appl_basic |> List.first() |> Enum.at(2)
 
     {:atomic, appl_extra} = Plex.Data.Memory.get_flow_headers("APPL_EXTRA_HEADER")
-    appl_extra |> List.first() |> Enum.at(2)
+    appl_extra = appl_extra |> List.first() |> Enum.at(2)
 
     {:atomic, appl_extra_two} = Plex.Data.Memory.get_flow_headers("APPL_EXTRA_TWO_HEADER")
-    appl_extra_two |> List.first() |> Enum.at(2)
+    appl_extra_two = appl_extra_two |> List.first() |> Enum.at(2)
 
-    IO.inspect(appl_basic, label: "appl_basic")
+    IO.inspect(appl_basic, label: "|appl_basic|")
 
     data = %{
       "waba_id" => waba_id,

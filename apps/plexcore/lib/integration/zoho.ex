@@ -1,7 +1,7 @@
 defmodule Integration.Zoho do
   alias Util.Timez, as: T
   @base_url "https://accounts.zoho.eu/oauth/v2/token"
-  @candidates_url "https://recruit.zoho.eu/recruit/v2/Candidates/upsert"
+  @candidates_url "https://recruit.zoho.eu/recruit/v2/Candidates"
 
   def add_candidate(
     last_name,
@@ -29,7 +29,7 @@ defmodule Integration.Zoho do
     token = get_token()
 
     headers = %{
-      "Authorization" => "Bearer #{token}",
+      "Authorization" => "Zoho-oauthtoken #{token}",
       "Content-Type" => "application/json"
     }
 

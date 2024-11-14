@@ -674,7 +674,7 @@ defmodule Plex.State do
 
       Messages.send_message(client.msisdn, S.random_message(S.video_1), get_config())
 
-      url_video = "https://audio.synaia.io/stream/#{Path.basename(video_file)}"
+      url_video = "https://audio.synaia.io/stream/video/#{Path.basename(video_file)}"
       Data.update_video_path(client.msisdn, client.campaign, url_video)
     else
       switch_to_text = S.random_message(S.switch_to_text)

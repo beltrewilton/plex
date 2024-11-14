@@ -25,6 +25,10 @@ defmodule Plexgw.MixProject do
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
+    # export WHATSAPP_ELIXIR_PATH=/Users/beltre.wilton/apps/whatsapp_elixir
+    # export WHATSAPP_ELIXIR_PATH=/home/wilton/plex_env/whatsapp_elixir
+
+    whatsapp_elixir_path = System.get_env("WHATSAPP_ELIXIR_PATH")
     [
       {:ecto, "~> 3.12"},
       {:ecto_sql, "~> 3.12"},
@@ -35,8 +39,7 @@ defmodule Plexgw.MixProject do
       {:dotenv_parser, "~> 2.0"},
       {:tzdata, "~> 1.1"},
       {:corsica, "~> 2.1"},
-      # {:whatsapp_elixir, path: "/Users/beltre.wilton/apps/whatsapp_elixir"}
-      {:whatsapp_elixir, path: "/home/wilton/plex_env/whatsapp_elixir"}
+      {:whatsapp_elixir, path: whatsapp_elixir_path}
     ]
   end
 end

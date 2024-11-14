@@ -57,6 +57,29 @@ defmodule AudioSrv.Router do
     end
   end
 
+  get "/stream/video/:filename" do
+    # Authenticate token before proceeding with the streaming
+    conn = authenticate_token(conn, [])
+
+    # Check if authentication failed (i.e., halted the connection)
+    unless conn.halted do
+      # Define the path to the audio files
+      file_path = Path.join([System.get_env("VIDEO_RECORDING_PATH"), filename])
+
+      # Check if file exists
+      if File.exists?(file_path) do
+        # Set the response content-type header
+        conn
+        |> put_resp_content_type("video/mp4")
+        |> send_chunked(200)
+        |> stream_file(file_path)
+      else
+        # Send 404 response if file does not exist
+        send_resp(conn, 404, "File not found")
+      end
+    end
+  end
+
   # Function to handle file streaming
   defp stream_file(conn, file_path) do
     # Open the file stream

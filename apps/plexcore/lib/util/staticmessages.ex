@@ -3,8 +3,7 @@ defmodule Util.StaticMessages do
     "I'm excited to express my interest in the available position",
     "I'm writing to inquire about the opportunity to join your team",
     "I'm eager to submit my application for the role",
-    "I'm reaching out to express my enthusiasm for the job opening",
-    "I'm interested in exploring the possibility of joining your organization"
+    "I'm reaching out to express my enthusiasm for the job opening"
   ]
 
   @basic_form  [

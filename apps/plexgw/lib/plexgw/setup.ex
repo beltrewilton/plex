@@ -22,7 +22,8 @@ defmodule Plexgw.Setup do
   end
 
   def setup do
-    add("442392808948818", :"ccd@10.0.0.28", :plex_app)
+    # add("442392808948818", :"ccd@10.0.0.28", :plex_app)
+    add("442392808948818", :"ccd@10.132.102.216", :plex_app)
   end
 
   # Util.Addnode.start(:"plexgw@10.0.0.28", :"synaia@10.0.0.28", "367131756473430")

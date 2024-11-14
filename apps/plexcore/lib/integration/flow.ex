@@ -61,7 +61,11 @@ defmodule Plex.Flow do
 
     {first_name, last_name} = split_name(partner_name)
 
-    Integration.Zoho.add_candidate(last_name, first_name, "no@email.com", partner_phone, business_location, campaign)
+    IO.inspect(first_name, label: "Zoho Client first_name")
+
+    Integration.Zoho.add_candidate(last_name, first_name, "no@email.com", partner_phone, business_location, cedula_id)
+
+    IO.puts("Integration.Zoho.add_candidate ended")
   end
 
   def split_name(name) do

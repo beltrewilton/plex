@@ -137,9 +137,6 @@ defmodule Plex.State do
 
           # AQUI: fue encontrado `campaign_extracted` entonces remplazar ese mensaje por uno LLM friendly
           {:replace_message, S.random_message(S.user_hello_replaced)}
-
-          #TODO: try to change the default `client.message` variable for a generic one
-          # Map.put(client, :message, new_message_from_static)
       end
     end
   end
@@ -368,7 +365,6 @@ defmodule Plex.State do
         chat_history(client.msisdn, client.campaign)
       )
 
-    # TODO: mas pruebas son requeridas LLM...
     n_response = Plex.LLM.generate(n_request)
     IO.inspect(n_response)
 
@@ -403,7 +399,6 @@ defmodule Plex.State do
     )
 
     if n_response.output.schedule do
-      # TODO: remove the inactivity clock/job/task
       Scheduler.kill(
         client.msisdn,
         client.campaign,
@@ -413,7 +408,6 @@ defmodule Plex.State do
 
     if n_response.output.abort_scheduled_state do
       # TODO: call the stupid set_state_all function
-      #       remove previous_scheduled_job_id
       Scheduler.kill(
         client.msisdn,
         client.campaign,
@@ -443,8 +437,9 @@ defmodule Plex.State do
   def send_text_message(msisdn, message, wa_id \\ nil) do
     IO.puts("Here send to WhatsApp client #{msisdn}: #{message}")
     Messages.send_message(msisdn, message, get_config(), wa_id)
+    # TODO: IMPORTANT !!
     # TODO: hacer log source="REQUEST" del response que genera enviar un mensagge.
-    #      la vaina es que los logs son centralizados y esto es un nodo.....
+    #      ---> la vaina es que los logs son centralizados y esto es un nodo.....
   end
 
 
@@ -659,8 +654,6 @@ defmodule Plex.State do
 
   defp handle_audio(%ClientState{} = _client) do
     {:no_audio}
-
-    # TODO: esto se supone que detiene el flujo `return en Python` con return response, flow_trigger
   end
 
   def handle_video(%ClientState{} = client) when not is_nil(client.video_id) do

@@ -1,6 +1,6 @@
 import Config
 
-# TODO: THIS FILE IS IGNORED, SEE ROOT config.exs
+# IMPORTANT: THIS FILE IS IGNORED, SEE ROOT config.exs
 IO.puts("This is the path of apps/plexcore/config/config.exs")
 IO.inspect(File.cwd!())
 

@@ -1,6 +1,6 @@
 # Plexgw
 
-**TODO: Add description**
+**The Gateway**
 
 ## Installation
 

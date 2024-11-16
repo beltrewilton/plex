@@ -24,7 +24,7 @@ defmodule Plex.Scheduler do
     Memory.add_ref(msisdn, campaign, task_name, ref_string, ref_process)
   end
 
-  # Plex.Scheduler.delay("18296456177", "BLACKOUT", "some_task_name", fn -> Plex.Scheduler.dummy("Wilton") end) # TODO: also call cancel_execution
+  # Plex.Scheduler.delay("18296456177", "BLACKOUT", "some_task_name", fn -> Plex.Scheduler.dummy("Wilton") end)
   # Plex.Scheduler.kill("18296456177", "BLACKOUT", "some_task_name")
   # Plex.Data.Memory.get_ref("18296456177", "BLACKOUT", "some_task_name")
 
@@ -64,6 +64,7 @@ defmodule Plex.Scheduler do
 
           # Messages.send_message(msisdn, "A beauty WhatsApp message ....", Plex.State.get_config())
           # TODO: or generate a LLM message according to history.
+          # TODO: parte de la implr del scheduler (30) involucra un Flow 
 
           Data.done_scheduler(msisdn, campaign)
         end

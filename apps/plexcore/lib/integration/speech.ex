@@ -20,7 +20,6 @@ defmodule SpeechSuperClient do
     text =
       "In my previous role at a call center, I managed customer inquiries and resolved issues efficiently. I utilized active listening and problem-solving skills to enhance customer satisfaction. My ability to handle high-stress situations and maintain a professional demeanor contributed to a positive customer experience. This role honed my communication and multitasking abilities."
 
-    # TODO: fix abs paths
     request_scripted(
       "#{System.get_env("AUDIO_RECORDING_PATH")}/waves/#{wav}",
       s.para_eval,

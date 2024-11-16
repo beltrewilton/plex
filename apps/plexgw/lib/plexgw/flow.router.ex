@@ -95,6 +95,7 @@ defmodule Flow.Router do
       [_, target_node, :plex_app] ->
         cond do
           # TODO: considerar seriamente que los times esten hard-codeados en el flow.json en Meta para evitar esta llamada.
+          # TODO: tips para el modulo de scheduler (30)
           # TODO: esto es de mayor utilidad cuando el aplicante esté seleccionando una fecha de entrevista disponible en la que se requiera consultar la base de datos por disponibilidad del reclutador.
           remote_function == :scheduler and
               Map.get(decrypted_data["data"], "trigger", nil) == "period_selected" ->

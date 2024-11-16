@@ -29,7 +29,7 @@ defmodule Plexgw.Setup do
   # Util.Addnode.start(:"plexgw@10.0.0.28", :"synaia@10.0.0.28", "367131756473430")
   # Util.Addnode.start(:"plexgw@10.0.0.28", :"ceidi@10.0.0.28", "443834038808808")
 
-  # TODO: THE RECIPE FOR NODES
+  #THE RECIPE FOR NODES
   # start debug plexgw: bya launch -> iex --name plexgw@10.0.0.28 -S mix
   #
   # start console iex --name plexcore1@10.0.0.28 -S mix

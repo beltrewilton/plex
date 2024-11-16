@@ -42,8 +42,6 @@ defmodule PlexCore.MixProject do
       {:dotenv_parser, "~> 2.0"},
       {:bumblebee, "~> 0.6.0"},
       {:exla, "~> 0.9.1"},
-      #   TODO: this is for test -- remove...
-      {:plug_cowboy, "~> 2.7.2"},
       {:tzdata, "~> 1.1"},
       {:whatsapp_elixir, path: whatsapp_elixir_path}
     ]

@@ -53,7 +53,7 @@ defmodule PlexTest do
     #   assert {:ok, client} = Plex.State.message_handler(client)
     # end
 
-    # test "5 grammar completed" do #TODO: expect share_link = true
+    # test "5 grammar completed" do
     #   is_flow = true
 
     #   message = "completed"

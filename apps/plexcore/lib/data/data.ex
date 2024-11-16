@@ -19,9 +19,6 @@ defmodule Plex.Data do
 
   # import Logger
 
-  # TODO: pending:
-  # updated_collected_db
-
   def start_link(_args) do
     Memory.start()
 
@@ -87,7 +84,7 @@ defmodule Plex.Data do
 
         case Repo.insert(changeset) do
           {:ok, record} ->
-            # TODO: first time????
+            # first time key (msisdn, campaign)
             register_without_name(msisdn, campaign)
             Memory.add_applicant_stage(record, record.id)
 
@@ -246,18 +243,6 @@ defmodule Plex.Data do
     end
   end
 
-  # old name: odoo_update_state
-  # TODO: call indepentdently
-  # def odoo_update_state(msisdn, campaign, task, previous_task, state) do
-  #   # juhhh?
-  #   # if task in ["Talent entry form", "Grammar assessment form", "Scripted text", "Open question", "End_of_task"]:
-  #   update_hrapplicant(msisdn, campaign, task)
-
-  #   update_applicant_stage(msisdn, campaign, task, state)
-
-  # end
-
-  # old name: update_stage
   # really: update or insert
   def update_applicant_stage(msisdn, campaign, task, state) do
     query_update =
@@ -494,7 +479,6 @@ defmodule Plex.Data do
   end
 
   defp register_without_name(msisdn, campaign) do
-    # TODO: first: perform some memory logic
     {:ok, job} = get_job_by_campaign(campaign)
 
     appl = %HrApplicant{

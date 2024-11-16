@@ -48,6 +48,7 @@ defmodule Webhook.Router do
 
     case Setup.get(waba_id) do
       [_, target_node, :plex_app] ->
+        #TODO: if Node.connect(target_node) == true do --> this help?
         :rpc.cast(
           target_node,
           Plex.State,

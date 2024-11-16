@@ -223,7 +223,7 @@ defmodule Plex.Data.Memory do
     filter_function = fn messages ->
       Enum.filter(
         messages,
-        fn [_, _, _, _, _, _, _, _, _, collected, _, _, _, _] -> collected == false end
+        fn [_, _, _, _, _, _, _, _, _, collected, _, _, _, _] -> collected == true end
       )
     end
 

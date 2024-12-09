@@ -78,4 +78,33 @@ defmodule Redirect.Router do
         )
     end
   end
+
+  get "/purge/:msisdn/:campaign/:waba_id" do
+    try do
+      case Setup.get(waba_id) do
+      [_, target_node, :plex_app] ->
+            :rpc.cast(
+              target_node,
+              Plex.Data,
+              :purge_applicant,
+              [
+                msisdn,
+                campaign
+              ]
+            )
+        [_, nil, nil] ->
+          {:sorry_no_app}
+      end
+
+      send_resp(conn, 200, Jason.encode!(%{"success" => "success"}))
+    rescue
+      e ->
+        conn
+        |> put_resp_header("content-type", "application/json")
+        |> send_resp(
+          500,
+          Jason.encode!(%{error: "Internal Server Error", detail: Exception.message(e)})
+        )
+    end
+  end
 end

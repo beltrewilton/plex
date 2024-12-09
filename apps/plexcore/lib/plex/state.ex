@@ -752,6 +752,6 @@ defmodule Plex.State do
   defp chat_history(msisdn, campaign) do
     Memory.get_collected_messages(msisdn, campaign)
     |> Enum.slice(0..-2//1)
-    |> Enum.map(fn h -> Enum.at(h, 7) end)
+    |> Enum.map(fn h -> "#{Enum.at(h, 5)}:#{Enum.at(h, 7)}" end)
   end
 end

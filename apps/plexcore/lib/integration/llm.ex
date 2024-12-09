@@ -8,10 +8,12 @@ defmodule Plex.LLM do
 
   def generate(n_request) do
     body = Plex.Formater.transform_request(n_request)
+    IO.inspect(body, label: "Body")
     # n_request = Map.put(n_request, :state, n_request.app_states)
     # n_request = Map.delete(n_request, :app_states)
     # body = Jason.encode!(n_request)
     # IO.inspect(body)
+    # case HTTPoison.post(@url, body, @headers, timeout: 60_000 * 30, recv_timeout: 60_000 * 30) do
     case HTTPoison.post(@url, body, @headers, timeout: 60_000 * 30, recv_timeout: 60_000 * 30) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         # IO.puts("Response: #{response_body}")

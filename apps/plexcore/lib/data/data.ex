@@ -58,13 +58,13 @@ defmodule Plex.Data do
       end
     )
 
-    flow_headers = Repo.all(FlowHeaders)
-    Enum.each(
-      flow_headers,
-      fn a ->
-        Memory.add_flow_headers(a, a.id)
-      end
-    )
+    # flow_headers = Repo.all(FlowHeaders)
+    # Enum.each(
+    #   flow_headers,
+    #   fn a ->
+    #     Memory.add_flow_headers(a, a.id)
+    #   end
+    # )
   end
 
   def add_applicant_stage(msisdn, campaign, task, state) do

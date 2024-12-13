@@ -457,25 +457,25 @@ defmodule Plex.State do
     ]
 
 
-    {:atomic, appl_basic} = Plex.Data.Memory.get_flow_headers("APPL_BASIC_HEADER")
-    appl_basic = appl_basic |> List.first() |> Enum.at(2)
+    # {:atomic, appl_basic} = Plex.Data.Memory.get_flow_headers("APPL_BASIC_HEADER")
+    # appl_basic = appl_basic |> List.first() |> Enum.at(2)
 
-    {:atomic, appl_extra} = Plex.Data.Memory.get_flow_headers("APPL_EXTRA_HEADER")
-    appl_extra = appl_extra |> List.first() |> Enum.at(2)
+    # {:atomic, appl_extra} = Plex.Data.Memory.get_flow_headers("APPL_EXTRA_HEADER")
+    # appl_extra = appl_extra |> List.first() |> Enum.at(2)
 
-    {:atomic, appl_extra_two} = Plex.Data.Memory.get_flow_headers("APPL_EXTRA_TWO_HEADER")
-    appl_extra_two = appl_extra_two |> List.first() |> Enum.at(2)
+    # {:atomic, appl_extra_two} = Plex.Data.Memory.get_flow_headers("APPL_EXTRA_TWO_HEADER")
+    # appl_extra_two = appl_extra_two |> List.first() |> Enum.at(2)
 
-    IO.inspect(appl_basic, label: "|appl_basic|")
+    # IO.inspect(appl_basic, label: "|appl_basic|")
 
     data = %{
       "waba_id" => waba_id,
       "msisdn" => msisdn,
-      "campaign" => campaign,
+      "campaign" => campaign
 
-      "applicant_basic_header" => appl_basic,
-      "applicant_extra_header" => appl_extra,
-      "applicant_extra_two_header" => appl_extra_two
+      # "applicant_basic_header" => appl_basic,
+      # "applicant_extra_header" => appl_extra,
+      # "applicant_extra_two_header" => appl_extra_two
     }
 
     Flow.send_flow_as_message(msisdn, data, get_config(), opts)

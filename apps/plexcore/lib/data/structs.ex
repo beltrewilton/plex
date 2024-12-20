@@ -130,6 +130,7 @@ defmodule ApplicantStageStruct do
           campaign: String.t() | nil,
           task: String.t() | nil,
           state: String.t() | nil,
+          previous_state: String.t() | nil,
           last_update: NaiveDateTime.t() | nil,
           create_date: NaiveDateTime.t() | nil,
           write_date: NaiveDateTime.t() | nil
@@ -143,6 +144,7 @@ defmodule ApplicantStageStruct do
     :campaign,
     :task,
     :state,
+    :previous_state,
     :last_update,
     :create_date,
     :write_date
@@ -156,6 +158,7 @@ defmodule ApplicantStageStruct do
         campaign,
         task,
         state,
+        previous_state,
         last_update,
         create_date,
         write_date
@@ -168,6 +171,7 @@ defmodule ApplicantStageStruct do
       campaign: campaign,
       task: task,
       state: state,
+      previous_state: previous_state,
       last_update: last_update,
       create_date: create_date,
       write_date: write_date

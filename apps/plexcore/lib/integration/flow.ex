@@ -59,11 +59,17 @@ defmodule Plex.Flow do
       hear_about_us
     )
 
+    #TODO: `english_level` prepare a case to translate to ccd scales
+    # 3.5+
+    # 3.75
+    # 4
+    #TODO: availability_tostart
+
     {first_name, last_name} = split_name(partner_name)
 
     IO.inspect(first_name, label: "Zoho Client first_name")
 
-    Integration.Zoho.add_candidate(last_name, first_name, "no@email.com", partner_phone, business_location, cedula_id)
+    Integration.Zoho.add_candidate(last_name, first_name, "no@email.com", partner_phone, business_location, cedula_id, type_document_id, work_permit, english_level, availability_towork, hear_about_us)
 
     IO.puts("Integration.Zoho.add_candidate ended")
   end

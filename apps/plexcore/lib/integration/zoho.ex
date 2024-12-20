@@ -8,11 +8,16 @@ defmodule Integration.Zoho do
     first_mame,
     email,
     mobile,
-    city,
-    cedula
+    site,
+    cedula,
+    type_document_id,
+    work_permit,
+    english_level,
+    availability_towork,
+    hear_about_us
   ) do
     email = "#{UUID.uuid1}@xteam.com"
-    
+
     json_data = %{
       "data" => [
         %{
@@ -20,8 +25,13 @@ defmodule Integration.Zoho do
           "First_Name" => first_mame,
           "Email" => email,
           "Mobile" => mobile,
-          "City" => city,
-          "Cedula" => cedula
+          "Site" => site,
+          "Cedula" => cedula,
+          "Id_Type" => type_document_id,
+          "Work_Permit" => [work_permit],
+          "English_Level" => english_level,
+          "Modality" => availability_towork,
+          "Where_did_you_heard_from_us" => hear_about_us
         }
       ]
     }

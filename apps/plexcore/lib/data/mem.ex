@@ -323,13 +323,13 @@ defmodule Plex.Data.Memory do
     filter_function = fn stages ->
       Enum.filter(
         stages,
-        fn [_, _, _, _, _, _, _, last_update, _, _] ->
+        fn [_, _, _, _, _, _, _, last_update, _, _, _] ->
           Date.diff(T.now(), last_update) < min_days
         end
       )
       |> case do
         [] -> []
-        result -> Enum.max_by(result, fn [id, _, _, _, _, _, _, _, _, _] -> id end)
+        result -> Enum.max_by(result, fn [id, _, _, _, _, _, _, _, _, _, _] -> id end)
       end
     end
 

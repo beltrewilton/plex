@@ -66,6 +66,9 @@ defmodule Plex.Formater do
       :in_progress ->
         Atom.to_string(:in_progress) |> String.replace("_", " ") |> String.capitalize()
 
+      :previous_state ->
+        Atom.to_string(:previous_state) |> String.replace("_", " ") |> String.capitalize()
+
       :scheduled ->
         "Scheduled"
 
@@ -96,6 +99,7 @@ defmodule Plex.Formater do
     Enum.reduce(states, %{}, fn state, acc ->
       case state do
         :in_progress -> Map.put(acc, atom_to_str(:in_progress), "in_progress")
+        :previous_state -> Map.put(acc, atom_to_str(:previous_state), "previous_state")
         :scheduled -> Map.put(acc, atom_to_str(:scheduled), "scheduled")
         :completed -> Map.put(acc, atom_to_str(:completed), "completed")
       end

@@ -67,7 +67,7 @@ defmodule Plex.Data do
     # )
   end
 
-  def add_applicant_stage(msisdn, campaign, task, state) do
+  def add_applicant_stage(msisdn, campaign, task, state, previous_state \\ nil) do
     case Memory.get_applicant_stage(msisdn, campaign) do
       {:atomic, nil} ->
         changeset =
@@ -79,6 +79,7 @@ defmodule Plex.Data do
             campaign: campaign,
             task: task,
             state: state,
+            previous_state: previous_state,
             last_update: T.now()
           })
 
@@ -244,7 +245,7 @@ defmodule Plex.Data do
   end
 
   # really: update or insert
-  def update_applicant_stage(msisdn, campaign, task, state) do
+  def update_applicant_stage(msisdn, campaign, task, state, previous_state \\ nil) do
     query_update =
       from(a in ApplicantStage,
         where: a.msisdn == ^msisdn and a.campaign == ^campaign,
@@ -253,7 +254,7 @@ defmodule Plex.Data do
 
     applicant_stage =
       case Repo.update_all(query_update,
-             set: [state: state, task: task, last_update: T.now()]
+             set: [state: state, previous_state: previous_state, task: task, last_update: T.now()]
            ) do
         {0, _} ->
           # not found, insert
@@ -267,6 +268,7 @@ defmodule Plex.Data do
             campaign: campaign,
             task: task,
             state: state,
+            previous_state: previous_state,
             last_update: T.now()
           })
           |> Repo.insert!()

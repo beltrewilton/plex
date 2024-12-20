@@ -93,7 +93,7 @@ defmodule Plex.Data.Memory do
           [
             {
               {ApplicantStage, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9",
-               :"$10"},
+               :"$10", :"$11"},
               [{:==, :"$4", msisdn}, {:==, :"$5", campaign}],
               [:"$$"]
             }
@@ -124,6 +124,9 @@ defmodule Plex.Data.Memory do
     state =
       if is_binary(appl_stage.state), do: String.to_atom(appl_stage.state), else: appl_stage.state
 
+    previous_state =
+        if is_binary(appl_stage.previous_state), do: String.to_atom(appl_stage.previous_state), else: appl_stage.previous_state
+
     Mnesia.transaction(fn ->
       Mnesia.write({
         ApplicantStage,
@@ -134,6 +137,7 @@ defmodule Plex.Data.Memory do
         appl_stage.campaign,
         task,
         state,
+        previous_state,
         appl_stage.last_update,
         appl_stage.create_date,
         appl_stage.write_date
@@ -336,7 +340,7 @@ defmodule Plex.Data.Memory do
           [
             {
               {ApplicantStage, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9",
-               :"$10"},
+               :"$10", :"$11"},
               [{:==, :"$4", msisdn}],
               [:"$$"]
             }
@@ -492,7 +496,7 @@ defmodule Plex.Data.Memory do
         [
           {
             {ApplicantStage, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8", :"$9",
-             :"$10"},
+             :"$10", :"$11"},
             [{:==, :"$4", msisdn}],
             [:"$$"]
           }

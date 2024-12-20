@@ -95,7 +95,8 @@ defmodule Plex.State do
         scheduled,
         forwarded,
         task \\ :talent_entry_form,
-        state \\ :in_progress
+        state \\ :in_progress,
+        previous_state \\ :in_progress
       ) do
     %ClientState{
       waba_id: waba_id,
@@ -103,6 +104,7 @@ defmodule Plex.State do
       message: message,
       whatsapp_id: whatsapp_id,
       state: state,
+      previous_state: previous_state,
       task: task,
       flow: flow,
       audio_id: audio_id,
@@ -347,6 +349,14 @@ defmodule Plex.State do
         )
     end
 
+    #TODO: god place to previous state
+    if client.state == :completed and client.previous_state != :completed do
+      client = Map.put(client, :previous_state, :completed)
+      IO.inspect(client, label: "***** CLIENT ON :complete")
+      Data.update_applicant_stage(client.msisdn, client.campaign, client.task, client.state, client.previous_state)
+    end
+    ####
+
     if client.flow and not client.scheduled, do: task_completed(client)
 
     # if switch_to_text, NO debe ejecutar mas nada.
@@ -360,7 +370,8 @@ defmodule Plex.State do
       new_n_request(
         unreaded_messages_collected,
         client.state,
-        :in_progress,
+        # :in_progress, # TODO: this this this !!!
+        client.previous_state,
         client.task,
         chat_history(client.msisdn, client.campaign)
       )

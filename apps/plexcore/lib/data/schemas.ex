@@ -54,6 +54,7 @@ defmodule Plex.ApplicantStage do
     field(:campaign, :string)
     field(:task, Plex.Type.AtomString)
     field(:state, Plex.Type.AtomString)
+    field(:previous_state, Plex.Type.AtomString)
     field(:last_update, :naive_datetime_usec)
     field(:create_date, :naive_datetime_usec)
     field(:write_date, :naive_datetime_usec)

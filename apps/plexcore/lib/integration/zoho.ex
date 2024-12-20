@@ -32,7 +32,7 @@ defmodule Integration.Zoho do
           "Cedula" =>  cedula,
           "Id_Type" => type_document_id,
           "Work_Permit" => [work_permit],
-          "English_Level" => english_level,
+          "English_Level" => Integer.to_string(english_level),
           "Modality" => availability_towork,
           "Where_did_you_heard_from_us" => hear_about_us
         }

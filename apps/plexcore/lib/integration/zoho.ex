@@ -18,6 +18,9 @@ defmodule Integration.Zoho do
   ) do
     email = "#{UUID.uuid1}@xteam.com"
 
+    cedula = if is_nil(cedula), do: "", else: cedula
+    work_permit = if is_nil(work_permit), do: "", else: work_permit
+
     json_data = %{
       "data" => [
         %{
@@ -26,7 +29,7 @@ defmodule Integration.Zoho do
           "Email" => email,
           "Mobile" => mobile,
           "Site" => site,
-          "Cedula" => cedula,
+          "Cedula" =>  cedula,
           "Id_Type" => type_document_id,
           "Work_Permit" => [work_permit],
           "English_Level" => english_level,

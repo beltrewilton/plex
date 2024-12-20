@@ -350,6 +350,8 @@ defmodule Plex.State do
     end
 
     #TODO: god place to previous state
+    client = client_update(client)
+    
     if client.state == :completed and client.previous_state != :completed do
       client = Map.put(client, :previous_state, :completed)
       IO.inspect(client, label: "***** CLIENT ON :complete")

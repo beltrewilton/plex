@@ -323,7 +323,7 @@ defmodule Plex.Data.Memory do
     filter_function = fn stages ->
       Enum.filter(
         stages,
-        fn [_, _, _, _, _, _, _, last_update, _, _, _] ->
+        fn [_, _, _, _, _, _, _, _, last_update, _, _] ->
           Date.diff(T.now(), last_update) < min_days
         end
       )

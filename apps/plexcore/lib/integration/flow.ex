@@ -108,6 +108,20 @@ defmodule Plex.Flow do
     }
 
     Data.set_grammar_score(score)
+
+    scores_with_labels = [
+      {"A1", score.a1_score},
+      {"A2", score.a2_score},
+      {"B1", score.b1_score},
+      {"B2", score.b2_score},
+      {"C1", score.c1_score},
+      {"C2", score.c2_score}
+    ]
+
+    {label, _highest_score} = Enum.max_by(scores_with_labels, fn {_label, value} -> value end)
+
+    Zoho.add_score(msisdn, label, :grammar)
+
   end
 
   def scheduler(decrypted_data) do

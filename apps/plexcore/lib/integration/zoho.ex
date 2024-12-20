@@ -2,21 +2,22 @@ defmodule Integration.Zoho do
   alias Util.Timez, as: T
   @base_url "https://accounts.zoho.eu/oauth/v2/token"
   @candidates_url "https://recruit.zoho.eu/recruit/v2/Candidates"
+  @candidates_upsert_url "https://recruit.zoho.eu/recruit/v2/Candidates/upsert"
 
   def add_candidate(
-    last_name,
-    first_mame,
-    email,
-    mobile,
-    site,
-    cedula,
-    type_document_id,
-    work_permit,
-    english_level,
-    availability_towork,
-    hear_about_us
-  ) do
-    email = "#{UUID.uuid1}@xteam.com"
+        last_name,
+        first_mame,
+        email,
+        mobile,
+        site,
+        cedula,
+        type_document_id,
+        work_permit,
+        english_level,
+        availability_towork,
+        hear_about_us
+      ) do
+    email = "#{mobile}@synaia.io"
 
     cedula = if is_nil(cedula), do: "", else: cedula
     work_permit = if is_nil(work_permit), do: "", else: work_permit
@@ -29,7 +30,7 @@ defmodule Integration.Zoho do
           "Email" => email,
           "Mobile" => mobile,
           "Site" => site,
-          "Cedula" =>  cedula,
+          "Cedula" => cedula,
           "Id_Type" => type_document_id,
           "Work_Permit" => [work_permit],
           "English_Level" => Integer.to_string(english_level),
@@ -50,8 +51,60 @@ defmodule Integration.Zoho do
 
     IO.inspect(headers, label: "Zoho Headers")
 
-    case HTTPoison.post(@candidates_url, Jason.encode!(json_data), headers, timeout: 60_000 * 5, recv_timeout: 60_000 * 5) do
-      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} when status_code in 200..300 ->
+    case HTTPoison.post(@candidates_url, Jason.encode!(json_data), headers,
+           timeout: 60_000 * 5,
+           recv_timeout: 60_000 * 5
+         ) do
+      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}}
+      when status_code in 200..300 ->
+        Jason.decode!(response_body)
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
+        IO.puts("Error: Received status code #{status_code}. Response: #{response_body}")
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.puts("Error: #{reason}")
+    end
+  end
+
+  def add_score(
+        mobile,
+        score_value,
+        score_type
+      ) do
+    email = "#{mobile}@synaia.io"
+
+    field_name =
+      case score_type do
+        :grammar -> "Grammar_Score"
+        :scripted -> "Scripted_Score"
+        :speech -> "Speech_Overall_Score"
+      end
+
+    json_data = %{
+      "data" => [
+        %{
+          "Email" => email,
+          field_name => score_value
+        }
+      ]
+    }
+
+    IO.inspect(json_data, label: "Zoho Add Score")
+
+    token = get_token()
+
+    headers = %{
+      "Authorization" => "Zoho-oauthtoken #{token}",
+      "Content-Type" => "application/json"
+    }
+
+    case HTTPoison.post(@candidates_upsert_url, Jason.encode!(json_data), headers,
+           timeout: 60_000 * 5,
+           recv_timeout: 60_000 * 5
+         ) do
+      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}}
+      when status_code in 200..300 ->
         Jason.decode!(response_body)
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
@@ -67,7 +120,7 @@ defmodule Integration.Zoho do
       grant_type: "refresh_token",
       client_id: System.get_env("Z_CLIENT_ID"),
       client_secret: System.get_env("Z_SECRET_CLIENT"),
-      refresh_token: System.get_env("Z_REFRESH_TOKEN"),
+      refresh_token: System.get_env("Z_REFRESH_TOKEN")
     }
 
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
@@ -89,10 +142,16 @@ defmodule Integration.Zoho do
 
     case result do
       %Plex.ZohoToken{} = data ->
-        if NaiveDateTime.diff(data.expires_at, T.now()) < 0 do # expiro
+        # expiro
+        if NaiveDateTime.diff(data.expires_at, T.now()) < 0 do
           {:ok, token} = refresh_token()
           expires_at = T.now(3600, :second)
-          Plex.Data.upsert_access_token(Map.get(token, "access_token"), expires_at, data.access_token)
+
+          Plex.Data.upsert_access_token(
+            Map.get(token, "access_token"),
+            expires_at,
+            data.access_token
+          )
 
           Map.get(token, "access_token")
         else

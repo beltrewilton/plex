@@ -48,6 +48,7 @@ defmodule Plex.State do
 
   require Logger
 
+  alias Integration.Zoho
   alias Plex.Data.Memory
   alias Plex.Data
   alias Plex.Scheduler
@@ -598,6 +599,8 @@ defmodule Plex.State do
           speech_warning: "warning"
         }
 
+        Zoho.add_score(client.msisdn, result["overall"], :scripted)
+
         Data.set_score(scripted_score)
 
         log = %SpeechLog{
@@ -642,6 +645,8 @@ defmodule Plex.State do
           speech_unscripted_transcription: result["transcription"],
           speech_unscripted_warning: "warning"
         }
+
+        Zoho.add_score(client.msisdn, result["overall"], :speech)
 
         Data.set_score(un_scripted_score)
 

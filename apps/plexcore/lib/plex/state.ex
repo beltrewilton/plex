@@ -293,13 +293,15 @@ defmodule Plex.State do
       Map.merge(client, %{
         campaign: stage.campaign,
         task: stage.task,
-        state: stage.state
+        state: stage.state,
+        previous_state: stage.previous_state
       })
     else
       Map.merge(client, %{
         campaign: stage.campaign,
         task: stage.task,
         state: stage.state,
+        previous_state: stage.previous_state,
         message: new_message
       })
     end
@@ -351,7 +353,7 @@ defmodule Plex.State do
 
     #TODO: god place to previous state
     client = client_update(client)
-    
+
     if client.state == :completed and client.previous_state != :completed do
       client = Map.put(client, :previous_state, :completed)
       IO.inspect(client, label: "***** CLIENT ON :complete")

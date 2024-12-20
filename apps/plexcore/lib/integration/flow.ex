@@ -120,7 +120,7 @@ defmodule Plex.Flow do
 
     {label, _highest_score} = Enum.max_by(scores_with_labels, fn {_label, value} -> value end)
 
-    Zoho.add_score(msisdn, label, :grammar)
+    Integration.Zoho.add_score(msisdn, label, :grammar)
 
   end
 

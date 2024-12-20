@@ -74,6 +74,8 @@ defmodule Plex.Formater do
 
       :completed ->
         "Completed"
+
+      nil -> "In progress"
     end
   end
 

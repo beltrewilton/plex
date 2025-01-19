@@ -18,8 +18,14 @@ defmodule Redirect.Router do
       referer = get_req_header(conn, "referer") |> List.first()
       user_agent = get_req_header(conn, "user-agent") |> List.first()
 
-      header_keys = Enum.map(conn.req_headers, fn {key, _value} -> key end)
-      IO.inspect(header_keys, label: "Header Keys")
+      # Iterate over the keys and fetch their values
+      Enum.each(conn.req_headers |> Enum.map(fn {key, _value} -> key end), fn key ->
+        # Fetch the values for each key
+        values = Plug.Conn.get_req_header(conn, key)
+
+        # Print the key and its associated values
+        IO.puts("#{key}: #{Enum.join(values, ", ")}")
+      end)
 
       IO.inspect(referer, label: "referer")
       IO.inspect(user_agent, label: "user_agent")

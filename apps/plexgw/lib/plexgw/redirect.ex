@@ -18,6 +18,9 @@ defmodule Redirect.Router do
       referer = get_req_header(conn, "referer") |> List.first()
       user_agent = get_req_header(conn, "user-agent") |> List.first()
 
+      header_keys = Enum.map(conn.req_headers, fn {key, _value} -> key end)
+      IO.inspect(header_keys, label: "Header Keys")
+
       IO.inspect(referer, label: "referer")
       IO.inspect(user_agent, label: "user_agent")
 

@@ -16,7 +16,8 @@ defmodule Redirect.Router do
   get "/redirect/:campaign/:waba_id" do
     try do
       referer = get_req_header(conn, "referer") |> List.first()
-      referer = if is_nil(referer), do: "", else: referer
+      host = get_req_header(conn, "host") |> List.first()
+      referer = if is_nil(referer), do: host, else: referer
       user_agent = get_req_header(conn, "user-agent") |> List.first()
 
       IO.inspect(referer, label: "referer")

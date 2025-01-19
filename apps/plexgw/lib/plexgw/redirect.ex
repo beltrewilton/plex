@@ -16,16 +16,8 @@ defmodule Redirect.Router do
   get "/redirect/:campaign/:waba_id" do
     try do
       referer = get_req_header(conn, "referer") |> List.first()
+      referer = if is_nil(referer), do: "", else: referer
       user_agent = get_req_header(conn, "user-agent") |> List.first()
-
-      # Iterate over the keys and fetch their values
-      Enum.each(conn.req_headers |> Enum.map(fn {key, _value} -> key end), fn key ->
-        # Fetch the values for each key
-        values = Plug.Conn.get_req_header(conn, key)
-
-        # Print the key and its associated values
-        IO.puts("#{key}: #{Enum.join(values, ", ")}")
-      end)
 
       IO.inspect(referer, label: "referer")
       IO.inspect(user_agent, label: "user_agent")

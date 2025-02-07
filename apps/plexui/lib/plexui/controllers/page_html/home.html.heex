@@ -1,0 +1,295 @@
+<.flash_group flash={@flash} />
+<!-- Header -->
+<header class="bg-white shadow-md sticky top-0 z-10 flex justify-between items-center py-4 font-mono">
+    <h2 class="text-xl font-bold ml-4">{@applicant.partner_name}</h2>
+    <nav class="flex items-center space-x-4 mr-4">
+        <span class="text-gray-600">New</span>
+        <span class="text-gray-600">QA Assessment</span>
+        <span class="text-gray-600">Recording</span>
+        <span class="text-gray-600">Evaluation</span>
+    </nav>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col md:flex-row font-mono text-sm">
+    <!-- Left Column -->
+    <div class="md:w-1/2 p-4 flex-1">
+        <div class="space-y-4">
+            <div class="flex space-x-4">
+                <span class="text-gray-600 w-32">Applied on:</span>
+                <span class="text-gray-900">2023-02-20</span>
+            </div>
+            <div class="flex space-x-4">
+                <span class="text-gray-600 w-32">Mobile:</span>
+                <span class="text-gray-900">{@applicant.partner_phone}</span>
+            </div>
+            <div class="flex space-x-4">
+                <span class="text-gray-600 w-32">Cédula:</span>
+                <span class="text-gray-900">{@applicant.cedula_id}</span>
+            </div>
+            <div class="flex space-x-4">
+                <span class="text-gray-600 w-32">Aval. to start working:</span>
+                <span class="text-gray-900">{@applicant.availability_tostart}</span>
+            </div>
+            <div class="flex space-x-4">
+                <span class="text-gray-600 w-32">Availability to work:</span>
+                <span class="text-gray-900">{@applicant.availability_towork}</span>
+            </div>
+            <div class="flex space-x-4">
+                <span class="text-gray-600 w-32">Business Location:</span>
+                <span class="text-gray-900">{@applicant.business_location}</span>
+            </div>
+            <div class="flex space-x-4">
+                <span class="text-gray-600 w-32">Work Permit:</span>
+                <span class="text-gray-900">{@applicant.work_permit}</span>
+            </div>
+            <div class="flex space-x-4">
+                <span class="text-gray-600 w-32">Hear About Us:</span>
+                <span class="text-gray-900">{@applicant.hear_about_us}</span>
+            </div>
+        </div>
+    </div>
+    <!-- Right Column -->
+    <div class="md:w-1/2 p-4 flex-1">
+        <div class="flex space-x-4 mb-4">
+            <div class="w-24 h-24 flex items-center justify-center">
+                <canvas class="mb-10" id="lead-temperature-id" phx-hook="HalfGauge" data-label="Lead Temperature"
+                    data-lead_max_temperature={0.7} data-lead_heat_check="{0.3}">
+                </canvas>
+            </div>
+            <div class="w-24 h-24 flex items-center justify-center">
+                <canvas id="speech-unscripted-overall-score-id" phx-hook="LetterGauge" data-label="Speech Overall"
+                    data-score={@applicant.speech_unscripted_overall_score} data-bgcolor="#1fc0f3">
+                </canvas>
+            </div>
+            <div class="w-24 h-24 flex items-center justify-center">
+                <canvas id="speech-overall-score-id" phx-hook="LetterGauge" data-label="Scripted Score"
+                    data-score={@applicant.speech_overall} data-bgcolor="#2abe23"></canvas>
+            </div>
+            <div class="w-24 h-24 flex items-center justify-center">
+                <canvas id="grammar-score-id" phx-hook="LetterGauge" data-label="Grammar Score"
+                    data-score={@applicant.speech_overall} data-bgcolor="#ab65ed"></canvas>
+            </div>
+        </div>
+        <div class="h-64 bg-gray-200 flex items-center justify-center">
+            
+        </div>
+    </div>
+</main>
+
+<!--  uses radio buttons -->
+<section class="flex flex-row flex-wrap ml-3 mb-20 font-mono text-sm">
+
+    <input id="tab-one" phx-hook="ControlPlay" type="radio" name="tabs" class="peer/tab-one opacity-0 absolute" checked />
+    <label for="tab-one"
+        class="peer-checked/tab-one:border-b-2 cursor-pointer p-4  block">
+        Scripted Speech Score
+    </label>
+
+    <input id="tab-two" phx-hook="ControlPlay" type="radio" name="tabs" class="peer/tab-two opacity-0 absolute" />
+    <label for="tab-two"
+        class=" peer-checked/tab-two:border-b-2 cursor-pointer p-4  block">
+        Scripted Speech Score
+    </label>
+
+    <input id="tab-three" type="radio" name="tabs" class="peer/tab-three opacity-0 absolute" />
+    <label for="tab-three"
+        class=" peer-checked/tab-three:border-b-2 cursor-pointer p-4 block">
+        Grammar Score
+    </label>
+
+    <input id="tab-four" phx-hook="ScrollInto" type="radio" name="tabs" class="peer/tab-four opacity-0 absolute" />
+    <label for="tab-four"
+        class=" peer-checked/tab-four:border-b-2 cursor-pointer p-4 block">
+        Video
+    </label>
+
+    <div class="basis-full h-0"></div>
+
+    <div class=" hidden peer-checked/tab-one:block p-4 w-full">
+        <!-- Tab 1 Content -->
+        <div class="block mb-24">
+            <div class="mb-4">
+                <span class="text-gray-600">Open Question:</span>
+                <span class="text-gray-900">{@applicant.speech_open_question}</span>
+            </div>
+            <div class="flex space-x-4 mb-4">
+                <div class="w-1/2">
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600 w-48">Speech Overall Score:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="speech-overall-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={@applicant.speech_unscripted_overall_score}
+                                data-bgcolor="#1fc0f3"
+                            >
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600 w-48">Fluency Coherence:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="fluency-coherence-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={@applicant.speech_unscripted_fluency_coherence}
+                                data-bgcolor="#236c8a"
+                            >
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600 w-48">Pronunciation:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="pronuntiation-coherence-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={@applicant.speech_unscripted_pronunciation}
+                                data-bgcolor="#236c8a"
+                            >
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600 w-48">Grammar Score:</span>
+                        <span class="text-gray-900 w-48">
+                            <canvas 
+                                id="grammar-coherence-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={@applicant.speech_unscripted_grammar}
+                                data-bgcolor="#236c8a"
+                            >
+                            </canvas>
+                        </span>
+                    </div>
+                </div>
+                <div class="w-1/2">
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600 w-48">Lexical Score:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="lexical-coherence-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={@applicant.speech_unscripted_lexical_resource}
+                                data-bgcolor="#236c8a"
+                            >
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600 w-48">Relevance:</span>
+                        <span class="text-gray-900">{@applicant.speech_unscripted_relevance} %</span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600 w-48">Speed:</span>
+                        <span class="text-gray-900">{@applicant.speech_unscripted_speed}</span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600 w-48">Pause Fillers:</span>
+                        <span class="text-gray-900">P/D</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <span class="text-gray-600">Transcription:</span>
+                <span class="text-gray-900">{@applicant.speech_unscripted_transcription}</span>
+            </div>
+            <div class="mb-4">
+
+            </div>
+        </div>
+    </div>
+    <div class="hidden peer-checked/tab-two:block p-4 w-full">
+        <!-- Tab 2 Content -->
+        <div class="w-60 bg-gray-200 h-48 items-center justify-center mb-24">
+            <!-- Similar to Tab 1 Content -->
+           
+        </div>
+    </div>
+    <div class="hidden peer-checked/tab-three:block p-4 w-full">
+        <!-- Tab 3 Content -->
+        <div class="mb-24">
+            <div class="flex space-x-4 mb-2">
+                <span class="text-gray-600">A1:</span>
+                <span class="text-gray-900">
+                    <canvas 
+                        id="a1-grammar-score-progress"
+                        phx-hook="ProgressBar"
+                        style="width: 200px; height: 20px;"
+                        data-progressvalue={@applicant.speech_unscripted_lexical_resource}
+                        data-bgcolor="#236c8a"
+                        data-maxvalue="100"
+                    >
+                    </canvas>
+                </span>
+            </div>
+            <div class="flex space-x-4 mb-2">
+                <span class="text-gray-600">A2:</span>
+                <span class="text-gray-900">No</span>
+            </div>
+            <div class="flex space-x-4 mb-2">
+                <span class="text-gray-600">B1:</span>
+                <span class="text-gray-900">Yes</span>
+            </div>
+            <div class="flex space-x-4 mb-2">
+                <span class="text-gray-600">B2:</span>
+                <span class="text-gray-900">No</span>
+            </div>
+            <div class="flex space-x-4 mb-2">
+                <span class="text-gray-600">Assessment No. 1:</span>
+                <span class="text-gray-900">Passed</span>
+            </div>
+            <div class="flex space-x-4 mb-2">
+                <span class="text-gray-600">Applicant Answer No. 1:</span>
+                <span class="text-gray-900">Sample answer.</span>
+            </div>
+        </div>
+    </div>
+    <div class="hidden peer-checked/tab-four:block p-4 w-full">
+        <!-- Tab 2 Content -->
+        <div class="w-60 bg-gray-200 h-48 items-center justify-center mb-72 ">
+            <video 
+                phx-hook="VideoPlayer" 
+                class="border border-gray-200 shadow-md rounded-lg"   
+                controls="controls" 
+                id="video-element-id"
+                data-video={@applicant.video_path}
+            >
+                <source src="" type="video/mp4" />
+            </video>
+        </div>
+    </div>
+
+</section>
+
+<!-- Footer -->
+<footer
+    class="border-t-2 border-light-blue-500 border-opacity-25 bg-white shadow-sm p-4 fixed bottom-0 left-0 right-0 font-mono text-sm">
+    <div class="" id="speech-non-scripted-id">
+        <div style="display: grid; grid-template-columns: 110px auto;">
+            <button 
+                id="player-btn-id" phx-hook="AudioPlayer"
+                data-audiopath={@applicant.speech_unscripted_audio_path}
+                data-container="audio-container-id"
+                data-progresscolor="#BFDBFE"
+                class="transition duration-500 ease-in-out bg-blue-200 hover:bg-blue-300 transform hover:-translate-y-1 hover:scale-110 text-nowrap me-1 btn-primary my-2 rounded-md">Play</button>
+            <div class="position-relative" id="audio-container-id" />
+        </div>
+    </div>
+    <div class="hidden" id="speech-scripted-id">
+        <div style="display: grid; grid-template-columns: 110px auto;">
+            <button 
+                id="player-btn-id-01" phx-hook="AudioPlayer"
+                data-audiopath={@applicant.speech_audio_path}
+                data-container="audio-container-id-01"
+                data-progresscolor="#fa9167"
+                class="transition duration-500 ease-in-out bg-red-200 hover:bg-red-300 transform hover:-translate-y-1 hover:scale-110 text-nowrap me-1 btn-primary my-2 rounded-md">Play</button>
+             <div class="position-relative" id="audio-container-id-01" />
+        </div>
+    </div>
+</footer>

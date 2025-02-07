@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "chart.js": "^4.4.7",
+    "wavesurfer.js": "^7.9.0"
+  }
+}

@@ -29,6 +29,7 @@ import ProgressBar from "./progresss_bar"
 import VideoPlayer from "./video_player"
 import ControlPlay from "./control_play"
 import ScrollInto from "./scroll_into_video"
+import ClosePopup from "./close_popup_window"
 
 let hooks = {}
 hooks.AudioPlayer = AudioPlayer
@@ -38,6 +39,7 @@ hooks.ProgressBar = ProgressBar
 hooks.VideoPlayer = VideoPlayer
 hooks.ControlPlay = ControlPlay
 hooks.ScrollInto = ScrollInto
+hooks.ClosePopup = ClosePopup
 
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")

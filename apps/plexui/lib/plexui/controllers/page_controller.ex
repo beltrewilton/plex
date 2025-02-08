@@ -16,6 +16,6 @@ defmodule Plexui.PageController do
       end
 
 
-    render(conn, :home, page_title: applicant.partner_name, layout: false, applicant: applicant, referer: true)
+    render(conn, :home, page_title: applicant.partner_name, layout: false, applicant: applicant, referer: referer)
   end
 end

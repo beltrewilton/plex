@@ -8,13 +8,14 @@ defmodule Plexui.PageController do
     # so skip the default app layout.
     applicant = Data.get_hrapplicant(msisdn, campaign)
     headers = Enum.into(conn.req_headers, %{})
-    result =
+    referer =
       case headers do
-        %{"referer" => referer} -> referer
-        _ -> "Not found"
+        %{"referer" => ref} ->
+          if ref == "https://recruit.zoho.eu/", do: true, else: false
+        _ -> false
       end
-    IO.inspect( result )
-    
-    render(conn, :home, layout: false, applicant: applicant)
+
+
+    render(conn, :home, layout: false, applicant: applicant, referer: referer)
   end
 end

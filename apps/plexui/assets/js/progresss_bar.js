@@ -8,7 +8,7 @@ export default ProgressBar = {
 
         const progressValue = ctx.dataset.progressvalue
         const bgcolor = ctx.dataset.bgcolor
-        const maxValue = 9 || ctx.dataset.maxvalue;
+        const maxValue = ctx.dataset.maxvalue || 9 ;
 
         // Custom plugin to show progress text inside the bar
         const progressTextPlugin = {

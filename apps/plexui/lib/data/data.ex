@@ -40,4 +40,16 @@ defmodule Plexui.Data do
     )
     Repo.all(query)
   end
+
+  def get_heat_check(msisdn, campaign) do
+    query = from(hc in HrHeatCheck,
+      join: a in HrApplicant,
+      on: a.id == hc.applicant_id,
+      join: j in HrJob,
+      on: a.job_id == j.id,
+      where: a.phone_sanitized == ^msisdn and j.va_campaign == ^campaign,
+      limit: 1
+    )
+    Repo.one!(query)
+  end
 end

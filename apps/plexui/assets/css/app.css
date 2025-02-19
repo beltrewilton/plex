@@ -2,5 +2,6 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "./custom.css";
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css");
 
 /* This file is for your main application CSS */

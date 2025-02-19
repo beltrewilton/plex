@@ -3,13 +3,25 @@
     <!-- Header -->
     <header class="bg-white shadow-md sticky top-0 z-10 flex justify-between items-center py-3 pb-1 font-mono">
         <div>
-            <h2 class="text-xl font-bold ml-4">{@applicant.partner_name}</h2>
-            <h2 class="text-xl font-bold ml-4">{@applicant.partner_phone}</h2>
+            <h2 class="text-xl font-bold ml-2">
+                <i class="fas fa-user-circle ml-1"></i>
+                {@applicant.partner_name}
+            </h2>
+            <h2 class="text-xl font-bold ml-2">
+                <i class="fab fa-whatsapp ml-1 text-green-500"></i>
+                {@applicant.partner_phone}
+            </h2>
+            
         </div>
         <div class="flex space-x-4 mb-4">
             <div class="w-24 h-24 flex items-center justify-center">
-                <canvas class="mb-10" id="lead-temperature-id" phx-hook="HalfGauge" data-label="Lead Temperature"
-                    data-lead_max_temperature={0.7} data-lead_heat_check="{0.3}">
+                <canvas 
+                    class="mb-10" 
+                    id="lead-temperature-id" 
+                    phx-hook="HalfGauge" 
+                    data-label="Lead Temperature"
+                    data-lead_max_temperature={1} 
+                    data-lead_heat_check={@heat_check.lead_temperature |> Decimal.to_float()}>
                 </canvas>
             </div>
             <div class="w-24 h-24 flex items-center justify-center">
@@ -269,7 +281,7 @@
             <div class="block mb-24">
                 <div class="mb-4">
                     <span class="text-gray-600">Open Question:</span>
-                    <span class="text-gray-900">{@applicant.speech_open_question}</span>
+                    <span class="text-gray-900 italic">{@applicant.speech_open_question}</span>
                 </div>
                 <div class="flex space-x-4 mb-4">
                     <div class="w-1/2">
@@ -340,7 +352,9 @@
                 </div>
                 <div class="mb-4">
                     <span class="text-gray-600">Transcription:</span>
-                    <span class="text-gray-900">{@applicant.speech_unscripted_transcription}</span>
+                    <span class="text-gray-900 block mt-2 p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                        {@applicant.speech_unscripted_transcription}
+                    </span>
                 </div>
                 <div class="mb-4">
 

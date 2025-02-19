@@ -448,6 +448,37 @@ defmodule HrJob do
   end
 end
 
+
+defmodule HrHeatCheck do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "hr_heat_check" do
+    field(:applicant_id, :integer)
+    field(:lead_stage, :string)
+    field(:lead_last_update, :naive_datetime_usec)
+    field(:lead_last_client_update, :naive_datetime_usec)
+    field(:lead_heat_check, :string)
+    field(:lead_temperature, :decimal, default: 0.0)
+    field(:lead_client_temperature, :decimal, default: 0.0)
+  end
+
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [
+      :id,
+      :applicant_id,
+      :lead_stage,
+      :lead_last_update,
+      :lead_last_client_update,
+      :lead_heat_check,
+      :lead_temperature,
+      :lead_client_temperature
+    ])
+  end
+end
+
+
 defmodule SpeechLogSchema do
   use Ecto.Schema
   import Ecto.Changeset

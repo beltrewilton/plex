@@ -17,6 +17,8 @@ defmodule Plexui.PageController do
 
     chat_history = Data.get_chat_history(msisdn, campaign)
 
-    render(conn, :home, page_title: applicant.partner_name, layout: false, applicant: applicant, referer: referer, chat_history: chat_history)
+    heat_check = Data.get_heat_check(msisdn, campaign)
+
+    render(conn, :home, page_title: applicant.partner_name, layout: false, applicant: applicant, referer: referer, chat_history: chat_history, heat_check: heat_check)
   end
 end

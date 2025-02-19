@@ -8,7 +8,7 @@ export default HalfGauge = {
         const lead_heat_check = this.el.dataset.lead_heat_check
         const _title = this.el.dataset.label
 
-        console.log(lead_heat_check)
+        console.log("lead_heat_check", lead_heat_check)
 
         const config = {
             type: "doughnut",

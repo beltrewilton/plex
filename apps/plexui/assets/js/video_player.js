@@ -4,7 +4,7 @@ export default VideoPlayer = {
         const video_path =  this.el.dataset.video
         // "https://audio.synaia.io/stream/video/442392808948818-18494589977-CNYE6FR4AM4D-end_of_task.mp4"
         const sourceElement = videoElement.querySelector("source")
-        sourceElement.src = video_path
+        // sourceElement.src = video_path
         
         const token = "your_valid_token";
 

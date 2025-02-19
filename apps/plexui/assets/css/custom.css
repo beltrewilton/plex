@@ -1,0 +1,414 @@
+.date-left {
+  text-align: left;
+}
+
+.date-right {
+  text-align: right;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00000080;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #000000cc;
+}
+
+
+hr {
+  width: 75%;
+  height: 1px;
+  margin: auto;
+  border: none;
+  background: #00000020;
+}
+
+.icon {
+  cursor: pointer;
+  transition: all ease 0.5s;
+}
+.icon:hover {
+  opacity: 0.5;
+}
+
+.person {
+  --size:2em;
+  width: fit-content;
+  min-width: var(--size);
+  min-height: var(--size);
+  position: relative;
+  background-image: url("https://static.synaia.io/maria-face.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 50%;
+}
+.person.avatar {
+  --size:3em;
+}
+.person.photo {
+  --size:6em;
+}
+.person.photo .online {
+  --size:1.5em;
+}
+.person .online {
+  --size:0.75em;
+  width: fit-content;
+  min-width: var(--size);
+  min-height: var(--size);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: #09db84;
+  border-radius: 50%;
+}
+
+.chat {
+  --bg:#fff;
+  --bg-secundary:#e1e1e8;
+  --bg-highlight:#057ef7;
+  --color:#2a2b2e;
+  max-width: 960px;
+  width: 100%;
+  height: 95%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  color: var(--color);
+  background: var(--bg);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 8px -4px #00000020;
+  transition: all ease 0.5s;
+}
+.chat.dark {
+  --bg:#1f2024;
+  --bg-secundary:#292a30;
+  --color:#dde4f0;
+}
+.chat[data-color=red] {
+  --bg-highlight:#f70546;
+}
+.chat[data-color=green] {
+  --bg-highlight:#10915c;
+}
+.chat[data-color=purple] {
+  --bg-highlight:#b600f2;
+}
+.chat .conversation {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: all ease 0.5s;
+}
+.chat .conversation .head {
+  width: 100%;
+  min-height: 4em;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  background: var(--bg-secundary);
+  padding: 0.5em;
+}
+.chat .conversation .head .buttons {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  margin-left: auto;
+}
+.chat .conversation .messages {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  padding: 1em;
+  overflow: auto;
+}
+.chat .conversation .messages .time {
+  width: fit-content;
+  font-size: 0.75em;
+  margin: 0 auto;
+  padding: 0.5em;
+  border-radius: 6px;
+  background: #00000020;
+}
+.chat .conversation .messages .msg-text {
+  width: fit-content;
+  font-size: 0.85em;
+  animation: appear-msg ease 0.25s forwards;
+}
+.chat .conversation .messages .msg-text .text {
+  display: block;
+  padding: 0.75em;
+  border-radius: 0.75em 0.75em 0.75em 0;
+  background: var(--bg-secundary);
+  box-shadow: 0 2px 0 #00000020;
+}
+.chat .conversation .messages .msg-text.owner {
+  margin-left: auto;
+}
+.chat .conversation .messages .msg-text.owner .text {
+  color: #fff;
+  background: var(--bg-highlight);
+  border-radius: 0.75em 0.75em 0 0.75em;
+}
+.chat .conversation .field {
+  width: 100%;
+  height: 4em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.25em 0.5em;
+  border-top: 1px solid var(--bg-secundary);
+  transition: all ease 0.5s;
+}
+.chat .conversation .field .input-message {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 0.5em 1em;
+  border-radius: 50px;
+  color: var(--color);
+  background: var(--bg-secundary);
+  transition: all ease 0.5s;
+}
+.chat .conversation .field .input-message:placeholder-shown ~ .text {
+  display: none;
+}
+.chat .conversation .field .input-message:not(:placeholder-shown) ~ .plus {
+  display: none;
+}
+.chat .conversation .field .input-message:not(:placeholder-shown) ~ .audio {
+  display: none;
+}
+.chat .conversation .field .plus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5em;
+  border-radius: 50%;
+  background: var(--bg-secundary);
+}
+.chat .conversation .field .send {
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  background: var(--bg-highlight);
+  padding: 0.5em;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.chat .conversation .field .send .audio {
+  display: none;
+}
+.chat .options {
+  min-width: 50%;
+  height: 100%;
+  padding: 0.5em;
+  border-left: 1px solid var(--bg-secundary);
+  background: var(--bg);
+  position: absolute;
+  right: -100%;
+  overflow: auto;
+  transition: all ease 0.5s;
+}
+.chat .options.active {
+  right: 0;
+}
+.chat .options .head {
+  display: flex;
+  align-items: center;
+}
+.chat .options .info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+}
+.chat .options .buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+.chat .options .buttons .button {
+  text-align: center;
+}
+.chat .options .buttons .button .icon {
+  --size:2em;
+  width: var(--size);
+  height: var(--size);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5em;
+  margin: auto;
+  background: var(--bg-secundary);
+  border-radius: 50%;
+}
+.chat .options .buttons .button .title {
+  font-size: 0.9em;
+  margin: 0.25em;
+  opacity: 0.5;
+}
+.chat .options .details {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  font-size: 0.9em;
+  padding: 1em 2em;
+}
+.chat .options .details > * {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 1em 0;
+  border-bottom: 1px solid #00000020;
+}
+.chat .options .details .search-field .icon {
+  display: flex;
+  align-items: center;
+}
+.chat .options .details .search-field .search {
+  width: 100%;
+  padding: 0.25em;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+.chat .options .details .dark-mode .input-dark {
+  display: none;
+}
+.chat .options .details .dark-mode .input-dark:checked ~ .toggle .circle {
+  left: 50%;
+  background: var(--bg-highlight);
+}
+.chat .options .details .dark-mode .toggle {
+  cursor: pointer;
+  --size:1.5em;
+  width: calc(var(--size) * 2);
+  height: var(--size);
+  position: relative;
+  border-radius: var(--size);
+  outline: 2px solid var(--bg-secundary);
+}
+.chat .options .details .dark-mode .toggle .circle {
+  width: var(--size);
+  height: var(--size);
+  position: relative;
+  left: 0;
+  background: var(--bg-secundary);
+  border-radius: var(--size);
+  transition: all ease 0.5s;
+}
+.chat .options .details .theme .colors {
+  display: flex;
+  gap: 0.5em;
+}
+.chat .options .details .theme .colors .color {
+  cursor: pointer;
+  --size:1.25em;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+}
+.chat .options .details .theme .colors .color:hover {
+  outline: 2px solid var(--bg-secundary);
+}
+.chat .options .details .theme .colors .color.blue {
+  background: #057ef7;
+}
+.chat .options .details .theme .colors .color.red {
+  background: #f70546;
+}
+.chat .options .details .theme .colors .color.green {
+  background: #10915c;
+}
+.chat .options .details .theme .colors .color.purple {
+  background: #b600f2;
+}
+.chat .options .details .media {
+  flex-direction: column;
+  gap: 1em;
+}
+.chat .options .details .media .label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.chat .options .details .media .photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 96px;
+  grid-column-gap: 6px;
+  grid-row-gap: 6px;
+}
+.chat .options .details .media .photos .img {
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  object-position: center;
+}
+.chat .options .details .view-more {
+  cursor: pointer;
+  width: fit-content;
+  margin: auto;
+  font-size: 1.1em;
+  font-weight: 600;
+  text-align: center;
+  color: var(--bg-highlight);
+  background: #00000005;
+  border-radius: 8px;
+  padding: 0.5em;
+}
+
+.social {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1em;
+}
+.social .button {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  color: #000;
+  text-decoration: none;
+}
+
+@media screen and (max-width: 768px) {
+  .chat .conversation, .chat .options {
+    width: 100%;
+  }
+}
+@keyframes appear-msg {
+  from {
+    opacity: 0;
+    transform: translateY(50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

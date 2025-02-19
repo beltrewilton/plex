@@ -25,6 +25,7 @@ import topbar from "../vendor/topbar"
 import AudioPlayer from "./audio_player"
 import HalfGauge from "./half_gauge"
 import LetterGauge from "./letter_gauge"
+import ScoreGauge from "./score_gauge"
 import ProgressBar from "./progresss_bar"
 import VideoPlayer from "./video_player"
 import ControlPlay from "./control_play"
@@ -35,6 +36,7 @@ let hooks = {}
 hooks.AudioPlayer = AudioPlayer
 hooks.HalfGauge = HalfGauge
 hooks.LetterGauge = LetterGauge
+hooks.ScoreGauge = ScoreGauge
 hooks.ProgressBar = ProgressBar
 hooks.VideoPlayer = VideoPlayer
 hooks.ControlPlay = ControlPlay

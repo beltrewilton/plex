@@ -1,16 +1,16 @@
 import Chart from "chart.js/auto";
 
-export default LetterGauge = {
+export default ScoreGauge = {
     mounted() {
         if (!this.el) return; // Ensure element exists
 
         let ctx = this.el.getContext("2d");
-        const labelValue = this.el.dataset.grammletterscore
-        const grammarhighestscore = this.el.dataset.grammarhighestscore
-        const maxValue = 100
-        const remainingValue = maxValue - grammarhighestscore
+        const score = this.el.dataset.score
+        const maxValue = this.el.dataset.maxvalue
+        const remainingValue = maxValue - score
         const _title = this.el.dataset.label
         const backgroundColor = this.el.dataset.bgcolor
+        const labelValue = score
 
         // Custom plugin to add text in the center
         const centerTextPlugin = {
@@ -35,7 +35,7 @@ export default LetterGauge = {
             data: {
                 datasets: [
                     {
-                        data: [grammarhighestscore, remainingValue],
+                        data: [score, remainingValue],
                         backgroundColor: [backgroundColor, "#dddddd"],
                     },
                 ],

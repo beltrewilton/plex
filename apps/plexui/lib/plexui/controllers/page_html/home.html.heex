@@ -472,104 +472,115 @@
         </div>
         <div class="hidden peer-checked/tab-three:block p-4 w-full">
             <!-- Tab 3 Content -->
-            <div class="mb-24">
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">A1:</span>
-                    <span class="text-gray-900">
-                        <canvas 
-                            id="a1_score-score-progress"
-                            phx-hook="ProgressBar"
-                            style="width: 200px; height: 20px;"
-                            data-progressvalue={Float.round(@applicant.a1_score |> Decimal.to_float(), 2)}
-                            data-maxvalue={100}
-                            data-bgcolor="#236c8a">
-                        </canvas>
-                    </span>
+            <div class="mb-24 grid grid-cols-[33%_67%] gap-4">
+                <div class="col-span-1">
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600">A1:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="a1_score-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={Float.round(@applicant.a1_score |> Decimal.to_float(), 2)}
+                                data-maxvalue={100}
+                                data-bgcolor="#236c8a">
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600">A2:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="a2_score-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={Float.round(@applicant.a2_score |> Decimal.to_float(), 2)}
+                                data-maxvalue={100}
+                                data-bgcolor="#236c8a">
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600">B1:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="b1_score-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={Float.round(@applicant.b1_score |> Decimal.to_float(), 2)}
+                                data-maxvalue={100}
+                                data-bgcolor="#236c8a">
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600">B2:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="b2_score-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={Float.round(@applicant.b2_score |> Decimal.to_float(), 2)}
+                                data-maxvalue={100}
+                                data-bgcolor="#236c8a">
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600">C1:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="c1_score-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={Float.round(@applicant.c1_score |> Decimal.to_float(), 2)}
+                                data-maxvalue={100}
+                                data-bgcolor="#236c8a">
+                            </canvas>
+                        </span>
+                    </div>
+                    <div class="flex space-x-4 mb-2">
+                        <span class="text-gray-600">C2:</span>
+                        <span class="text-gray-900">
+                            <canvas 
+                                id="c2_score-score-progress"
+                                phx-hook="ProgressBar"
+                                style="width: 200px; height: 20px;"
+                                data-progressvalue={Float.round(@applicant.c2_score |> Decimal.to_float(), 2)}
+                                data-maxvalue={100}
+                                data-bgcolor="#236c8a">
+                            </canvas>
+                        </span>
+                    </div>
                 </div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">A2:</span>
-                    <span class="text-gray-900">
-                        <canvas 
-                            id="a2_score-score-progress"
-                            phx-hook="ProgressBar"
-                            style="width: 200px; height: 20px;"
-                            data-progressvalue={Float.round(@applicant.a2_score |> Decimal.to_float(), 2)}
-                            data-maxvalue={100}
-                            data-bgcolor="#236c8a">
-                        </canvas>
-                    </span>
+                <div class="col-span-1">
+                    <div class="bg-white p-4 shadow-md mb-2">
+                        <div class="flex flex-col space-y-4">
+                            <div class="bg-gray-100 p-4 rounded">
+                                <h2 class="text-gray-600 font-bold mb-2">Question #1:</h2>
+                                <p class="text-gray-900">{@applicant.user_question_1}</p>
+                            </div>
+                            <div class="bg-gray-100 p-4 rounded">
+                                <h2 class="text-gray-600 font-bold mb-2">Answer:</h2>
+                                <p class="text-gray-900">{@applicant.user_input_answer_1}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 shadow-md mb-2">
+                        <div class="flex flex-col space-y-4">
+                            <div class="bg-gray-100 p-4 rounded">
+                                <h2 class="text-gray-600 font-bold mb-2">Question #2:</h2>
+                                <p class="text-gray-900">{@applicant.user_question_2}</p>
+                            </div>
+                            <div class="bg-gray-100 p-4 rounded">
+                                <h2 class="text-gray-600 font-bold mb-2">Answer:</h2>
+                                <p class="text-gray-900">{@applicant.user_input_answer_2}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">B1:</span>
-                    <span class="text-gray-900">
-                        <canvas 
-                            id="b1_score-score-progress"
-                            phx-hook="ProgressBar"
-                            style="width: 200px; height: 20px;"
-                            data-progressvalue={Float.round(@applicant.b1_score |> Decimal.to_float(), 2)}
-                            data-maxvalue={100}
-                            data-bgcolor="#236c8a">
-                        </canvas>
-                    </span>
-                </div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">B2:</span>
-                    <span class="text-gray-900">
-                        <canvas 
-                            id="b2_score-score-progress"
-                            phx-hook="ProgressBar"
-                            style="width: 200px; height: 20px;"
-                            data-progressvalue={Float.round(@applicant.b2_score |> Decimal.to_float(), 2)}
-                            data-maxvalue={100}
-                            data-bgcolor="#236c8a">
-                        </canvas>
-                    </span>
-                </div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">C1:</span>
-                    <span class="text-gray-900">
-                        <canvas 
-                            id="c1_score-score-progress"
-                            phx-hook="ProgressBar"
-                            style="width: 200px; height: 20px;"
-                            data-progressvalue={Float.round(@applicant.c1_score |> Decimal.to_float(), 2)}
-                            data-maxvalue={100}
-                            data-bgcolor="#236c8a">
-                        </canvas>
-                    </span>
-                </div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">C2:</span>
-                    <span class="text-gray-900">
-                        <canvas 
-                            id="c2_score-score-progress"
-                            phx-hook="ProgressBar"
-                            style="width: 200px; height: 20px;"
-                            data-progressvalue={Float.round(@applicant.c2_score |> Decimal.to_float(), 2)}
-                            data-maxvalue={100}
-                            data-bgcolor="#236c8a">
-                        </canvas>
-                    </span>
-                </div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">Assessment No. 1:</span>
-                    <span class="text-gray-900">{@applicant.user_question_1}</span>
-                </div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">Answer No. 1:</span>
-                    <span class="text-gray-900">{@applicant.user_input_answer_1}</span>
-                </div>
-                <div class="flex space-x-4 mb-4"></div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">Assessment No. 2:</span>
-                    <span class="text-gray-900">{@applicant.user_question_2}</span>
-                </div>
-                <div class="flex space-x-4 mb-2">
-                    <span class="text-gray-600">Answer No. 2:</span>
-                    <span class="text-gray-900">{@applicant.user_input_answer_2}</span>
-                </div>
-
             </div>
+            
         </div>
         <div :if={@applicant.video_path} class="hidden peer-checked/tab-four:block p-4 w-full">
             <!-- Tab 2 Content -->

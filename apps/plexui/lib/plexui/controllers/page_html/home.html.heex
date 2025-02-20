@@ -1,9 +1,9 @@
 <.flash_group flash={@flash} />
 <div :if={@referer}>
     <!-- Header -->
-    <header class="bg-white shadow-md sticky top-0 z-10 flex justify-between items-center py-3 pb-1 font-sans">
+    <header class="bg-white bg-opacity-85 backdrop-filter backdrop-blur-md shadow-md sticky top-0 z-10 flex justify-between items-center py-3 pb-1 font-sans">
         <div>
-            <h2 class="text-xl  ml-2">
+            <h2 :if={@applicant.partner_name} class="text-xl  ml-2">
                 <i class="far fa-address-book ml-2 text-gray-500"></i>
                 {@applicant.partner_name |> String.upcase()}
             </h2>
@@ -11,9 +11,9 @@
                 <i class="fab fa-whatsapp ml-2 text-green-600"></i>
                 {@applicant.partner_phone}
             </h2>
-            <h2 class="text-xl  ml-2">
+            <h2 class="text-x  ml-2">
                 <i class="far fa-check-circle ml-2 text-gray-500"></i>
-                {@heat_check.lead_stage}
+                {@heat_check.lead_stage |> String.upcase()}
             </h2>
             
         </div>
@@ -57,7 +57,12 @@
             <div class="space-y-4">
                 <div class="flex space-x-4">
                     <span class="text-gray-600 w-32">Applied on:</span>
-                    <span class="text-gray-900">{Calendar.strftime(@applicant.create_date, "%Y %b %d, %H:%M")}</span>
+                    <span  :if={@applicant.create_date} class="text-gray-900">{Calendar.strftime(@applicant.create_date, "%Y %b %d, %H:%M")}</span>
+                </div>
+
+                <div class="flex space-x-4">
+                    <span class="text-gray-600 w-32">Record date:</span>
+                    <span :if={@applicant.write_date} class="text-gray-900">{Calendar.strftime(@applicant.write_date, "%Y %b %d, %H:%M")}</span>
                 </div>
                 
                 <div class="flex space-x-4">
@@ -584,7 +589,7 @@
 
     <!-- Footer -->
     <footer
-        class="border-t-2 border-light-blue-500 border-opacity-25 bg-white shadow-sm p-4 fixed bottom-0 left-0 right-0 font-sans text-sm">
+    class="border-t-2 border-light-blue-500 border-opacity-25 bg-white bg-opacity-95 shadow-sm p-4 fixed bottom-0 left-0 right-0 font-sans text-sm backdrop-filter backdrop-blur-sm">
         <div class="" id="speech-non-scripted-id">
             <div style="display: grid; grid-template-columns: 110px auto;">
                 <button 
@@ -593,7 +598,8 @@
                     data-container="audio-container-id"
                     data-progresscolor="#BFDBFE"
                     class="transition duration-500 ease-in-out bg-blue-200 hover:bg-blue-300 transform hover:-translate-y-1 hover:scale-110 text-nowrap me-1 btn-primary my-2 rounded-md">
-                    Play</button>
+                    Play
+                </button>
                 <div class="position-relative" id="audio-container-id" />
             </div>
         </div>

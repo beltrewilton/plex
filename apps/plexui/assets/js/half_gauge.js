@@ -4,19 +4,30 @@ export default HalfGauge = {
     mounted() {
         let ctx = this.el
 
-        const lead_max_temperature = this.el.dataset.lead_max_temperature
-        const lead_heat_check = this.el.dataset.lead_heat_check
+        const lead_max_temperature = 1.0
+        const lead_temperature = parseFloat(this.el.dataset.lead_temperature)
+        const lead_heat_check_text = this.el.dataset.lead_heat_check
         const _title = this.el.dataset.label
 
-        console.log("lead_heat_check", lead_heat_check)
+        console.log("lead_heat_check_text", lead_heat_check_text)
+
+        const strokeColor = (lead_temperature) => {
+            if (lead_temperature > 0.6) {
+                return "#ff0000"; // Red
+            } else if (lead_temperature >= 0.5) {
+                return "#ffa500"; // Orange
+            } else {
+                return "#ffff00"; // Yellow
+            }
+        }
 
         const config = {
             type: "doughnut",
             data: {
                 datasets: [
                     {
-                        data: [lead_max_temperature, lead_heat_check - lead_max_temperature],
-                        backgroundColor: ["#ffa500", "#dddddd"],
+                        data: [lead_temperature, 1 - lead_temperature],
+                        backgroundColor: [strokeColor(lead_temperature), "#dddddd"],
                         label: _title,
                     },
                 ],
@@ -24,7 +35,7 @@ export default HalfGauge = {
             options: {
                 circumference: 180,
                 rotation: 270,
-                responsive: false, // when true it cause error in phoenix.
+                responsive: false,
                 maintainAspectRatio: false,
                 cutout: "70%",
                 layout: {
@@ -35,36 +46,46 @@ export default HalfGauge = {
                         display: true,
                         text: _title,
                         padding: 4,
-                        font: "Consolas"
+                        font: "ui-monospace"
                     },
                     tooltip: {
                         displayColors: false,
                         callbacks: {
                             label: function (tooltipItem) {
                                 if (tooltipItem.dataIndex === 0) {
-                                    return _t("Value: ") + ledtempValue;
+                                    return "Value: " + lead_temperature;
                                 }
-                                return _t("Max: ") + max;
+                                return "Max: " + lead_max_temperature;
                             },
-                        },
-                    },
-                    // Adding the label in the center of the gauge
-                    datalabels: {
-                        display: true,
-                        formatter: (value, context) => {
-                            return context.dataIndex === 0 ? 'gaugeValue' : '';
-                        },
-                        color: "#000",
-                        font: {
-                            size: 20,
-                            weight: 'bold',
                         },
                     },
                 },
                 aspectRatio: 3.1,
             },
-        }
+            plugins: [
+                {
+                    id: "centerText",
+                    afterDraw: function (chart) {
+                        const { ctx, chartArea } = chart;
+                        if (!chartArea) return;
 
-        new Chart(ctx, config)
+                        ctx.save();
+                        ctx.font = "17px sans-serif";
+                        // ctx.fillStyle = "#ff0000";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+
+                        // Adjust positioning
+                        const centerX = chart.width / 2;
+                        const centerY = chart.height / 1.2;
+
+                        ctx.fillText(lead_heat_check_text?.toUpperCase(), centerX, centerY);
+                        ctx.restore();
+                    },
+                },
+            ],
+        };
+
+        new Chart(ctx, config);
     }
 }

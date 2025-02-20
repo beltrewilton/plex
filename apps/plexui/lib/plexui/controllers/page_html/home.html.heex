@@ -1,15 +1,19 @@
 <.flash_group flash={@flash} />
 <div :if={@referer}>
     <!-- Header -->
-    <header class="bg-white shadow-md sticky top-0 z-10 flex justify-between items-center py-3 pb-1 font-mono">
+    <header class="bg-white shadow-md sticky top-0 z-10 flex justify-between items-center py-3 pb-1 font-sans">
         <div>
-            <h2 class="text-xl font-bold ml-2">
-                <i class="fas fa-user-circle ml-1"></i>
-                {@applicant.partner_name}
+            <h2 class="text-xl  ml-2">
+                <i class="far fa-address-book ml-2 text-gray-500"></i>
+                {@applicant.partner_name |> String.upcase()}
             </h2>
-            <h2 class="text-xl font-bold ml-2">
-                <i class="fab fa-whatsapp ml-1 text-green-500"></i>
+            <h2 class="text-xl  ml-2">
+                <i class="fab fa-whatsapp ml-2 text-green-600"></i>
                 {@applicant.partner_phone}
+            </h2>
+            <h2 class="text-xl  ml-2">
+                <i class="far fa-check-circle ml-2 text-gray-500"></i>
+                {@heat_check.lead_stage}
             </h2>
             
         </div>
@@ -20,13 +24,17 @@
                     id="lead-temperature-id" 
                     phx-hook="HalfGauge" 
                     data-label="Lead Temperature"
-                    data-lead_max_temperature={1} 
-                    data-lead_heat_check={@heat_check.lead_temperature |> Decimal.to_float()}>
+                    data-lead_heat_check={@heat_check.lead_heat_check} 
+                    data-lead_temperature={@heat_check.lead_temperature |> Decimal.to_float()}>
                 </canvas>
             </div>
             <div class="w-24 h-24 flex items-center justify-center">
-                <canvas id="speech-unscripted-overall-score-id" phx-hook="ScoreGauge" data-label="Speech Overall"
-                    data-score={@applicant.speech_unscripted_overall_score} data-maxvalue={9} data-bgcolor="#1fc0f3">
+                <canvas 
+                    id="speech-unscripted-overall-score-id" 
+                    phx-hook="ScoreGauge" 
+                    data-label="Open Question"
+                    data-score={@applicant.speech_unscripted_overall_score} 
+                    data-maxvalue={9} data-bgcolor="#1fc0f3">
                 </canvas>
             </div>
             <div class="w-24 h-24 flex items-center justify-center">
@@ -43,18 +51,15 @@
 
     </header>
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col md:flex-row font-mono text-sm">
+    <main class="flex-1 flex flex-col md:flex-row font-sans text-sm">
         <!-- Left Column -->
         <div class="md:w-1/2 p-4 flex-1">
             <div class="space-y-4">
                 <div class="flex space-x-4">
                     <span class="text-gray-600 w-32">Applied on:</span>
-                    <span class="text-gray-900">2023-02-20</span>
+                    <span class="text-gray-900">{Calendar.strftime(@applicant.create_date, "%Y %b %d, %H:%M")}</span>
                 </div>
-                <div class="flex space-x-4">
-                    <span class="text-gray-600 w-32">Mobile:</span>
-                    <span class="text-gray-900">{@applicant.partner_phone}</span>
-                </div>
+                
                 <div class="flex space-x-4">
                     <span class="text-gray-600 w-32">Cédula:</span>
                     <span class="text-gray-900">{@applicant.cedula_id}</span>
@@ -249,21 +254,21 @@
     </main>
 
     <!--  uses radio buttons -->
-    <section class="flex flex-row flex-wrap ml-3 mb-20 font-mono text-sm">
+    <section class="flex flex-row flex-wrap ml-3 mb-20 font-sans text-sm">
 
         <input id="tab-one" phx-hook="ControlPlay" type="radio" name="tabs" class="peer/tab-one opacity-0 absolute"
             checked />
-        <label for="tab-one" class="peer-checked/tab-one:border-b-2 cursor-pointer p-4  block">
-            Scripted Speech Score
+        <label for="tab-one" class="peer-checked/tab-one:border-b-2 peer-checked/tab-one:border-blue-500  cursor-pointer p-4  block">
+            Open Question
         </label>
 
         <input id="tab-two" phx-hook="ControlPlay" type="radio" name="tabs" class="peer/tab-two opacity-0 absolute" />
-        <label for="tab-two" class=" peer-checked/tab-two:border-b-2 cursor-pointer p-4  block">
-            Scripted Speech Score
+        <label for="tab-two" class=" peer-checked/tab-two:border-b-2 peer-checked/tab-two:border-green-500 cursor-pointer p-4  block">
+            Scripted Score
         </label>
 
         <input id="tab-three" type="radio" name="tabs" class="peer/tab-three opacity-0 absolute" />
-        <label for="tab-three" class=" peer-checked/tab-three:border-b-2 cursor-pointer p-4 block">
+        <label for="tab-three" class=" peer-checked/tab-three:border-b-2  peer-checked/tab-three:border-purple-600 cursor-pointer p-4 block">
             Grammar Score
         </label>
 
@@ -338,6 +343,8 @@
                         </div>
                         <div class="flex space-x-4 mb-2">
                             <span class="text-gray-600 w-48">Relevance:</span>
+                            <i :if={@applicant.speech_unscripted_relevance < 50 } class="fas fa-arrow-down text-red-500 mt-1"></i>
+                            <i :if={@applicant.speech_unscripted_relevance > 50 } class="fas fa-arrow-up text-purple-500 mt-1"></i>
                             <span class="text-gray-900">{@applicant.speech_unscripted_relevance} %</span>
                         </div>
                         <div class="flex space-x-4 mb-2">
@@ -562,8 +569,12 @@
         <div :if={@applicant.video_path} class="hidden peer-checked/tab-four:block p-4 w-full">
             <!-- Tab 2 Content -->
             <div class="w-60 bg-gray-200 h-48 items-center justify-center mb-72 ">
-                <video phx-hook="VideoPlayer" class="border border-gray-200 shadow-md rounded-lg" controls="controls"
-                    id="video-element-id" data-video={@applicant.video_path}>
+                <video 
+                    phx-hook="VideoPlayer" 
+                    class="border border-gray-200 shadow-md rounded-lg" 
+                    controls="controls"
+                    id="video-element-id" 
+                    data-video={@applicant.video_path}>
                     <source src="" type="video/mp4" />
                 </video>
             </div>
@@ -573,21 +584,28 @@
 
     <!-- Footer -->
     <footer
-        class="border-t-2 border-light-blue-500 border-opacity-25 bg-white shadow-sm p-4 fixed bottom-0 left-0 right-0 font-mono text-sm">
+        class="border-t-2 border-light-blue-500 border-opacity-25 bg-white shadow-sm p-4 fixed bottom-0 left-0 right-0 font-sans text-sm">
         <div class="" id="speech-non-scripted-id">
             <div style="display: grid; grid-template-columns: 110px auto;">
-                <button id="player-btn-id" phx-hook="AudioPlayer"
-                    data-audiopath={@applicant.speech_unscripted_audio_path} data-container="audio-container-id"
+                <button 
+                    id="player-btn-id" phx-hook="AudioPlayer"
+                    data-audiopath={@applicant.speech_unscripted_audio_path} 
+                    data-container="audio-container-id"
                     data-progresscolor="#BFDBFE"
-                    class="transition duration-500 ease-in-out bg-blue-200 hover:bg-blue-300 transform hover:-translate-y-1 hover:scale-110 text-nowrap me-1 btn-primary my-2 rounded-md">Play</button>
+                    class="transition duration-500 ease-in-out bg-blue-200 hover:bg-blue-300 transform hover:-translate-y-1 hover:scale-110 text-nowrap me-1 btn-primary my-2 rounded-md">
+                    Play</button>
                 <div class="position-relative" id="audio-container-id" />
             </div>
         </div>
         <div class="hidden" id="speech-scripted-id">
             <div style="display: grid; grid-template-columns: 110px auto;">
-                <button id="player-btn-id-01" phx-hook="AudioPlayer" data-audiopath={@applicant.speech_audio_path}
-                    data-container="audio-container-id-01" data-progresscolor="#fa9167"
-                    class="transition duration-500 ease-in-out bg-red-200 hover:bg-red-300 transform hover:-translate-y-1 hover:scale-110 text-nowrap me-1 btn-primary my-2 rounded-md">Play</button>
+                <button 
+                    id="player-btn-id-01" phx-hook="AudioPlayer" 
+                    data-audiopath={@applicant.speech_audio_path}
+                    data-container="audio-container-id-01" 
+                    data-progresscolor="#d3f5c6"
+                    class="transition duration-500 ease-in-out bg-green-200 hover:bg-green-300 transform hover:-translate-y-1 hover:scale-110 text-nowrap me-1 btn-primary my-2 rounded-md">
+                    Play</button>
                 <div class="position-relative" id="audio-container-id-01" />
             </div>
         </div>

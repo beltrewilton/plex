@@ -31,4 +31,8 @@ defmodule Plexui.PageController do
       heat_check: heat_check
     )
   end
+
+  def report(conn, _params) do
+    render(conn, :report, page_title: "Reports", layout: false)
+  end
 end

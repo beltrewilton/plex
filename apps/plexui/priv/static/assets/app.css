@@ -1181,18 +1181,6 @@ select{
   cursor: pointer;
 }
 
-.grid-cols-2{
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.grid-cols-\[33\%-67\%\]{
-  grid-template-columns: 33%-67%;
-}
-
-.grid-cols-\[33\%-1fr\]{
-  grid-template-columns: 33%-1fr;
-}
-
 .grid-cols-\[33\%_67\%\]{
   grid-template-columns: 33% 67%;
 }
@@ -1659,6 +1647,11 @@ select{
 .text-zinc-900{
   --tw-text-opacity: 1;
   color: rgb(24 24 27 / var(--tw-text-opacity));
+}
+
+.text-purple-800{
+  --tw-text-opacity: 1;
+  color: rgb(107 33 168 / var(--tw-text-opacity));
 }
 
 .underline{

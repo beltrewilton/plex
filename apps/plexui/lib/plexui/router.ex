@@ -18,6 +18,8 @@ defmodule Plexui.Router do
     pipe_through :browser
 
     get "/:msisdn/:campaign", PageController, :home
+
+    get "/report", PageController, :report
   end
 
   # Other scopes may use custom stacks.

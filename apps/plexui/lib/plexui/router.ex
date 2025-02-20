@@ -2,9 +2,9 @@ defmodule Plexui.Router do
   use Plexui, :router
 
   pipeline :browser do
+    plug Corsica, origins: "*"
     plug :accepts, ["html"]
     plug :fetch_session
-    plug Corsica, origins: "*"
     plug :fetch_live_flash
     plug :put_root_layout, html: {Plexui.Layouts, :root}
     plug :protect_from_forgery

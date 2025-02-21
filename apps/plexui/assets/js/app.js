@@ -31,6 +31,7 @@ import VideoPlayer from "./video_player"
 import ControlPlay from "./control_play"
 import ScrollInto from "./scroll_into_video"
 import ClosePopup from "./close_popup_window"
+import DataPicker from "./date_picker"
 
 let hooks = {}
 hooks.AudioPlayer = AudioPlayer
@@ -42,6 +43,7 @@ hooks.VideoPlayer = VideoPlayer
 hooks.ControlPlay = ControlPlay
 hooks.ScrollInto = ScrollInto
 hooks.ClosePopup = ClosePopup
+hooks.DataPicker = DataPicker
 
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")

@@ -60,6 +60,7 @@ defmodule Plexui.MixProject do
       {:ecto_sql, "~> 3.12"},
       {:postgrex, "~> 0.19.1"},
       {:corsica, "~> 2.1"},
+      {:elixlsx, "~> 0.6.0"},
       {:plexcore, in_umbrella: true}
     ]
   end

@@ -989,6 +989,10 @@ select{
   margin-right: 0.5rem;
 }
 
+.mr-4{
+  margin-right: 1rem;
+}
+
 .mt-0{
   margin-top: 0px;
 }
@@ -1023,6 +1027,14 @@ select{
 
 .mt-3{
   margin-top: 0.75rem;
+}
+
+.mt-4{
+  margin-top: 1rem;
+}
+
+.mt-6{
+  margin-top: 1.5rem;
 }
 
 .block{
@@ -1485,8 +1497,16 @@ select{
   padding-right: 1.5rem;
 }
 
+.pt-8{
+  padding-top: 2rem;
+}
+
 .text-left{
   text-align: left;
+}
+
+.text-center{
+  text-align: center;
 }
 
 .text-right{
@@ -1599,6 +1619,11 @@ select{
   color: rgb(168 85 247 / var(--tw-text-opacity));
 }
 
+.text-purple-600{
+  --tw-text-opacity: 1;
+  color: rgb(147 51 234 / var(--tw-text-opacity));
+}
+
 .text-red-500{
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity));
@@ -1647,11 +1672,6 @@ select{
 .text-zinc-900{
   --tw-text-opacity: 1;
   color: rgb(24 24 27 / var(--tw-text-opacity));
-}
-
-.text-purple-800{
-  --tw-text-opacity: 1;
-  color: rgb(107 33 168 / var(--tw-text-opacity));
 }
 
 .underline{
@@ -2280,6 +2300,100 @@ hr {
   }
 }
 
+/* data picker */
+
+.form-container {
+  align-items: center;
+  display: flex;
+  /* height: 100vh; */
+  justify-content: center;
+}
+
+.form-container form {
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.form-container form.open .calendar-popup {
+  opacity: 1;
+}
+
+.form-container form i {
+  padding: 0 10px 0 15px;
+}
+
+.form-container form input {
+  background-color: transparent !important;
+  border: none;
+  border-left: 1px solid #eee;
+  padding: 15px 25px;
+}
+
+.form-container .calendar-popup {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  padding: 10px;
+  position: absolute;
+  top: calc(100% + 5px);
+  transition: all 0.1s linear;
+  width: 100%;
+}
+
+.form-container .calendar-popup .month-and-year {
+  align-items: center;
+  display: flex;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.form-container .calendar-popup .month-and-year h4 {
+  width: 100%;
+}
+
+.form-container .calendar-popup .button {
+  background-color: transparent;
+  border: none;
+  font-weight: bold;
+  outline: none;
+  position: absolute;
+  top: 15px;
+}
+
+.form-container .calendar-popup .button:hover {
+  cursor: pointer;
+}
+
+.form-container .calendar-popup .button.prev {
+  left: 10px;
+}
+
+.form-container .calendar-popup .button.next {
+  right: 10px;
+}
+
+.form-container .calendar-popup table {
+  font-size: 12px;
+  width: 100%;
+}
+
+.form-container .calendar-popup table tr {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 5px 0;
+}
+
+.form-container .calendar-popup table tr th,
+.form-container .calendar-popup table tr td {
+  text-align: center;
+}
+
+.form-container .calendar-popup table .day:hover {
+  cursor: pointer;
+}
+
 /* This file is for your main application CSS */
 
 .hover\:-translate-y-1:hover{
@@ -2319,6 +2433,11 @@ hr {
 .hover\:bg-zinc-700:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(63 63 70 / var(--tw-bg-opacity));
+}
+
+.hover\:text-blue-900:hover{
+  --tw-text-opacity: 1;
+  color: rgb(30 58 138 / var(--tw-text-opacity));
 }
 
 .hover\:text-zinc-700:hover{

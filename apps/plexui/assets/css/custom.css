@@ -412,3 +412,81 @@ hr {
     transform: translateY(0);
   }
 }
+
+/* data picker */
+.form-container {
+  align-items: center;
+  display: flex;
+  /* height: 100vh; */
+  justify-content: center;
+}
+.form-container form {
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+.form-container form.open .calendar-popup {
+  opacity: 1;
+}
+.form-container form i {
+  padding: 0 10px 0 15px;
+}
+.form-container form input {
+  background-color: transparent !important;
+  border: none;
+  border-left: 1px solid #eee;
+  padding: 15px 25px;
+}
+.form-container .calendar-popup {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  padding: 10px;
+  position: absolute;
+  top: calc(100% + 5px);
+  transition: all 0.1s linear;
+  width: 100%;
+}
+.form-container .calendar-popup .month-and-year {
+  align-items: center;
+  display: flex;
+  text-align: center;
+  text-transform: uppercase;
+}
+.form-container .calendar-popup .month-and-year h4 {
+  width: 100%;
+}
+.form-container .calendar-popup .button {
+  background-color: transparent;
+  border: none;
+  font-weight: bold;
+  outline: none;
+  position: absolute;
+  top: 15px;
+}
+.form-container .calendar-popup .button:hover {
+  cursor: pointer;
+}
+.form-container .calendar-popup .button.prev {
+  left: 10px;
+}
+.form-container .calendar-popup .button.next {
+  right: 10px;
+}
+.form-container .calendar-popup table {
+  font-size: 12px;
+  width: 100%;
+}
+.form-container .calendar-popup table tr {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 5px 0;
+}
+.form-container .calendar-popup table tr th,
+.form-container .calendar-popup table tr td {
+  text-align: center;
+}
+.form-container .calendar-popup table .day:hover {
+  cursor: pointer;
+}

@@ -21,6 +21,8 @@ defmodule Plexui.Router do
     get "/:msisdn/:campaign", PageController, :home
 
     get "/report", PageController, :report
+
+    get "/download/:startdate/:enddate", PageController, :download
   end
 
   # Other scopes may use custom stacks.

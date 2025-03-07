@@ -72,6 +72,10 @@ defmodule Plex.Flow do
     Integration.Zoho.add_candidate(last_name, first_name, "no@email.com", partner_phone, business_location, cedula_id, type_document_id, work_permit, english_level, availability_towork, hear_about_us)
 
     IO.puts("Integration.Zoho.add_candidate ended")
+
+    m_event_response = Integration.MetaEvent.register_event("Submit application", partner_phone)
+
+    IO.inspect(m_event_response, label: "Response register_event")
   end
 
   def split_name(name) do

@@ -66,19 +66,19 @@ defmodule Plexui.Data do
   end
 
   def get_applicants_by_date(init_date, end_date) do
-    query =
-      from(a in HrApplicant,
-        where: a.write_date >= ^init_date and a.write_date <= ^end_date,
-        order_by: [desc: a.id]
-      )
-
     # query =
-    #     from(a in HrApplicant,
-    #       join: j in HrJob, on: j.id == a.job_id,
-    #       where: a.write_date >= ^init_date and a.write_date <= ^end_date,
-    #       order_by: [desc: a.id],
-    #       select: %{applicant: a, va_campaign: j.va_campaign}
-    #     )
+    #   from(a in HrApplicant,
+    #     where: a.write_date >= ^init_date and a.write_date <= ^end_date,
+    #     order_by: [desc: a.id]
+    #   )
+
+    query =
+        from(a in HrApplicant,
+          join: j in HrJob, on: j.id == a.job_id,
+          where: a.write_date >= ^init_date and a.write_date <= ^end_date,
+          order_by: [desc: a.id],
+          select: %{applicant: a, va_campaign: j.va_campaign}
+        )
 
     data = Repo.all(query)
 

@@ -68,11 +68,8 @@ defmodule Plexui.Data do
   def get_applicants_by_date(init_date, end_date) do
     query =
       from(a in HrApplicant,
-        join: j in HrJob,
-        on: j.id == a.job_id,
         where: a.write_date >= ^init_date and a.write_date <= ^end_date,
-        order_by: [desc: a.id],
-        select: %{applicant: a, va_campaign: j.va_campaign}
+        order_by: [desc: a.id]
       )
 
     data = Repo.all(query)
@@ -107,45 +104,74 @@ defmodule Plexui.Data do
       "speech_pronunciation",
       "speech_rhythm",
       "speech_speed",
-      "write_date",
-      "va_campaign"
+      "write_date"
     ]
 
     rows =
       data
-      |> Enum.map(fn %{applicant: applicant, va_campaign: va_campaign} ->
+      |> Enum.map(fn %{
+                       partner_name: partner_name,
+                       partner_phone: partner_phone,
+                       cedula_id: cedula_id,
+                       availability_tostart: availability_tostart,
+                       work_permit: work_permit,
+                       business_location: business_location,
+                       hear_about_us: hear_about_us,
+                       availability_towork: availability_towork,
+                       a1_score: a1_score,
+                       a2_score: a2_score,
+                       b1_score: b1_score,
+                       b2_score: b2_score,
+                       c1_score: c1_score,
+                       c2_score: c2_score,
+                       speech_unscripted_overall_score: speech_unscripted_overall_score,
+                       speech_unscripted_length: speech_unscripted_length,
+                       speech_unscripted_fluency_coherence: speech_unscripted_fluency_coherence,
+                       speech_unscripted_grammar: speech_unscripted_grammar,
+                       speech_unscripted_lexical_resource: speech_unscripted_lexical_resource,
+                       speech_unscripted_pronunciation: speech_unscripted_pronunciation,
+                       speech_unscripted_relevance: speech_unscripted_relevance,
+                       speech_unscripted_speed: speech_unscripted_speed,
+                       speech_overall: speech_overall,
+                       speech_duration: speech_duration,
+                       speech_fluency: speech_fluency,
+                       speech_integrity: speech_integrity,
+                       speech_pronunciation: speech_pronunciation,
+                       speech_rhythm: speech_rhythm,
+                       speech_speed: speech_speed,
+                       write_date: write_date
+                     } ->
         [
-          applicant.partner_name,
-          applicant.partner_phone,
-          applicant.cedula_id,
-          applicant.availability_tostart,
-          applicant.work_permit,
-          applicant.business_location,
-          applicant.hear_about_us,
-          applicant.availability_towork,
-          applicant.a1_score,
-          applicant.a2_score,
-          applicant.b1_score,
-          applicant.b2_score,
-          applicant.c1_score,
-          applicant.c2_score,
-          applicant.speech_unscripted_overall_score,
-          applicant.speech_unscripted_length,
-          applicant.speech_unscripted_fluency_coherence,
-          applicant.speech_unscripted_grammar,
-          applicant.speech_unscripted_lexical_resource,
-          applicant.speech_unscripted_pronunciation,
-          applicant.speech_unscripted_relevance,
-          applicant.speech_unscripted_speed,
-          applicant.speech_overall,
-          applicant.speech_duration,
-          applicant.speech_fluency,
-          applicant.speech_integrity,
-          applicant.speech_pronunciation,
-          applicant.speech_rhythm,
-          applicant.speech_speed,
-          Calendar.strftime(applicant.write_date, "%Y-%m-%d %H:%M:%S"),
-          va_campaign
+          partner_name,
+          partner_phone,
+          cedula_id,
+          availability_tostart,
+          work_permit,
+          business_location,
+          hear_about_us,
+          availability_towork,
+          a1_score |> Decimal.to_float(),
+          a2_score |> Decimal.to_float(),
+          b1_score |> Decimal.to_float(),
+          b2_score |> Decimal.to_float(),
+          c1_score |> Decimal.to_float(),
+          c2_score |> Decimal.to_float(),
+          speech_unscripted_overall_score,
+          speech_unscripted_length,
+          speech_unscripted_fluency_coherence,
+          speech_unscripted_grammar,
+          speech_unscripted_lexical_resource,
+          speech_unscripted_pronunciation,
+          speech_unscripted_relevance,
+          speech_unscripted_speed,
+          speech_overall,
+          speech_duration,
+          speech_fluency,
+          speech_integrity,
+          speech_pronunciation,
+          speech_rhythm,
+          speech_speed,
+          Calendar.strftime(write_date, "%Y-%m-%d %H:%M:%S")
         ]
       end)
 

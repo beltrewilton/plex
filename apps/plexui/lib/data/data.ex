@@ -65,12 +65,14 @@ defmodule Plexui.Data do
     Repo.one!(query)
   end
 
-  def get_applicants_by_date(init_date, end_date) do
+  def get_applicants_by_date(init_date, end_date) do  
     query =
-      from(a in HrApplicant,
-        where: a.write_date >= ^init_date and a.write_date <= ^end_date,
-        order_by: [desc: a.id]
-      )
+        from(a in HrApplicant,
+          join: j in HrJob, on: j.id == a.job_id,
+          where: a.write_date >= ^init_date and a.write_date <= ^end_date,
+          order_by: [desc: a.id],
+          select: %{applicant: a, va_campaign: j.va_campaign}
+        )
 
     data = Repo.all(query)
 
@@ -104,7 +106,8 @@ defmodule Plexui.Data do
       "speech_pronunciation",
       "speech_rhythm",
       "speech_speed",
-      "write_date"
+      "write_date",
+      "va_campaign"
     ]
 
     rows =
@@ -139,7 +142,8 @@ defmodule Plexui.Data do
                        speech_pronunciation: speech_pronunciation,
                        speech_rhythm: speech_rhythm,
                        speech_speed: speech_speed,
-                       write_date: write_date
+                       write_date: write_date,
+                       va_campaign: va_campaign
                      } ->
         [
           partner_name,
@@ -171,7 +175,8 @@ defmodule Plexui.Data do
           speech_pronunciation,
           speech_rhythm,
           speech_speed,
-          Calendar.strftime(write_date, "%Y-%m-%d %H:%M:%S")
+          Calendar.strftime(write_date, "%Y-%m-%d %H:%M:%S"),
+          va_campaign
         ]
       end)
 

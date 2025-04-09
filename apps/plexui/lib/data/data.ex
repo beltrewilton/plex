@@ -72,6 +72,14 @@ defmodule Plexui.Data do
         order_by: [desc: a.id]
       )
 
+    # query =
+    #     from(a in HrApplicant,
+    #       join: j in HrJob, on: j.id == a.job_id,
+    #       where: a.write_date >= ^init_date and a.write_date <= ^end_date,
+    #       order_by: [desc: a.id],
+    #       select: %{applicant: a, va_campaign: j.va_campaign}
+    #     )
+
     data = Repo.all(query)
 
     header = [
@@ -108,38 +116,41 @@ defmodule Plexui.Data do
     ]
 
     rows =
-      data
+      data \
       |> Enum.map(fn %{
-                       partner_name: partner_name,
-                       partner_phone: partner_phone,
-                       cedula_id: cedula_id,
-                       availability_tostart: availability_tostart,
-                       work_permit: work_permit,
-                       business_location: business_location,
-                       hear_about_us: hear_about_us,
-                       availability_towork: availability_towork,
-                       a1_score: a1_score,
-                       a2_score: a2_score,
-                       b1_score: b1_score,
-                       b2_score: b2_score,
-                       c1_score: c1_score,
-                       c2_score: c2_score,
-                       speech_unscripted_overall_score: speech_unscripted_overall_score,
-                       speech_unscripted_length: speech_unscripted_length,
-                       speech_unscripted_fluency_coherence: speech_unscripted_fluency_coherence,
-                       speech_unscripted_grammar: speech_unscripted_grammar,
-                       speech_unscripted_lexical_resource: speech_unscripted_lexical_resource,
-                       speech_unscripted_pronunciation: speech_unscripted_pronunciation,
-                       speech_unscripted_relevance: speech_unscripted_relevance,
-                       speech_unscripted_speed: speech_unscripted_speed,
-                       speech_overall: speech_overall,
-                       speech_duration: speech_duration,
-                       speech_fluency: speech_fluency,
-                       speech_integrity: speech_integrity,
-                       speech_pronunciation: speech_pronunciation,
-                       speech_rhythm: speech_rhythm,
-                       speech_speed: speech_speed,
-                       write_date: write_date
+                       applicant: %HrApplicant{
+                         partner_name: partner_name,
+                         partner_phone: partner_phone,
+                         cedula_id: cedula_id,
+                         availability_tostart: availability_tostart,
+                         work_permit: work_permit,
+                         business_location: business_location,
+                         hear_about_us: hear_about_us,
+                         availability_towork: availability_towork,
+                         a1_score: a1_score,
+                         a2_score: a2_score,
+                         b1_score: b1_score,
+                         b2_score: b2_score,
+                         c1_score: c1_score,
+                         c2_score: c2_score,
+                         speech_unscripted_overall_score: speech_unscripted_overall_score,
+                         speech_unscripted_length: speech_unscripted_length,
+                         speech_unscripted_fluency_coherence: speech_unscripted_fluency_coherence,
+                         speech_unscripted_grammar: speech_unscripted_grammar,
+                         speech_unscripted_lexical_resource: speech_unscripted_lexical_resource,
+                         speech_unscripted_pronunciation: speech_unscripted_pronunciation,
+                         speech_unscripted_relevance: speech_unscripted_relevance,
+                         speech_unscripted_speed: speech_unscripted_speed,
+                         speech_overall: speech_overall,
+                         speech_duration: speech_duration,
+                         speech_fluency: speech_fluency,
+                         speech_integrity: speech_integrity,
+                         speech_pronunciation: speech_pronunciation,
+                         speech_rhythm: speech_rhythm,
+                         speech_speed: speech_speed,
+                         write_date: write_date
+                       },
+                       va_campaign: va_campaign
                      } ->
         [
           partner_name,
@@ -171,7 +182,8 @@ defmodule Plexui.Data do
           speech_pronunciation,
           speech_rhythm,
           speech_speed,
-          Calendar.strftime(write_date, "%Y-%m-%d %H:%M:%S")
+          Calendar.strftime(write_date, "%Y-%m-%d %H:%M:%S"),
+          va_campaign
         ]
       end)
 
